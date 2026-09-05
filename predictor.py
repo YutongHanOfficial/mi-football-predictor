@@ -389,14 +389,23 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+# UI Fix for extremely long team names AND hiding Streamlit branding
 st.markdown("""
     <style>
+    /* 1. Force metric text to wrap */
     div[data-testid="stMetricValue"] > div {
         white-space: normal !important;
         word-wrap: break-word !important;
         line-height: 1.2 !important;
         font-size: 1.75rem !important;
     }
+    
+    /* 2. Hide the Streamlit footer */
+    footer {visibility: hidden;}
+    
+    /* 3. Hide the top-right hamburger menu and header */
+    #MainMenu {visibility: hidden;}
+    header {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
