@@ -4,6 +4,7 @@ import csv
 import os
 import statistics
 import pandas as pd
+from datetime import datetime, timedelta
 from collections import deque
 import streamlit as st
 
@@ -200,7 +201,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=10000):
+    def predict_matchup(self, away_team, home_team, num_simulations=5000):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
@@ -259,7 +260,20 @@ class SeasonPredictor:
     def get_team_rating_history(self, team_name):
         history = []
         
-        # 1. Evaluate Preseason Rankings for all teams
+        # 1. Grab all valid dates in the current season
+        all_dates = [g["date"] for g in self.current_games if g.get("home_score") not in [None, ""] and g.get("date")]
+        if not all_dates:
+            return []
+            
+        start_date_str = min(all_dates)
+        end_date_str = max(all_dates)
+        
+        start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+        
+        # Plot Preseason 1 day before the first state-wide game to maintain chronological order
+        preseason_dt = start_dt - timedelta(days=1)
+        
         pre_ratings = []
         for t in self.teams:
             p_osrs = self.teams[t].get("preseason_OSRS", 0.0)
@@ -272,91 +286,99 @@ class SeasonPredictor:
         pre_dsrs = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
         history.append({
-            "Date": "Preseason",
+            "Date": preseason_dt,
+            "Label": "Preseason",
             "Power": round(pre_osrs - pre_dsrs, 2),
             "Offense": round(pre_osrs, 2),
             "Defense": round(pre_dsrs, 2),
             "Rank": preseason_rank
         })
         
-        # 2. Find chronological dates the team played
-        team_dates = []
+        # Map games by date to optimize the loop
+        games_by_date = {}
         for g in self.current_games:
-            if g.get("home_score") not in [None, ""] and (g["home"] == team_name or g["away"] == team_name):
-                team_dates.append(g["date"])
+            if g.get("home_score") not in [None, ""]:
+                d = g["date"]
+                if d not in games_by_date: games_by_date[d] = []
+                games_by_date[d].append(g)
                 
-        team_dates = sorted(list(set(team_dates)))
+        cumulative_games = []
+        current_dt = start_dt
         
-        # 3. Simulate statewide stats sequentially for each date
-        for d in team_dates:
-            games_up_to_date = [g for g in self.current_games if g.get("home_score") not in [None, ""] and g["date"] <= d]
+        last_power = round(pre_osrs - pre_dsrs, 2)
+        last_off = round(pre_osrs, 2)
+        last_def = round(pre_dsrs, 2)
+        last_rank = preseason_rank
+        
+        # Iterate day-by-day
+        while current_dt <= end_dt:
+            date_str = current_dt.strftime("%Y-%m-%d")
             
-            temp_teams = {}
-            total_points = 0
-            for g in games_up_to_date:
-                home, away = g["home"], g["away"]
-                hs, as_ = g["home_score"], g["away_score"]
-                for t in (home, away):
-                    if t not in temp_teams:
-                        temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
-                temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
-                temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
-                total_points += (hs + as_)
+            # If games were played anywhere in the state today, recalculate SRS
+            if date_str in games_by_date:
+                cumulative_games.extend(games_by_date[date_str])
                 
-            league_avg = total_points / (len(games_up_to_date) * 2) if games_up_to_date else 24.0
-            
-            # Fast isolated loop just for this date's snapshot
-            for _ in range(40): 
-                new_ratings = {}
-                for t, data in temp_teams.items():
-                    sum_adj_off = league_avg
-                    sum_adj_def = league_avg
-                    num_games = len(data["game_log"]) + 1 
-                    for game in data["game_log"]:
-                        opp = game["opponent"]
-                        sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS":0})["DSRS"])
-                        sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS":0})["OSRS"])
-                    new_ratings[t] = {
-                        "OSRS": (sum_adj_off / num_games) - league_avg,
-                        "DSRS": (sum_adj_def / num_games) - league_avg
-                    }
-                for t in temp_teams:
-                    temp_teams[t]["OSRS"] = new_ratings[t]["OSRS"]
-                    temp_teams[t]["DSRS"] = new_ratings[t]["DSRS"]
+                temp_teams = {}
+                total_points = 0
+                for g in cumulative_games:
+                    home, away = g["home"], g["away"]
+                    hs, as_ = g["home_score"], g["away_score"]
+                    for t in (home, away):
+                        if t not in temp_teams:
+                            temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
+                    temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
+                    temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
+                    total_points += (hs + as_)
                     
-            # Check statewide power rankings at this date snapshot
-            active_ratings = []
-            team_power = team_osrs = team_dsrs = 0.0
-            
-            for t in self.teams:
-                t_pre_osrs = self.teams[t].get("preseason_OSRS", 0.0)
-                t_pre_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
-                t_data = temp_teams.get(t, {"OSRS": 0.0, "DSRS": 0.0, "game_log": []})
-                t_curr_osrs = t_data["OSRS"]
-                t_curr_dsrs = t_data["DSRS"]
-                t_curr_games = len(t_data["game_log"])
+                league_avg = total_points / (len(cumulative_games) * 2) if cumulative_games else 24.0
                 
-                t_act_osrs = ((self.prior_weight * t_pre_osrs) + (t_curr_games * t_curr_osrs)) / (self.prior_weight + t_curr_games)
-                t_act_dsrs = ((self.prior_weight * t_pre_dsrs) + (t_curr_games * t_curr_dsrs)) / (self.prior_weight + t_curr_games)
-                
-                t_power = t_act_osrs - t_act_dsrs
-                active_ratings.append((t, t_power))
-                
-                if t == team_name:
-                    team_power = t_power
-                    team_osrs = t_act_osrs
-                    team_dsrs = t_act_dsrs
+                for _ in range(40): 
+                    new_ratings = {}
+                    for t, data in temp_teams.items():
+                        sum_adj_off = league_avg
+                        sum_adj_def = league_avg
+                        num_games = len(data["game_log"]) + 1 
+                        for game in data["game_log"]:
+                            opp = game["opponent"]
+                            sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS":0})["DSRS"])
+                            sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS":0})["OSRS"])
+                        new_ratings[t] = {
+                            "OSRS": (sum_adj_off / num_games) - league_avg,
+                            "DSRS": (sum_adj_def / num_games) - league_avg
+                        }
+                    for t in temp_teams:
+                        temp_teams[t]["OSRS"] = new_ratings[t]["OSRS"]
+                        temp_teams[t]["DSRS"] = new_ratings[t]["DSRS"]
+                        
+                active_ratings = []
+                for t in self.teams:
+                    t_pre_osrs = self.teams[t].get("preseason_OSRS", 0.0)
+                    t_pre_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
+                    t_data = temp_teams.get(t, {"OSRS": 0.0, "DSRS": 0.0, "game_log": []})
+                    t_act_osrs = ((self.prior_weight * t_pre_osrs) + (len(t_data["game_log"]) * t_data["OSRS"])) / (self.prior_weight + len(t_data["game_log"]))
+                    t_act_dsrs = ((self.prior_weight * t_pre_dsrs) + (len(t_data["game_log"]) * t_data["DSRS"])) / (self.prior_weight + len(t_data["game_log"]))
                     
-            active_ratings.sort(key=lambda x: x[1], reverse=True)
-            active_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
-            
+                    t_power = t_act_osrs - t_act_dsrs
+                    active_ratings.append((t, t_power))
+                    
+                    if t == team_name:
+                        last_power = round(t_power, 2)
+                        last_off = round(t_act_osrs, 2)
+                        last_def = round(t_act_dsrs, 2)
+                        
+                active_ratings.sort(key=lambda x: x[1], reverse=True)
+                last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
+                
             history.append({
-                "Date": d,
-                "Power": round(team_power, 2),
-                "Offense": round(team_osrs, 2),
-                "Defense": round(team_dsrs, 2),
-                "Rank": active_rank
+                "Date": current_dt,
+                "Label": date_str,
+                "Power": last_power,
+                "Offense": last_off,
+                "Defense": last_def,
+                "Rank": last_rank
             })
+            
+            current_dt += timedelta(days=1)
             
         return history
 
@@ -367,7 +389,6 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
-# UI Fix for extremely long team names in Streamlit metrics
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
@@ -410,7 +431,7 @@ else:
             default_h_idx = 1 if len(all_teams) > 1 else 0
             home = st.selectbox("Home Team", all_teams, index=default_h_idx)
         with col_c:
-            sims = st.select_slider("Simulations", options=[1000, 5000, 10000, 50000, 100000], value=10000)
+            sims = st.select_slider("Simulations", options=[1000, 5000, 10000], value=5000)
 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True):
             if away == home:
@@ -518,13 +539,12 @@ else:
             c2.metric("State Rank", f"#{team_rank}")
             c3.metric("2026 Record", f"{wins}-{losses}")
             
-            # --- NEW RATING PROGRESSION GRAPHS ---
+            # --- DAILY RATING PROGRESSION GRAPHS ---
             history_data = predictor.get_team_rating_history(selected_team)
             if len(history_data) > 1:
                 st.markdown("### 📈 Season Progression")
                 
-                # By pushing the data into a Pandas DataFrame and setting Date as the index, 
-                # Streamlit respects the exact chronological order without alphabetizing it.
+                # Assign true datetime index to fix Streamlit sorting
                 df_hist = pd.DataFrame(history_data).set_index("Date")
                 
                 col_chart1, col_chart2 = st.columns(2)
@@ -537,8 +557,9 @@ else:
                     st.markdown("**Statewide Rank (Lower is Better)**")
                     st.line_chart(df_hist[["Rank"]], use_container_width=True)
                 
-                # Provide the raw progression table below the graphs
-                st.dataframe(df_hist.reset_index(), use_container_width=True, hide_index=True)
+                # Expose the table data using the string labels (so "Preseason" prints nicely)
+                df_table = df_hist.reset_index()[["Label", "Power", "Offense", "Defense", "Rank"]].rename(columns={"Label": "Date"})
+                st.dataframe(df_table, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             
