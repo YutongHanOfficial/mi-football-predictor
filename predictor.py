@@ -305,7 +305,7 @@ else:
             default_h_idx = 1 if len(all_teams) > 1 else 0
             home = st.selectbox("Home Team", all_teams, index=default_h_idx)
         with col_c:
-            sims = st.select_slider("Simulations", options=[1000, 5000, 10000], value=5000)
+            sims = st.select_slider("Simulations", options=[1000, 5000, 10000], value=10000)
 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True):
             if away == home:
