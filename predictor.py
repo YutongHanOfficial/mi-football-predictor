@@ -400,12 +400,14 @@ st.markdown("""
         font-size: 1.75rem !important;
     }
     
-    /* 2. Hide the Streamlit footer */
+    /* 2. Hide standard Streamlit header and footer */
     footer {visibility: hidden;}
-    
-    /* 3. Hide the top-right hamburger menu and header */
     #MainMenu {visibility: hidden;}
     header {visibility: hidden;}
+    
+    /* 3. Nuke the Streamlit Cloud Creator Badge */
+    div[class^="viewerBadge_"] { display: none !important; }
+    div[class^="styles_viewerBadge"] { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
