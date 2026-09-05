@@ -201,7 +201,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=5000):
+    def predict_matchup(self, away_team, home_team, num_simulations=10000):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
@@ -431,7 +431,7 @@ else:
             default_h_idx = 1 if len(all_teams) > 1 else 0
             home = st.selectbox("Home Team", all_teams, index=default_h_idx)
         with col_c:
-            sims = st.select_slider("Simulations", options=[1000, 5000, 10000], value=5000)
+            sims = st.select_slider("Simulations", options=[1000, 5000, 10000, 50000, 100000], value=10000)
 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True):
             if away == home:
