@@ -31,7 +31,6 @@ def generate_football_score(expected_points):
     return score
 
 def convert_to_moneyline(win_prob):
-    """Converts a win probability (0.0 to 1.0) into major market American Odds."""
     if win_prob <= 0.001: return "+99900"
     if win_prob >= 0.999: return "-99900"
     
@@ -51,17 +50,15 @@ class SeasonPredictor:
         self.regression_factor = regression_factor 
         self.prior_weight = prior_weight
         
-        # 1. Load historical games (all completed)
         self.historical_games = self._load_and_dedupe_csv(past_csv)
         if self.historical_games:
-            completed_hist = [g for g in self.historical_games if g["completed"]]
+            completed_hist = [g for g in self.historical_games if g.get("home_score") not in [None, ""]]
             self._build_srs_model(completed_hist, prefix="hist_")
             self._regress_to_preseason()
 
-        # 2. Load current season games (mix of completed and upcoming)
         self.current_games = self._load_and_dedupe_csv(current_csv) if current_csv else []
         if self.current_games:
-            completed_curr = [g for g in self.current_games if g["completed"]]
+            completed_curr = [g for g in self.current_games if g.get("home_score") not in [None, ""]]
             self._build_srs_model(completed_curr, prefix="curr_")
         
         self._blend_ratings()
@@ -78,7 +75,6 @@ class SeasonPredictor:
             for row in reader:
                 try:
                     date = row.get("date", "").strip()
-                    week = row.get("week", "").strip()
                     home = row["home"].strip()
                     away = row["away"].strip()
                     hs_raw = row.get("home_score", "").strip()
@@ -91,27 +87,23 @@ class SeasonPredictor:
                         continue
                     unique_games.add(game_signature)
 
-                    # Determine if game is completed or upcoming
                     if hs_raw != "" and as_raw != "":
                         hs = int(hs_raw)
                         as_ = int(as_raw)
                         
-                        # Filter out forfeits (1-0 or 0-1)
                         if (hs == 1 and as_ == 0) or (hs == 0 and as_ == 1):
                             continue
                             
                         games.append({
-                            "date": date, "week": week,
+                            "date": date,
                             "home": home, "away": away, 
-                            "home_score": hs, "away_score": as_,
-                            "completed": True
+                            "home_score": hs, "away_score": as_
                         })
                     else:
                         games.append({
-                            "date": date, "week": week,
+                            "date": date,
                             "home": home, "away": away, 
-                            "home_score": None, "away_score": None,
-                            "completed": False
+                            "home_score": None, "away_score": None
                         })
                 except (KeyError, ValueError):
                     pass
@@ -334,7 +326,9 @@ else:
         for t_name, t_data in predictor.teams.items():
             o_rating = t_data.get("active_OSRS", 0.0)
             d_rating = t_data.get("active_DSRS", 0.0)
-            net_power = o_rating + d_rating
+            
+            # MATH FIX: Subtract DSRS because a negative value signifies a good defense
+            net_power = o_rating - d_rating
             
             rankings.append({
                 "Team": t_name,
@@ -344,10 +338,19 @@ else:
             })
             
         rankings.sort(key=lambda x: x["Power Rating"], reverse=True)
-        st.dataframe(rankings, use_container_width=True)
+        
+        for idx, r in enumerate(rankings):
+            r["Rank"] = idx + 1
+            
+        st.dataframe(
+            rankings, 
+            column_order=["Rank", "Team", "Power Rating", "Offense (OSRS)", "Defense (DSRS)"],
+            use_container_width=True, 
+            hide_index=True
+        )
 
     # ----------------------------------------------------
-    # TAB 3: TEAM SCHEDULES & HUB (IMAGE 2 STYLE)
+    # TAB 3: TEAM SCHEDULES & HUB
     # ----------------------------------------------------
     with tab3:
         st.subheader("Team Schedule & Live Projections")
@@ -356,15 +359,12 @@ else:
         selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
         
         if selected_team:
-            # Calculate Team Rank
-            sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) + x[1].get("active_DSRS", 0)), reverse=True)
+            sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) - x[1].get("active_DSRS", 0)), reverse=True)
             team_rank = next((i + 1 for i, (t, _) in enumerate(sorted_teams) if t == selected_team), "N/A")
             
-            # Calculate Power Rating
             t_stats = predictor.teams[selected_team]
-            p_rating = round(t_stats.get("active_OSRS", 0) + t_stats.get("active_DSRS", 0), 2)
+            p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
             
-            # Find Completed and Upcoming Games
             completed_schedule = []
             upcoming_schedule = []
             wins, losses = 0, 0
@@ -375,16 +375,16 @@ else:
                     opp = g["away"] if is_home else g["home"]
                     location_prefix = "vs" if is_home else "@"
                     
-                    if g["completed"]:
-                        team_score = g["home_score"] if is_home else g["away_score"]
-                        opp_score = g["away_score"] if is_home else g["home_score"]
+                    if g.get("home_score") not in [None, ""]:
+                        team_score = int(g["home_score"]) if is_home else int(g["away_score"])
+                        opp_score = int(g["away_score"]) if is_home else int(g["home_score"])
                         mov = team_score - opp_score
                         result = "W" if mov > 0 else "L"
                         if mov > 0: wins += 1
                         else: losses += 1
                         
                         completed_schedule.append({
-                            "Wk": g.get("week", "-"),
+                            "Date": g.get("date", "-"),
                             "Opponent": f"{location_prefix} {opp}",
                             "Score": f"{team_score}-{opp_score}",
                             "MOV": f"+{mov}" if mov > 0 else str(mov),
@@ -392,13 +392,12 @@ else:
                         })
                     else:
                         upcoming_schedule.append({
-                            "week": g.get("week", "-"),
+                            "date": g.get("date", "-"),
                             "is_home": is_home,
                             "opp": opp,
                             "location_prefix": location_prefix
                         })
 
-            # Display Header Metrics
             c1, c2, c3 = st.columns(3)
             c1.metric("Power Rating", f"{p_rating}")
             c2.metric("State Rank", f"#{team_rank}")
@@ -406,32 +405,28 @@ else:
             
             st.markdown("---")
             
-            # Completed Games Table
             st.markdown("### 📜 2026 Season Schedule")
             if completed_schedule:
-                st.dataframe(completed_schedule, use_container_width=True)
+                st.dataframe(completed_schedule, use_container_width=True, hide_index=True)
             else:
                 st.info("No completed games recorded yet for the 2026 season.")
                 
             st.markdown("---")
             
-            # Upcoming Projections
             st.markdown("### 🔮 Upcoming Game Projections")
             if upcoming_schedule:
                 for match in upcoming_schedule:
                     away_t = selected_team if not match["is_home"] else match["opp"]
                     home_t = match["opp"] if not match["is_home"] else selected_team
                     
-                    # Run fast live simulation for upcoming game
                     proj = predictor.predict_matchup(away_t, home_t, num_simulations=2000)
                     
                     win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
                     proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
                     proj_opp_pts = proj["avg_score_a"] if match["is_home"] else proj["avg_score_h"]
                     
-                    # Display Projection Box
                     with st.container():
-                        st.markdown(f"#### **Wk {match['week']}** {match['location_prefix']} **{match['opp']}**")
+                        st.markdown(f"#### **{match['date']}** {match['location_prefix']} **{match['opp']}**")
                         col1, col2, col3, col4 = st.columns(4)
                         col1.metric("Win Prob", f"{win_p*100:.1f}%")
                         col2.metric("Spread", proj["spread_str"])
