@@ -392,7 +392,7 @@ st.set_page_config(page_title="High School Football Predictor", page_icon="🏈"
 # UI Fix for extremely long team names AND hiding Streamlit branding
 st.markdown("""
     <style>
-    /* 1. Force metric text to wrap */
+    /* 1. Prevent long team names from being cut off */
     div[data-testid="stMetricValue"] > div {
         white-space: normal !important;
         word-wrap: break-word !important;
@@ -400,14 +400,27 @@ st.markdown("""
         font-size: 1.75rem !important;
     }
     
-    /* 2. Hide standard Streamlit header and footer */
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
-    header {visibility: hidden;}
-    
-    /* 3. Nuke the Streamlit Cloud Creator Badge */
-    div[class^="viewerBadge_"] { display: none !important; }
-    div[class^="styles_viewerBadge"] { display: none !important; }
+    /* 2. Your Forum Snippet: Hides standard Streamlit UI */
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    #MainMenu,
+    header,
+    footer {
+        visibility: hidden !important;
+        height: 0% !important;
+        position: fixed !important;
+    }
+
+    /* 3. Aggressive wildcard targets for the Cloud Badge */
+    iframe[title*="Streamlit Cloud"],
+    div[class^="viewerBadge"], 
+    div[class^="styles_viewerBadge"],
+    div[class*="_profileContainer_"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
     </style>
 """, unsafe_allow_html=True)
 
