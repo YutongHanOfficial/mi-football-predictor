@@ -262,6 +262,18 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+st.markdown("""
+    <style>
+    /* Force metric text to wrap to the next line instead of truncating */
+    div[data-testid="stMetricValue"] > div {
+        white-space: normal !important;
+        word-wrap: break-word !important;
+        line-height: 1.2 !important;
+        font-size: 1.75rem !important; /* Slightly reduced to fit better */
+    }
+    </style>
+""", unsafe_allow_html=True)
+
 @st.cache_resource
 def load_predictor():
     past_file = "games_2025.csv" if os.path.exists("games_2025.csv") else None
