@@ -199,7 +199,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=10000):
+    def predict_matchup(self, away_team, home_team, num_simulations=5000):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
@@ -254,6 +254,80 @@ class SeasonPredictor:
             "avg_score_h": round(h_total_pts / num_simulations),
             "path": path
         }
+        
+    def get_team_rating_history(self, team_name):
+        history = []
+        
+        # Plot preseason baseline
+        pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
+        pre_dsrs = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
+        history.append({
+            "Date": "Preseason",
+            "Power": round(pre_osrs - pre_dsrs, 2),
+            "Offense": round(pre_osrs, 2),
+            "Defense": round(pre_dsrs, 2)
+        })
+        
+        # Identify dates the team played
+        team_dates = []
+        for g in self.current_games:
+            if g.get("home_score") not in [None, ""] and (g["home"] == team_name or g["away"] == team_name):
+                team_dates.append(g["date"])
+                
+        team_dates = sorted(list(set(team_dates)))
+        
+        # Simulate active rating calculation up to each date
+        for d in team_dates:
+            games_up_to_date = [g for g in self.current_games if g.get("home_score") not in [None, ""] and g["date"] <= d]
+            
+            temp_teams = {}
+            total_points = 0
+            for g in games_up_to_date:
+                home, away = g["home"], g["away"]
+                hs, as_ = g["home_score"], g["away_score"]
+                for t in (home, away):
+                    if t not in temp_teams:
+                        temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
+                temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
+                temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
+                total_points += (hs + as_)
+                
+            league_avg = total_points / (len(games_up_to_date) * 2) if games_up_to_date else 24.0
+            
+            for _ in range(50):
+                new_ratings = {}
+                for t, data in temp_teams.items():
+                    sum_adj_off = league_avg
+                    sum_adj_def = league_avg
+                    num_games = len(data["game_log"]) + 1 
+                    for game in data["game_log"]:
+                        opp = game["opponent"]
+                        sum_adj_off += (game["points_scored"] - temp_teams[opp]["DSRS"])
+                        sum_adj_def += (game["points_allowed"] - temp_teams[opp]["OSRS"])
+                    new_ratings[t] = {
+                        "OSRS": (sum_adj_off / num_games) - league_avg,
+                        "DSRS": (sum_adj_def / num_games) - league_avg
+                    }
+                for t in temp_teams:
+                    temp_teams[t]["OSRS"] = new_ratings[t]["OSRS"]
+                    temp_teams[t]["DSRS"] = new_ratings[t]["DSRS"]
+                    
+            t_data = temp_teams.get(team_name, {"OSRS": 0.0, "DSRS": 0.0, "game_log": []})
+            curr_osrs = t_data["OSRS"]
+            curr_dsrs = t_data["DSRS"]
+            curr_games = len(t_data["game_log"])
+            
+            active_osrs = ((self.prior_weight * pre_osrs) + (curr_games * curr_osrs)) / (self.prior_weight + curr_games)
+            active_dsrs = ((self.prior_weight * pre_dsrs) + (curr_games * curr_dsrs)) / (self.prior_weight + curr_games)
+            
+            history.append({
+                "Date": d,
+                "Power": round(active_osrs - active_dsrs, 2),
+                "Offense": round(active_osrs, 2),
+                "Defense": round(active_dsrs, 2)
+            })
+            
+        return history
 
 
 # ==========================================
@@ -262,14 +336,14 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+# UI Fix for extremely long team names in Streamlit metrics
 st.markdown("""
     <style>
-    /* Force metric text to wrap to the next line instead of truncating */
     div[data-testid="stMetricValue"] > div {
         white-space: normal !important;
         word-wrap: break-word !important;
         line-height: 1.2 !important;
-        font-size: 1.75rem !important; /* Slightly reduced to fit better */
+        font-size: 1.75rem !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -305,7 +379,7 @@ else:
             default_h_idx = 1 if len(all_teams) > 1 else 0
             home = st.selectbox("Home Team", all_teams, index=default_h_idx)
         with col_c:
-            sims = st.select_slider("Simulations", options=[1000, 5000, 10000, 50000, 100000], value=10000)
+            sims = st.select_slider("Simulations", options=[1000, 5000, 10000], value=5000)
 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True):
             if away == home:
@@ -338,8 +412,6 @@ else:
         for t_name, t_data in predictor.teams.items():
             o_rating = t_data.get("active_OSRS", 0.0)
             d_rating = t_data.get("active_DSRS", 0.0)
-            
-            # MATH FIX: Subtract DSRS because a negative value signifies a good defense
             net_power = o_rating - d_rating
             
             rankings.append({
@@ -404,7 +476,7 @@ else:
                         })
                     else:
                         upcoming_schedule.append({
-                            "date": g.get("date", "-"),
+                            "Date": g.get("date", "-"),
                             "is_home": is_home,
                             "opp": opp,
                             "location_prefix": location_prefix
@@ -414,6 +486,12 @@ else:
             c1.metric("Power Rating", f"{p_rating}")
             c2.metric("State Rank", f"#{team_rank}")
             c3.metric("2026 Record", f"{wins}-{losses}")
+            
+            # --- NEW RATING PROGRESSION GRAPH ---
+            history_data = predictor.get_team_rating_history(selected_team)
+            if len(history_data) > 1:
+                st.markdown("### 📈 Season Rating Progression")
+                st.line_chart(history_data, x="Date", y=["Power", "Offense", "Defense"], use_container_width=True)
             
             st.markdown("---")
             
@@ -438,7 +516,7 @@ else:
                     proj_opp_pts = proj["avg_score_a"] if match["is_home"] else proj["avg_score_h"]
                     
                     with st.container():
-                        st.markdown(f"#### **{match['date']}** {match['location_prefix']} **{match['opp']}**")
+                        st.markdown(f"#### **{match['Date']}** {match['location_prefix']} **{match['opp']}**")
                         col1, col2, col3, col4 = st.columns(4)
                         col1.metric("Win Prob", f"{win_p*100:.1f}%")
                         col2.metric("Spread", proj["spread_str"])
