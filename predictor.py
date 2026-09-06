@@ -201,7 +201,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=10000):
+    def predict_matchup(self, away_team, home_team, num_simulations=5000):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
@@ -260,7 +260,6 @@ class SeasonPredictor:
     def get_team_rating_history(self, team_name):
         history = []
         
-        # 1. Grab all valid dates in the current season
         all_dates = [g["date"] for g in self.current_games if g.get("home_score") not in [None, ""] and g.get("date")]
         if not all_dates:
             return []
@@ -269,9 +268,12 @@ class SeasonPredictor:
         end_date_str = max(all_dates)
         
         start_dt = datetime.strptime(start_date_str, "%Y-%m-%d")
-        end_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
+        last_game_dt = datetime.strptime(end_date_str, "%Y-%m-%d")
         
-        # Plot Preseason 1 day before the first state-wide game to maintain chronological order
+        # Extend the graph to today's real-world date if we are actively in the season
+        current_real_dt = datetime.now()
+        end_dt = max(last_game_dt, current_real_dt) if current_real_dt.year == last_game_dt.year else last_game_dt
+        
         preseason_dt = start_dt - timedelta(days=1)
         
         pre_ratings = []
@@ -283,18 +285,17 @@ class SeasonPredictor:
         preseason_rank = next((i + 1 for i, v in enumerate(pre_ratings) if v[0] == team_name), "N/A")
         
         pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
-        pre_dsrs = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
+        pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
         history.append({
             "Date": preseason_dt,
             "Label": "Preseason",
-            "Power": round(pre_osrs - pre_dsrs, 2),
+            "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
-            "Defense": round(pre_dsrs, 2),
+            "Defense": round(-pre_dsrs_raw, 2), # Flipped so positive = good
             "Rank": preseason_rank
         })
         
-        # Map games by date to optimize the loop
         games_by_date = {}
         for g in self.current_games:
             if g.get("home_score") not in [None, ""]:
@@ -305,16 +306,14 @@ class SeasonPredictor:
         cumulative_games = []
         current_dt = start_dt
         
-        last_power = round(pre_osrs - pre_dsrs, 2)
+        last_power = round(pre_osrs - pre_dsrs_raw, 2)
         last_off = round(pre_osrs, 2)
-        last_def = round(pre_dsrs, 2)
+        last_def = round(-pre_dsrs_raw, 2) # Flipped
         last_rank = preseason_rank
         
-        # Iterate day-by-day
         while current_dt <= end_dt:
             date_str = current_dt.strftime("%Y-%m-%d")
             
-            # If games were played anywhere in the state today, recalculate SRS
             if date_str in games_by_date:
                 cumulative_games.extend(games_by_date[date_str])
                 
@@ -364,7 +363,7 @@ class SeasonPredictor:
                     if t == team_name:
                         last_power = round(t_power, 2)
                         last_off = round(t_act_osrs, 2)
-                        last_def = round(t_act_dsrs, 2)
+                        last_def = round(-t_act_dsrs, 2) # Flipped so positive = good
                         
                 active_ratings.sort(key=lambda x: x[1], reverse=True)
                 last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
@@ -389,13 +388,40 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+# Nuclear CSS Fix to prevent text truncation and hide branding
 st.markdown("""
     <style>
-    div[data-testid="stMetricValue"] > div {
+    /* Force ALL text inside metric values to wrap completely */
+    [data-testid="stMetricValue"], 
+    [data-testid="stMetricValue"] > div, 
+    [data-testid="stMetricValue"] span {
         white-space: normal !important;
         word-wrap: break-word !important;
+        word-break: break-word !important;
+        overflow: visible !important;
+        text-overflow: clip !important;
         line-height: 1.2 !important;
         font-size: 1.75rem !important;
+    }
+    
+    /* Hide standard Streamlit header and footer */
+    div[data-testid="stToolbar"],
+    div[data-testid="stDecoration"],
+    div[data-testid="stStatusWidget"],
+    #MainMenu, header, footer {
+        visibility: hidden !important;
+        height: 0% !important;
+        position: fixed !important;
+    }
+
+    /* Target the Streamlit Cloud Creator Badge */
+    iframe[title*="Streamlit Cloud"],
+    div[class^="viewerBadge"], 
+    div[class^="styles_viewerBadge"],
+    div[class*="_profileContainer_"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -469,8 +495,8 @@ else:
             rankings.append({
                 "Team": t_name,
                 "Power Rating": round(net_power, 2),
-                "Offense (OSRS)": round(o_rating, 2),
-                "Defense (DSRS)": round(d_rating, 2),
+                "Offense": round(o_rating, 2),
+                "Defense": round(-d_rating, 2), # Flipped for display
             })
             
         rankings.sort(key=lambda x: x["Power Rating"], reverse=True)
@@ -480,7 +506,7 @@ else:
             
         st.dataframe(
             rankings, 
-            column_order=["Rank", "Team", "Power Rating", "Offense (OSRS)", "Defense (DSRS)"],
+            column_order=["Rank", "Team", "Power Rating", "Offense", "Defense"],
             use_container_width=True, 
             hide_index=True
         )
@@ -539,14 +565,11 @@ else:
             c2.metric("State Rank", f"#{team_rank}")
             c3.metric("2026 Record", f"{wins}-{losses}")
             
-            # --- DAILY RATING PROGRESSION GRAPHS ---
             history_data = predictor.get_team_rating_history(selected_team)
             if len(history_data) > 1:
                 st.markdown("### 📈 Season Progression")
                 
-                # Assign true datetime index to fix Streamlit sorting
                 df_hist = pd.DataFrame(history_data).set_index("Date")
-                
                 col_chart1, col_chart2 = st.columns(2)
                 
                 with col_chart1:
@@ -557,7 +580,6 @@ else:
                     st.markdown("**Statewide Rank (Lower is Better)**")
                     st.line_chart(df_hist[["Rank"]], use_container_width=True)
                 
-                # Expose the table data using the string labels (so "Preseason" prints nicely)
                 df_table = df_hist.reset_index()[["Label", "Power", "Offense", "Defense", "Rank"]].rename(columns={"Label": "Date"})
                 st.dataframe(df_table, use_container_width=True, hide_index=True)
             
