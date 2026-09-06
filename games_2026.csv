@@ -452,14 +452,14 @@ date,home,away,home_score,away_score
 2026-09-04,Battle Creek Harper Creek,Cedar Springs,19,0
 2026-09-04,Berrien Springs,Otsego,56,14
 2026-09-04,Bloomfield Hills Brother Rice,River Rouge,42,6
-2026-09-04,Boone Grove (IN),Bremen (IN),,
+2026-09-04,Boone Grove (IN),Bremen (IN),7,52
 2026-09-04,Carrollton,Bridgeport,53,0
 2026-09-04,Center Line,Clawson,0,7
 2026-09-04,Charlevoix,Boyne City,28,12
-2026-09-04,Chesterton (IN),Michigan City (IN),,
-2026-09-04,Clyde (OH),Ashland (OH),,
+2026-09-04,Chesterton (IN),Michigan City (IN),28,7
+2026-09-04,Clyde (OH),Ashland (OH),19,21
 2026-09-04,Columbus Harvest Prep (OH),Jackson Lumen Christi,22,43
-2026-09-04,Columbus St Francis de Sales (OH),Columbus East (OH),,
+2026-09-04,Columbus St Francis de Sales (OH),Columbus East (OH),35,14
 2026-09-04,Cuyahoga Heights (OH),Pioneer North Central (OH),36,7
 2026-09-04,Detroit Catholic Central,Davison,56,14
 2026-09-04,Detroit Cody,Detroit University Prep,52,0
@@ -477,21 +477,21 @@ date,home,away,home_score,away_score
 2026-09-04,Hamtramck,Detroit Voyageur College Prep,6,41
 2026-09-04,Harper Woods Chandler Park,Romulus Summit Academy North,0,42
 2026-09-04,Iron Mountain,North Muskegon,14,19
-2026-09-04,LaGrange Prairie Heights (IN),LaGrange Lakeland (IN),,
-2026-09-04,Louisville Trinity (KY),Cincinnati Moeller (OH),,
+2026-09-04,LaGrange Prairie Heights (IN),LaGrange Lakeland (IN),14,20
+2026-09-04,Louisville Trinity (KY),Cincinnati Moeller (OH),31,14
 2026-09-04,Macomb Dakota,New Baltimore Anchor Bay,24,7
 2026-09-04,Marine City Cardinal Mooney,Auburn Hills Oakland Christian,35,0
-2026-09-04,Marinette (WI),Brussels Southern Door (WI),,
+2026-09-04,Marinette (WI),Brussels Southern Door (WI),20,24
 2026-09-04,Monroe St Mary Catholic Central,Flat Rock,29,19
 2026-09-04,Negaunee,Gladstone,42,6
-2026-09-04,Neillsville (WI),Elk Mound (WI),,
+2026-09-04,Neillsville (WI),Elk Mound (WI),8,42
 2026-09-04,Niles,Stevensville Lakeshore,16,21
 2026-09-04,Niles Brandywine,Buchanan,0,48
 2026-09-04,Oak Park,Waterford Kettering,48,0
 2026-09-04,Orchard Lake St Mary's,Detroit Martin Luther King,42,44
 2026-09-04,Ottawa Lake Whiteford,Pewamo-Westphalia,0,35
 2026-09-04,Owosso,Aurora St Andrews (CN),7,49
-2026-09-04,Peshtigo (WI),Sturgeon Bay (WI),,
+2026-09-04,Peshtigo (WI),Sturgeon Bay (WI),35,0
 2026-09-04,Petoskey,Sault Ste Marie,52,8
 2026-09-04,Pinckney,Tecumseh,15,42
 2026-09-04,Port Huron,Marysville,35,8
@@ -503,8 +503,8 @@ date,home,away,home_score,away_score
 2026-09-04,Southfield Bradford Academy,Detroit Pershing,30,0
 2026-09-04,St Joseph,Lowell,34,35
 2026-09-04,Sterling Heights Parkway Christian,Detroit Leadership Academy,47,6
-2026-09-04,Sylvania Southview (OH),Toledo Whitmer (OH),,
-2026-09-04,Toledo Ottawa Hills (OH),Swanton (OH),,
+2026-09-04,Sylvania Southview (OH),Toledo Whitmer (OH),6,37
+2026-09-04,Toledo Ottawa Hills (OH),Swanton (OH),14,7
 2026-09-04,Traverse City St Francis,Ogemaw Heights,13,33
 2026-09-04,Traverse City West,Grand Rapids Christian,22,20
 2026-09-04,Vestaburg,St Louis,16,0
@@ -512,7 +512,7 @@ date,home,away,home_score,away_score
 2026-09-04,Ypsilanti Lincoln,Ypsilanti Community,7,12
 2026-09-04,Zeeland West,Midland,50,20
 2026-09-05,Eureka St. Bernard (CA),Petaluma St Vincent de Paul (CA),,
-2026-09-05,Grand Rapids Catholic Central,Chicago Kenwood Academy (IL),,
+2026-09-05,Grand Rapids Catholic Central,Chicago Kenwood Academy (IL),7,40
 2026-09-05,Melrose Park Walther Christian (IL),Westmont (IL),,
 2026-09-10,Ann Arbor Huron,Dexter,,
 2026-09-10,Birmingham Groves,Southfield Arts & Technology,,
