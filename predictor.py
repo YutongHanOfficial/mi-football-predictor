@@ -440,16 +440,14 @@ st.title("🏈 High School Football Predictor Engine")
 if predictor is None:
     st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your GitHub repository.")
 else:
-    # Added a new 4th Tab for Season Stats
     tab1, tab2, tab3, tab4 = st.tabs(["🎮 Matchup Simulator", "🏆 Power Rankings", "📅 Team Schedules & Hub", "📈 Season Leaderboards"])
 
-    # Pre-calculate statewide rankings for quick reference in tabs
     sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) - x[1].get("active_DSRS", 0)), reverse=True)
     def get_rank(t_name):
         return next((i + 1 for i, (t, _) in enumerate(sorted_teams) if t == t_name), "N/A")
 
     # ----------------------------------------------------
-    # TAB 1: MATCHUP SIMULATOR (Redesigned)
+    # TAB 1: MATCHUP SIMULATOR
     # ----------------------------------------------------
     with tab1:
         all_teams = sorted(list(predictor.teams.keys()))
@@ -464,7 +462,6 @@ else:
                 a_pwr = round(predictor.teams[away].get("active_OSRS",0) - predictor.teams[away].get("active_DSRS",0), 2)
                 a_gp = max(1, a_stats["GP"])
                 
-                # Dynamic Team Stats Dashboard
                 st.caption(f"🏆 **State Rank:** #{get_rank(away)} | ⚡ **Power Rating:** {a_pwr}")
                 st.caption(f"📊 **Record:** {a_stats['W']}-{a_stats['L']} | 🟢 **PPG:** {a_stats['PF']/a_gp:.1f} | 🔴 **PA/G:** {a_stats['PA']/a_gp:.1f}")
 
@@ -477,15 +474,13 @@ else:
                 h_pwr = round(predictor.teams[home].get("active_OSRS",0) - predictor.teams[home].get("active_DSRS",0), 2)
                 h_gp = max(1, h_stats["GP"])
                 
-                # Dynamic Team Stats Dashboard
                 st.caption(f"🏆 **State Rank:** #{get_rank(home)} | ⚡ **Power Rating:** {h_pwr}")
                 st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp:.1f}")
 
-        # Moved simulation settings into an expander to clean up the primary view
         with st.expander("⚙️ Advanced Simulation Settings"):
             sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
 
-        st.write("") # Add a little vertical breathing room
+        st.write("") 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True, type="primary"):
             if away == home:
                 st.warning("Please select two different teams.")
@@ -498,7 +493,6 @@ else:
 
                 st.markdown("---")
                 
-                # Centered, scoreboard-style final output
                 st.markdown("<h3 style='text-align: center; color: #a1a1aa;'>📊 Projected Final Score</h3>", unsafe_allow_html=True)
                 st.markdown(f"<h1 style='text-align: center; margin-bottom: 30px;'>{away} {res['avg_score_a']} — {res['avg_score_h']} {home}</h1>", unsafe_allow_html=True)
                 
@@ -552,9 +546,36 @@ else:
             t_stats = predictor.teams[selected_team]
             p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
             
+            # --- NEW 8-STAT MINI DASHBOARD ---
+            t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+            gp = t_basic["GP"]
+            safe_gp = max(1, gp)
+            pf = t_basic["PF"]
+            pa = t_basic["PA"]
+            diff = pf - pa
+            ppg = pf / safe_gp if gp > 0 else 0.0
+            papg = pa / safe_gp if gp > 0 else 0.0
+            win_pct = t_basic["W"] / safe_gp if gp > 0 else 0.0
+
+            st.markdown("### 📊 Team Dashboard")
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("State Rank", f"#{team_rank}")
+            m2.metric("Power Rating", f"{p_rating}")
+            m3.metric("2026 Record", f"{t_basic['W']}-{t_basic['L']}")
+            m4.metric("Win %", f"{win_pct:.3f}")
+            
+            st.write("") # Spacer between metric rows
+            
+            m5, m6, m7, m8 = st.columns(4)
+            m5.metric("Points Per Game", f"{ppg:.1f}")
+            m6.metric("Pts Against / Gm", f"{papg:.1f}")
+            m7.metric("Total Points For", f"{pf}")
+            m8.metric("Point Diff", f"{'+' if diff > 0 else ''}{diff}")
+            
+            st.markdown("---")
+            
             completed_schedule = []
             upcoming_schedule = []
-            wins, losses = 0, 0
             
             for g in predictor.current_games:
                 if g["home"] == selected_team or g["away"] == selected_team:
@@ -567,8 +588,6 @@ else:
                         opp_score = int(g["away_score"]) if is_home else int(g["home_score"])
                         mov = team_score - opp_score
                         result = "W" if mov > 0 else "L"
-                        if mov > 0: wins += 1
-                        else: losses += 1
                         
                         completed_schedule.append({
                             "Date": g.get("date", "-"),
@@ -585,11 +604,6 @@ else:
                             "location_prefix": location_prefix
                         })
 
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Power Rating", f"{p_rating}")
-            c2.metric("State Rank", f"#{team_rank}")
-            c3.metric("2026 Record", f"{wins}-{losses}")
-            
             history_data = predictor.get_team_rating_history(selected_team)
             if len(history_data) > 1:
                 st.markdown("### 📈 Season Progression")
@@ -704,7 +718,7 @@ else:
                 st.info("No upcoming unplayed games found in the schedule.")
 
     # ----------------------------------------------------
-    # TAB 4: SEASON LEADERBOARDS & STATS (New)
+    # TAB 4: SEASON LEADERBOARDS & STATS 
     # ----------------------------------------------------
     with tab4:
         st.subheader("Season Leaderboards & Statistical Aggregates")
@@ -729,7 +743,6 @@ else:
                 "PA/G": round(pa / gp, 1) if gp > 0 else 0.0
             })
             
-        # Ensure the table sorts by state rank by default
         stat_rows.sort(key=lambda x: (isinstance(x["Rank"], str), x["Rank"]))
         
         st.dataframe(
