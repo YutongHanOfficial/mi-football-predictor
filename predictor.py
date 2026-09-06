@@ -205,6 +205,41 @@ class SeasonPredictor:
                 elif as_ > hs:
                     self.basic_stats[a]["W"] += 1
                     self.basic_stats[h]["L"] += 1
+                    
+        # Calculate statewide rankings for each category
+        all_teams_stats = []
+        for t, s in self.basic_stats.items():
+            gp = max(1, s["GP"])
+            pf = s["PF"]
+            pa = s["PA"]
+            diff = pf - pa
+            ppg = pf / gp
+            papg = pa / gp
+            win_pct = s["W"] / gp
+            
+            all_teams_stats.append({
+                "team": t,
+                "win_pct": win_pct,
+                "pf": pf,
+                "pa": pa,
+                "diff": diff,
+                "ppg": ppg,
+                "papg": papg
+            })
+
+        def get_ranks(sort_key, reverse=True):
+            sorted_list = sorted(all_teams_stats, key=lambda x: x[sort_key], reverse=reverse)
+            ranks = {}
+            for i, item in enumerate(sorted_list):
+                ranks[item["team"]] = i + 1
+            return ranks
+        
+        self.ranks_win_pct = get_ranks("win_pct", True)
+        self.ranks_pf = get_ranks("pf", True)
+        self.ranks_pa = get_ranks("pa", False) # Lowest PA is best
+        self.ranks_diff = get_ranks("diff", True)
+        self.ranks_ppg = get_ranks("ppg", True)
+        self.ranks_papg = get_ranks("papg", False) # Lowest PAPG is best
 
     def _find_connection_path(self, team_a, team_b):
         if team_a not in self.teams or team_b not in self.teams: return None
@@ -414,6 +449,7 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+# CSS adjustments to wrap long team text and hide anchor links globally
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
@@ -421,6 +457,14 @@ st.markdown("""
         word-wrap: break-word !important;
         line-height: 1.2 !important;
         font-size: 1.75rem !important;
+    }
+    
+    /* Permanently hide all anchor links associated with headers */
+    .stMarkdown a.header-anchor,
+    .stMarkdown a.anchor,
+    h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
+        display: none !important;
+        pointer-events: none !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -435,7 +479,7 @@ def load_predictor():
 
 predictor = load_predictor()
 
-st.title("🏈 High School Football Predictor Engine")
+st.title("🏈 High School Football Predictor Engine", anchor=False)
 
 if predictor is None:
     st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your GitHub repository.")
@@ -506,7 +550,7 @@ else:
     # TAB 2: POWER RANKINGS
     # ----------------------------------------------------
     with tab2:
-        st.subheader("Statewide Power Rankings")
+        st.subheader("Statewide Power Rankings", anchor=False)
         
         rankings = []
         for t_name, t_data in predictor.teams.items():
@@ -537,7 +581,7 @@ else:
     # TAB 3: TEAM SCHEDULES & HUB
     # ----------------------------------------------------
     with tab3:
-        st.subheader("Team Schedule & Live Projections")
+        st.subheader("Team Schedule & Live Projections", anchor=False)
         
         selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
         
@@ -546,7 +590,6 @@ else:
             t_stats = predictor.teams[selected_team]
             p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
             
-            # --- NEW 8-STAT MINI DASHBOARD ---
             t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
             gp = t_basic["GP"]
             safe_gp = max(1, gp)
@@ -559,18 +602,18 @@ else:
 
             st.markdown("### 📊 Team Dashboard")
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("State Rank", f"#{team_rank}")
+            m1.metric("Overall State Rank", f"#{team_rank}")
             m2.metric("Power Rating", f"{p_rating}")
             m3.metric("2026 Record", f"{t_basic['W']}-{t_basic['L']}")
-            m4.metric("Win %", f"{win_pct:.3f}")
+            m4.metric(f"Win % (#{predictor.ranks_win_pct.get(selected_team, 'N/A')})", f"{win_pct:.3f}")
             
-            st.write("") # Spacer between metric rows
+            st.write("") 
             
             m5, m6, m7, m8 = st.columns(4)
-            m5.metric("Points Per Game", f"{ppg:.1f}")
-            m6.metric("Pts Against / Gm", f"{papg:.1f}")
-            m7.metric("Total Points For", f"{pf}")
-            m8.metric("Point Diff", f"{'+' if diff > 0 else ''}{diff}")
+            m5.metric(f"Points Per Game (#{predictor.ranks_ppg.get(selected_team, 'N/A')})", f"{ppg:.1f}")
+            m6.metric(f"Pts Against / Gm (#{predictor.ranks_papg.get(selected_team, 'N/A')})", f"{papg:.1f}")
+            m7.metric(f"Total Points For (#{predictor.ranks_pf.get(selected_team, 'N/A')})", f"{pf}")
+            m8.metric(f"Point Diff (#{predictor.ranks_diff.get(selected_team, 'N/A')})", f"{'+' if diff > 0 else ''}{diff}")
             
             st.markdown("---")
             
@@ -650,7 +693,8 @@ else:
                         opacity=alt.condition(hover, alt.value(1), alt.value(0))
                     )
                     
-                    st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings).interactive(), use_container_width=True)
+                    # Removed .interactive() to lock zoom and panning
+                    st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings), use_container_width=True)
                     
                 with col_chart2:
                     st.markdown("**Statewide Rank (Lower is Better)**")
@@ -678,7 +722,8 @@ else:
                         opacity=alt.condition(hover, alt.value(1), alt.value(0))
                     )
                     
-                    st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank).interactive(), use_container_width=True)
+                    # Removed .interactive() to lock zoom and panning
+                    st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
                 
                 df_table = df_hist[['Label', 'Power', 'Offense', 'Defense', 'Rank']].rename(columns={'Label': 'Date'})
                 st.dataframe(df_table, use_container_width=True, hide_index=True)
@@ -721,7 +766,7 @@ else:
     # TAB 4: SEASON LEADERBOARDS & STATS 
     # ----------------------------------------------------
     with tab4:
-        st.subheader("Season Leaderboards & Statistical Aggregates")
+        st.subheader("Season Leaderboards & Statistical Aggregates", anchor=False)
         
         stat_rows = []
         for t in all_teams:
