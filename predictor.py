@@ -65,6 +65,7 @@ class SeasonPredictor:
             self._build_srs_model(completed_curr, prefix="curr_")
         
         self._blend_ratings()
+        self._calculate_basic_stats()
 
     def _load_and_dedupe_csv(self, filename):
         games = []
@@ -181,6 +182,30 @@ class SeasonPredictor:
             self.teams[team]["active_OSRS"] = ((self.prior_weight * pre_osrs) + (curr_games * curr_osrs)) / (self.prior_weight + curr_games)
             self.teams[team]["active_DSRS"] = ((self.prior_weight * pre_dsrs) + (curr_games * curr_dsrs)) / (self.prior_weight + curr_games)
 
+    def _calculate_basic_stats(self):
+        self.basic_stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0} for t in self.teams}
+        for g in self.current_games:
+            if g.get("home_score") not in [None, ""]:
+                h, a = g["home"], g["away"]
+                hs, as_ = int(g["home_score"]), int(g["away_score"])
+                
+                if h not in self.basic_stats: self.basic_stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
+                if a not in self.basic_stats: self.basic_stats[a] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
+
+                self.basic_stats[h]["GP"] += 1
+                self.basic_stats[a]["GP"] += 1
+                self.basic_stats[h]["PF"] += hs
+                self.basic_stats[h]["PA"] += as_
+                self.basic_stats[a]["PF"] += as_
+                self.basic_stats[a]["PA"] += hs
+
+                if hs > as_:
+                    self.basic_stats[h]["W"] += 1
+                    self.basic_stats[a]["L"] += 1
+                elif as_ > hs:
+                    self.basic_stats[a]["W"] += 1
+                    self.basic_stats[h]["L"] += 1
+
     def _find_connection_path(self, team_a, team_b):
         if team_a not in self.teams or team_b not in self.teams: return None
         
@@ -288,7 +313,7 @@ class SeasonPredictor:
         pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
         history.append({
-            "Date": preseason_dt, # Passed as true datetime object for uniform charting
+            "Date": preseason_dt, 
             "Label": f"{preseason_dt.month}/{preseason_dt.day} (Pre)", 
             "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
@@ -370,7 +395,7 @@ class SeasonPredictor:
                 last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
                 
             history.append({
-                "Date": current_dt, # Passed as true datetime object
+                "Date": current_dt,
                 "Label": display_label,
                 "Power": last_power,
                 "Offense": last_off,
@@ -415,25 +440,53 @@ st.title("🏈 High School Football Predictor Engine")
 if predictor is None:
     st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your GitHub repository.")
 else:
-    tab1, tab2, tab3 = st.tabs(["🎮 Matchup Simulator", "🏆 Power Rankings", "📅 Team Schedules & Hub"])
+    # Added a new 4th Tab for Season Stats
+    tab1, tab2, tab3, tab4 = st.tabs(["🎮 Matchup Simulator", "🏆 Power Rankings", "📅 Team Schedules & Hub", "📈 Season Leaderboards"])
+
+    # Pre-calculate statewide rankings for quick reference in tabs
+    sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) - x[1].get("active_DSRS", 0)), reverse=True)
+    def get_rank(t_name):
+        return next((i + 1 for i, (t, _) in enumerate(sorted_teams) if t == t_name), "N/A")
 
     # ----------------------------------------------------
-    # TAB 1: MATCHUP SIMULATOR
+    # TAB 1: MATCHUP SIMULATOR (Redesigned)
     # ----------------------------------------------------
     with tab1:
-        st.subheader("Simulate Any Matchup")
         all_teams = sorted(list(predictor.teams.keys()))
         
-        col_a, col_b, col_c = st.columns([2, 2, 1])
+        col_a, col_b = st.columns(2)
+        
         with col_a:
-            away = st.selectbox("Away Team", all_teams, index=0 if all_teams else None)
-        with col_b:
-            default_h_idx = 1 if len(all_teams) > 1 else 0
-            home = st.selectbox("Home Team", all_teams, index=default_h_idx)
-        with col_c:
-            sims = st.select_slider("Simulations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
+            st.markdown("### ✈️ Away Team")
+            away = st.selectbox("Away Team Select", all_teams, index=0 if all_teams else None, label_visibility="collapsed")
+            if away:
+                a_stats = predictor.basic_stats.get(away, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                a_pwr = round(predictor.teams[away].get("active_OSRS",0) - predictor.teams[away].get("active_DSRS",0), 2)
+                a_gp = max(1, a_stats["GP"])
+                
+                # Dynamic Team Stats Dashboard
+                st.caption(f"🏆 **State Rank:** #{get_rank(away)} | ⚡ **Power Rating:** {a_pwr}")
+                st.caption(f"📊 **Record:** {a_stats['W']}-{a_stats['L']} | 🟢 **PPG:** {a_stats['PF']/a_gp:.1f} | 🔴 **PA/G:** {a_stats['PA']/a_gp:.1f}")
 
-        if st.button("🚀 Run Vegas Simulation", use_container_width=True):
+        with col_b:
+            st.markdown("### 🏠 Home Team")
+            default_h_idx = 1 if len(all_teams) > 1 else 0
+            home = st.selectbox("Home Team Select", all_teams, index=default_h_idx, label_visibility="collapsed")
+            if home:
+                h_stats = predictor.basic_stats.get(home, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                h_pwr = round(predictor.teams[home].get("active_OSRS",0) - predictor.teams[home].get("active_DSRS",0), 2)
+                h_gp = max(1, h_stats["GP"])
+                
+                # Dynamic Team Stats Dashboard
+                st.caption(f"🏆 **State Rank:** #{get_rank(home)} | ⚡ **Power Rating:** {h_pwr}")
+                st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp:.1f}")
+
+        # Moved simulation settings into an expander to clean up the primary view
+        with st.expander("⚙️ Advanced Simulation Settings"):
+            sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
+
+        st.write("") # Add a little vertical breathing room
+        if st.button("🚀 Run Vegas Simulation", use_container_width=True, type="primary"):
             if away == home:
                 st.warning("Please select two different teams.")
             else:
@@ -445,15 +498,15 @@ else:
 
                 st.markdown("---")
                 
-                m1, m2, m3, m4 = st.columns([1, 2.5, 1, 1])
+                # Centered, scoreboard-style final output
+                st.markdown("<h3 style='text-align: center; color: #a1a1aa;'>📊 Projected Final Score</h3>", unsafe_allow_html=True)
+                st.markdown(f"<h1 style='text-align: center; margin-bottom: 30px;'>{away} {res['avg_score_a']} — {res['avg_score_h']} {home}</h1>", unsafe_allow_html=True)
+                
+                m1, m2, m3, m4 = st.columns([1, 1.5, 1, 1])
                 m1.metric(f"{away} Win Prob", f"{res['prob_a']*100:.1f}%", convert_to_moneyline(res['prob_a']))
                 m2.metric("True Spread", res["spread_str"])
                 m3.metric("Over / Under", f"{res['median_total']:g} pts")
                 m4.metric(f"{home} Win Prob", f"{res['prob_h']*100:.1f}%", convert_to_moneyline(res['prob_h']))
-
-                st.markdown("---")
-                st.subheader("📊 Average Score Projection")
-                st.markdown(f"### **{away} {res['avg_score_a']}** — **{res['avg_score_h']} {home}**")
 
     # ----------------------------------------------------
     # TAB 2: POWER RANKINGS
@@ -492,13 +545,10 @@ else:
     with tab3:
         st.subheader("Team Schedule & Live Projections")
         
-        all_teams = sorted(list(predictor.teams.keys()))
         selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
         
         if selected_team:
-            sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) - x[1].get("active_DSRS", 0)), reverse=True)
-            team_rank = next((i + 1 for i, (t, _) in enumerate(sorted_teams) if t == selected_team), "N/A")
-            
+            team_rank = get_rank(selected_team)
             t_stats = predictor.teams[selected_team]
             p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
             
@@ -547,11 +597,9 @@ else:
                 df_hist = pd.DataFrame(history_data)
                 col_chart1, col_chart2 = st.columns(2)
                 
-                # --- Advanced Interactive Hover Rendering for Chart 1 ---
                 with col_chart1:
                     st.markdown("**Team Ratings over Time**")
                     
-                    # Create the interactive hover selection mechanism
                     hover = alt.selection_point(
                         fields=['Date'],
                         nearest=True,
@@ -559,12 +607,10 @@ else:
                         empty=False
                     )
                     
-                    # Base layout using true temporal datetime logic for perfect even spacing
                     base_ratings = alt.Chart(df_hist).encode(
                         x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
                     )
                     
-                    # Draw the 3 static lines
                     lines_ratings = base_ratings.transform_fold(
                         ['Power', 'Offense', 'Defense'],
                         as_=['Metric', 'Rating']
@@ -573,7 +619,6 @@ else:
                         color=alt.Color('Metric:N', legend=alt.Legend(orient="bottom", title=None))
                     )
                     
-                    # Invisible vertical columns that catch the mouse hover and display the single tooltip
                     selectors_ratings = base_ratings.mark_rule(opacity=0, size=30).encode(
                         tooltip=[
                             alt.Tooltip('Label:N', title='Date'),
@@ -583,19 +628,16 @@ else:
                         ]
                     ).add_params(hover)
                     
-                    # Vertical crosshair line that appears on hover
                     rules_ratings = base_ratings.mark_rule(color='gray', strokeDash=[3, 3]).encode(
                         opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
                     )
                     
-                    # The glowing points that only appear on the line when hovered
                     points_ratings = lines_ratings.mark_point(size=70, filled=True).encode(
                         opacity=alt.condition(hover, alt.value(1), alt.value(0))
                     )
                     
                     st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings).interactive(), use_container_width=True)
                     
-                # --- Advanced Interactive Hover Rendering for Chart 2 ---
                 with col_chart2:
                     st.markdown("**Statewide Rank (Lower is Better)**")
                     
@@ -624,7 +666,6 @@ else:
                     
                     st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank).interactive(), use_container_width=True)
                 
-                # Expose the table below the charts using the string labels (so "Preseason" prints nicely)
                 df_table = df_hist[['Label', 'Power', 'Offense', 'Defense', 'Rank']].rename(columns={'Label': 'Date'})
                 st.dataframe(df_table, use_container_width=True, hide_index=True)
             
@@ -661,3 +702,39 @@ else:
                         st.divider()
             else:
                 st.info("No upcoming unplayed games found in the schedule.")
+
+    # ----------------------------------------------------
+    # TAB 4: SEASON LEADERBOARDS & STATS (New)
+    # ----------------------------------------------------
+    with tab4:
+        st.subheader("Season Leaderboards & Statistical Aggregates")
+        
+        stat_rows = []
+        for t in all_teams:
+            s = predictor.basic_stats.get(t, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+            gp = s["GP"]
+            pf = s["PF"]
+            pa = s["PA"]
+            
+            stat_rows.append({
+                "Rank": get_rank(t),
+                "Team": t,
+                "GP": gp,
+                "Record": f"{s['W']}-{s['L']}",
+                "Win %": round(s['W'] / gp, 3) if gp > 0 else 0.000,
+                "PF": pf,
+                "PA": pa,
+                "Diff": pf - pa,
+                "PPG": round(pf / gp, 1) if gp > 0 else 0.0,
+                "PA/G": round(pa / gp, 1) if gp > 0 else 0.0
+            })
+            
+        # Ensure the table sorts by state rank by default
+        stat_rows.sort(key=lambda x: (isinstance(x["Rank"], str), x["Rank"]))
+        
+        st.dataframe(
+            stat_rows, 
+            column_order=["Rank", "Team", "Record", "Win %", "GP", "PF", "PA", "Diff", "PPG", "PA/G"],
+            use_container_width=True, 
+            hide_index=True
+        )
