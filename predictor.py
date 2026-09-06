@@ -4,6 +4,7 @@ import csv
 import os
 import statistics
 import pandas as pd
+import altair as alt
 from datetime import datetime, timedelta
 from collections import deque
 import streamlit as st
@@ -286,14 +287,13 @@ class SeasonPredictor:
         pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
         pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
-        # Explicit M/D formatted strings to defeat Streamlit's date auto-parsing
         pre_label = f"{preseason_dt.month}/{preseason_dt.day} (Pre)"
         
         history.append({
             "Date": pre_label,
             "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
-            "Defense": round(-pre_dsrs_raw, 2), # Inverted so Positive = Good Defense
+            "Defense": round(-pre_dsrs_raw, 2),
             "Rank": preseason_rank
         })
         
@@ -365,7 +365,7 @@ class SeasonPredictor:
                     if t == team_name:
                         last_power = round(t_power, 2)
                         last_off = round(t_act_osrs, 2)
-                        last_def = round(-t_act_dsrs, 2) # Inverted so Positive = Good Defense
+                        last_def = round(-t_act_dsrs, 2) 
                         
                 active_ratings.sort(key=lambda x: x[1], reverse=True)
                 last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
@@ -389,7 +389,6 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
-# CSS adjustments to hide branding and enable text wrapping
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
@@ -446,7 +445,6 @@ else:
 
                 st.markdown("---")
                 
-                # Assigned a wider ratio to the Spread column so long team names don't overlap
                 m1, m2, m3, m4 = st.columns([1, 2.5, 1, 1])
                 m1.metric(f"{away} Win Prob", f"{res['prob_a']*100:.1f}%", convert_to_moneyline(res['prob_a']))
                 m2.metric("True Spread", res["spread_str"])
@@ -473,7 +471,7 @@ else:
                 "Team": t_name,
                 "Power Rating": round(net_power, 2),
                 "Offense": round(o_rating, 2),
-                "Defense": round(-d_rating, 2), # Inverted for correct positive display
+                "Defense": round(-d_rating, 2),
             })
             
         rankings.sort(key=lambda x: x["Power Rating"], reverse=True)
@@ -551,12 +549,53 @@ else:
                 
                 with col_chart1:
                     st.markdown("**Team Ratings over Time**")
-                    # Explicitly forcing Streamlit to use the string column for the X-axis so it stops hijacking the dates
-                    st.line_chart(df_hist, x="Date", y=["Power", "Offense", "Defense"], use_container_width=True)
+                    
+                    # Create the base Altair chart
+                    base_ratings = alt.Chart(df_hist).encode(
+                        x=alt.X('Date:N', axis=alt.Axis(labelAngle=0, labelOverlap='greedy', title=None))
+                    )
+                    
+                    # Fold data for multi-line plotting
+                    lines_ratings = base_ratings.transform_fold(
+                        ['Power', 'Offense', 'Defense'],
+                        as_=['Metric', 'Rating']
+                    ).mark_line().encode(
+                        y=alt.Y('Rating:Q', title=None),
+                        color=alt.Color('Metric:N', legend=alt.Legend(orient="bottom", title=None))
+                    )
+                    
+                    # Invisible vertical target to capture hover actions and display a unified tooltip
+                    hover_rules_ratings = base_ratings.mark_rule(size=30, opacity=0).encode(
+                        tooltip=[
+                            alt.Tooltip('Date:N', title='Date'),
+                            alt.Tooltip('Power:Q', title='Power'),
+                            alt.Tooltip('Offense:Q', title='Offense'),
+                            alt.Tooltip('Defense:Q', title='Defense')
+                        ]
+                    )
+                    
+                    st.altair_chart((lines_ratings + hover_rules_ratings).interactive(), use_container_width=True)
                     
                 with col_chart2:
                     st.markdown("**Statewide Rank (Lower is Better)**")
-                    st.line_chart(df_hist, x="Date", y=["Rank"], use_container_width=True)
+                    
+                    base_rank = alt.Chart(df_hist).encode(
+                        x=alt.X('Date:N', axis=alt.Axis(labelAngle=0, labelOverlap='greedy', title=None))
+                    )
+                    
+                    # Reversed Y-axis scale so Rank #1 sits visually at the top of the chart
+                    line_rank = base_rank.mark_line(color='#66b3ff').encode(
+                        y=alt.Y('Rank:Q', title=None, scale=alt.Scale(reverse=True))
+                    )
+                    
+                    hover_rules_rank = base_rank.mark_rule(size=30, opacity=0).encode(
+                        tooltip=[
+                            alt.Tooltip('Date:N', title='Date'),
+                            alt.Tooltip('Rank:Q', title='State Rank')
+                        ]
+                    )
+                    
+                    st.altair_chart((line_rank + hover_rules_rank).interactive(), use_container_width=True)
                 
                 st.dataframe(df_hist, use_container_width=True, hide_index=True)
             
