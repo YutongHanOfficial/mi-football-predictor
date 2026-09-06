@@ -287,12 +287,14 @@ class SeasonPredictor:
         pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
         pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
+        # Hard-coded string formatting to fix the X-axis labels
+        preseason_label = preseason_dt.strftime("%m/%d") + " (Pre)"
+        
         history.append({
-            "Date": preseason_dt,
-            "Label": "Preseason",
+            "Date": preseason_label,
             "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
-            "Defense": round(-pre_dsrs_raw, 2), # Flipped so positive = good
+            "Defense": round(-pre_dsrs_raw, 2), # Inverted so Positive = Good Defense
             "Rank": preseason_rank
         })
         
@@ -308,11 +310,12 @@ class SeasonPredictor:
         
         last_power = round(pre_osrs - pre_dsrs_raw, 2)
         last_off = round(pre_osrs, 2)
-        last_def = round(-pre_dsrs_raw, 2) # Flipped
+        last_def = round(-pre_dsrs_raw, 2) # Inverted
         last_rank = preseason_rank
         
         while current_dt <= end_dt:
             date_str = current_dt.strftime("%Y-%m-%d")
+            display_label = current_dt.strftime("%m/%d")
             
             if date_str in games_by_date:
                 cumulative_games.extend(games_by_date[date_str])
@@ -363,14 +366,13 @@ class SeasonPredictor:
                     if t == team_name:
                         last_power = round(t_power, 2)
                         last_off = round(t_act_osrs, 2)
-                        last_def = round(-t_act_dsrs, 2) # Flipped so positive = good
+                        last_def = round(-t_act_dsrs, 2) # Inverted so Positive = Good Defense
                         
                 active_ratings.sort(key=lambda x: x[1], reverse=True)
                 last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
                 
             history.append({
-                "Date": current_dt,
-                "Label": date_str,
+                "Date": display_label,
                 "Power": last_power,
                 "Offense": last_off,
                 "Defense": last_def,
@@ -388,23 +390,19 @@ class SeasonPredictor:
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
-# Nuclear CSS Fix to prevent text truncation and hide branding
+# CSS adjustments to hide branding and enable text wrapping
 st.markdown("""
     <style>
-    /* Force ALL text inside metric values to wrap completely */
     [data-testid="stMetricValue"], 
     [data-testid="stMetricValue"] > div, 
     [data-testid="stMetricValue"] span {
         white-space: normal !important;
         word-wrap: break-word !important;
-        word-break: break-word !important;
-        overflow: visible !important;
-        text-overflow: clip !important;
+        overflow-wrap: break-word !important;
         line-height: 1.2 !important;
         font-size: 1.75rem !important;
     }
     
-    /* Hide standard Streamlit header and footer */
     div[data-testid="stToolbar"],
     div[data-testid="stDecoration"],
     div[data-testid="stStatusWidget"],
@@ -414,7 +412,6 @@ st.markdown("""
         position: fixed !important;
     }
 
-    /* Target the Streamlit Cloud Creator Badge */
     iframe[title*="Streamlit Cloud"],
     div[class^="viewerBadge"], 
     div[class^="styles_viewerBadge"],
@@ -470,10 +467,12 @@ else:
                     st.info(f"**Network Path Found ({hops} hop{'s' if hops > 1 else ''}):** " + " ➔ ".join(res["path"]))
 
                 st.markdown("---")
-                m1, m2, m3, m4 = st.columns(4)
-                m1.metric("True Spread", res["spread_str"])
-                m2.metric("Over / Under", f"{res['median_total']:g} pts")
-                m3.metric(f"{away} Win Prob", f"{res['prob_a']*100:.1f}%", convert_to_moneyline(res['prob_a']))
+                
+                # Assigned a wider ratio to the Spread column so long team names don't overlap
+                m1, m2, m3, m4 = st.columns([1, 2.5, 1, 1])
+                m1.metric(f"{away} Win Prob", f"{res['prob_a']*100:.1f}%", convert_to_moneyline(res['prob_a']))
+                m2.metric("True Spread", res["spread_str"])
+                m3.metric("Over / Under", f"{res['median_total']:g} pts")
                 m4.metric(f"{home} Win Prob", f"{res['prob_h']*100:.1f}%", convert_to_moneyline(res['prob_h']))
 
                 st.markdown("---")
@@ -496,7 +495,7 @@ else:
                 "Team": t_name,
                 "Power Rating": round(net_power, 2),
                 "Offense": round(o_rating, 2),
-                "Defense": round(-d_rating, 2), # Flipped for display
+                "Defense": round(-d_rating, 2), # Correctly inverted for display
             })
             
         rankings.sort(key=lambda x: x["Power Rating"], reverse=True)
@@ -569,6 +568,8 @@ else:
             if len(history_data) > 1:
                 st.markdown("### 📈 Season Progression")
                 
+                # Because Date is now just a string (e.g., "08/27"), the charts will strictly read it textually 
+                # instead of letting Streamlit's date heuristics scramble the axis.
                 df_hist = pd.DataFrame(history_data).set_index("Date")
                 col_chart1, col_chart2 = st.columns(2)
                 
@@ -580,8 +581,7 @@ else:
                     st.markdown("**Statewide Rank (Lower is Better)**")
                     st.line_chart(df_hist[["Rank"]], use_container_width=True)
                 
-                df_table = df_hist.reset_index()[["Label", "Power", "Offense", "Defense", "Rank"]].rename(columns={"Label": "Date"})
-                st.dataframe(df_table, use_container_width=True, hide_index=True)
+                st.dataframe(df_hist.reset_index(), use_container_width=True, hide_index=True)
             
             st.markdown("---")
             
@@ -607,7 +607,9 @@ else:
                     
                     with st.container():
                         st.markdown(f"#### **{match['Date']}** {match['location_prefix']} **{match['opp']}**")
-                        col1, col2, col3, col4 = st.columns(4)
+                        
+                        # Assigned a wider ratio to the Spread column here as well to fix clipping
+                        col1, col2, col3, col4 = st.columns([1, 2.5, 1, 1])
                         col1.metric("Win Prob", f"{win_p*100:.1f}%")
                         col2.metric("Spread", proj["spread_str"])
                         col3.metric("Over/Under", f"{proj['median_total']:g}")
