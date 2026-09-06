@@ -202,7 +202,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=5000):
+    def predict_matchup(self, away_team, home_team, num_simulations=10000):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
