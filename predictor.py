@@ -287,10 +287,9 @@ class SeasonPredictor:
         pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
         pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
         
-        pre_label = f"{preseason_dt.month}/{preseason_dt.day} (Pre)"
-        
         history.append({
-            "Date": pre_label,
+            "Date": preseason_dt, # Passed as true datetime object for uniform charting
+            "Label": f"{preseason_dt.month}/{preseason_dt.day} (Pre)", 
             "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
             "Defense": round(-pre_dsrs_raw, 2),
@@ -371,7 +370,8 @@ class SeasonPredictor:
                 last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
                 
             history.append({
-                "Date": display_label,
+                "Date": current_dt, # Passed as true datetime object
+                "Label": display_label,
                 "Power": last_power,
                 "Offense": last_off,
                 "Defense": last_def,
@@ -547,15 +547,24 @@ else:
                 df_hist = pd.DataFrame(history_data)
                 col_chart1, col_chart2 = st.columns(2)
                 
+                # --- Advanced Interactive Hover Rendering for Chart 1 ---
                 with col_chart1:
                     st.markdown("**Team Ratings over Time**")
                     
-                    # Create the base Altair chart
-                    base_ratings = alt.Chart(df_hist).encode(
-                        x=alt.X('Date:N', axis=alt.Axis(labelAngle=0, labelOverlap='greedy', title=None))
+                    # Create the interactive hover selection mechanism
+                    hover = alt.selection_point(
+                        fields=['Date'],
+                        nearest=True,
+                        on='mouseover',
+                        empty=False
                     )
                     
-                    # Fold data for multi-line plotting
+                    # Base layout using true temporal datetime logic for perfect even spacing
+                    base_ratings = alt.Chart(df_hist).encode(
+                        x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
+                    )
+                    
+                    # Draw the 3 static lines
                     lines_ratings = base_ratings.transform_fold(
                         ['Power', 'Offense', 'Defense'],
                         as_=['Metric', 'Rating']
@@ -564,40 +573,60 @@ else:
                         color=alt.Color('Metric:N', legend=alt.Legend(orient="bottom", title=None))
                     )
                     
-                    # Invisible vertical target to capture hover actions and display a unified tooltip
-                    hover_rules_ratings = base_ratings.mark_rule(size=30, opacity=0).encode(
+                    # Invisible vertical columns that catch the mouse hover and display the single tooltip
+                    selectors_ratings = base_ratings.mark_rule(opacity=0, size=30).encode(
                         tooltip=[
-                            alt.Tooltip('Date:N', title='Date'),
+                            alt.Tooltip('Label:N', title='Date'),
                             alt.Tooltip('Power:Q', title='Power'),
                             alt.Tooltip('Offense:Q', title='Offense'),
                             alt.Tooltip('Defense:Q', title='Defense')
                         ]
+                    ).add_params(hover)
+                    
+                    # Vertical crosshair line that appears on hover
+                    rules_ratings = base_ratings.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                        opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
                     )
                     
-                    st.altair_chart((lines_ratings + hover_rules_ratings).interactive(), use_container_width=True)
+                    # The glowing points that only appear on the line when hovered
+                    points_ratings = lines_ratings.mark_point(size=70, filled=True).encode(
+                        opacity=alt.condition(hover, alt.value(1), alt.value(0))
+                    )
                     
+                    st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings).interactive(), use_container_width=True)
+                    
+                # --- Advanced Interactive Hover Rendering for Chart 2 ---
                 with col_chart2:
                     st.markdown("**Statewide Rank (Lower is Better)**")
                     
                     base_rank = alt.Chart(df_hist).encode(
-                        x=alt.X('Date:N', axis=alt.Axis(labelAngle=0, labelOverlap='greedy', title=None))
+                        x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
                     )
                     
-                    # Reversed Y-axis scale so Rank #1 sits visually at the top of the chart
                     line_rank = base_rank.mark_line(color='#66b3ff').encode(
                         y=alt.Y('Rank:Q', title=None, scale=alt.Scale(reverse=True))
                     )
                     
-                    hover_rules_rank = base_rank.mark_rule(size=30, opacity=0).encode(
+                    selectors_rank = base_rank.mark_rule(opacity=0, size=30).encode(
                         tooltip=[
-                            alt.Tooltip('Date:N', title='Date'),
+                            alt.Tooltip('Label:N', title='Date'),
                             alt.Tooltip('Rank:Q', title='State Rank')
                         ]
+                    ).add_params(hover)
+                    
+                    rules_rank = base_rank.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                        opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
                     )
                     
-                    st.altair_chart((line_rank + hover_rules_rank).interactive(), use_container_width=True)
+                    points_rank = line_rank.mark_point(size=70, filled=True, color='#66b3ff').encode(
+                        opacity=alt.condition(hover, alt.value(1), alt.value(0))
+                    )
+                    
+                    st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank).interactive(), use_container_width=True)
                 
-                st.dataframe(df_hist, use_container_width=True, hide_index=True)
+                # Expose the table below the charts using the string labels (so "Preseason" prints nicely)
+                df_table = df_hist[['Label', 'Power', 'Offense', 'Defense', 'Rank']].rename(columns={'Label': 'Date'})
+                st.dataframe(df_table, use_container_width=True, hide_index=True)
             
             st.markdown("---")
             
