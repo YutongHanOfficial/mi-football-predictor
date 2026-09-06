@@ -392,32 +392,11 @@ st.set_page_config(page_title="High School Football Predictor", page_icon="🏈"
 # CSS adjustments to hide branding and enable text wrapping
 st.markdown("""
     <style>
-    [data-testid="stMetricValue"], 
-    [data-testid="stMetricValue"] > div, 
-    [data-testid="stMetricValue"] span {
+    div[data-testid="stMetricValue"] > div {
         white-space: normal !important;
         word-wrap: break-word !important;
-        overflow-wrap: break-word !important;
         line-height: 1.2 !important;
         font-size: 1.75rem !important;
-    }
-    
-    div[data-testid="stToolbar"],
-    div[data-testid="stDecoration"],
-    div[data-testid="stStatusWidget"],
-    #MainMenu, header, footer {
-        visibility: hidden !important;
-        height: 0% !important;
-        position: fixed !important;
-    }
-
-    iframe[title*="Streamlit Cloud"],
-    div[class^="viewerBadge"], 
-    div[class^="styles_viewerBadge"],
-    div[class*="_profileContainer_"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
     }
     </style>
 """, unsafe_allow_html=True)
