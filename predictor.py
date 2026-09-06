@@ -522,7 +522,7 @@ else:
                 st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp:.1f}")
 
         with st.expander("⚙️ Advanced Simulation Settings"):
-            sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
+            sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000, 1000000, 10000000, 100000000, 1000000000], value=10000)
 
         st.write("") 
         if st.button("🚀 Run Vegas Simulation", use_container_width=True, type="primary"):
