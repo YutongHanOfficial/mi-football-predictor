@@ -273,8 +273,8 @@ class SeasonPredictor:
         a_wins, h_wins, a_total_pts, h_total_pts = 0, 0, 0, 0
         all_home_margins, all_totals = [], []
         
-        # Seed random for guaranteed consistency if somehow caching misses
-        random.seed(f"{away_team}{home_team}{num_simulations}")
+        # COMMENTED OUT TO BRING TRUE RANDOMNESS BACK FOR LOW SIMULATION COUNT Seed random for guaranteed consistency if somehow caching misses
+        # random.seed(f"{away_team}{home_team}{num_simulations}")
 
         for _ in range(num_simulations):
             score_a = generate_football_score(exp_pts_a)
@@ -546,8 +546,16 @@ else:
             if away == home:
                 st.warning("Please select two different teams.")
             else:
-                # USE CACHED PREDICTION WRAPPER HERE
-                res = get_cached_prediction(predictor, away, home, sims)
+                # --- HYBRID CACHING ROUTER ---
+                if sims >= 10000:
+                    # Use cache for heavy loads to save server strain and lock in the "official" projection
+                    res = get_cached_prediction(predictor, away, home, sims)
+                    st.caption("🔒 *Displaying stable, cached projection for high-iteration run.*")
+                else:
+                    # Run live for small loads so users can see the Monte Carlo variance
+                    res = predictor.predict_matchup(away, home, num_simulations=sims)
+                    st.caption("🎲 *Live simulation complete. Expect variance at lower iteration counts!*")
+                # -----------------------------
                 
                 if res["path"]:
                     hops = len(res["path"]) - 1
