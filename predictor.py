@@ -206,7 +206,6 @@ class SeasonPredictor:
                     self.basic_stats[a]["W"] += 1
                     self.basic_stats[h]["L"] += 1
                     
-        # Calculate statewide rankings for each category
         all_teams_stats = []
         for t, s in self.basic_stats.items():
             gp = max(1, s["GP"])
@@ -236,10 +235,10 @@ class SeasonPredictor:
         
         self.ranks_win_pct = get_ranks("win_pct", True)
         self.ranks_pf = get_ranks("pf", True)
-        self.ranks_pa = get_ranks("pa", False) # Lowest PA is best
+        self.ranks_pa = get_ranks("pa", False) 
         self.ranks_diff = get_ranks("diff", True)
         self.ranks_ppg = get_ranks("ppg", True)
-        self.ranks_papg = get_ranks("papg", False) # Lowest PAPG is best
+        self.ranks_papg = get_ranks("papg", False) 
 
     def _find_connection_path(self, team_a, team_b):
         if team_a not in self.teams or team_b not in self.teams: return None
@@ -274,6 +273,9 @@ class SeasonPredictor:
         a_wins, h_wins, a_total_pts, h_total_pts = 0, 0, 0, 0
         all_home_margins, all_totals = [], []
         
+        # Seed random for guaranteed consistency if somehow caching misses
+        random.seed(f"{away_team}{home_team}{num_simulations}")
+
         for _ in range(num_simulations):
             score_a = generate_football_score(exp_pts_a)
             score_h = generate_football_score(exp_pts_h)
@@ -444,6 +446,29 @@ class SeasonPredictor:
 
 
 # ==========================================
+# ⚡ STREAMLIT CACHING WRAPPERS 
+# ==========================================
+
+@st.cache_resource
+def load_predictor():
+    past_file = "games_2025.csv" if os.path.exists("games_2025.csv") else None
+    curr_file = "games_2026.csv" if os.path.exists("games_2026.csv") else None
+    if not past_file and not curr_file:
+        return None
+    return SeasonPredictor(past_file, curr_file, regression_factor=0.25, prior_weight=4)
+
+@st.cache_data
+def get_cached_prediction(_predictor, away_team, home_team, num_simulations):
+    """Caches matchup projections so all users see identical results and CPU strain drops."""
+    return _predictor.predict_matchup(away_team, home_team, num_simulations=num_simulations)
+
+@st.cache_data
+def get_cached_history(_predictor, team_name):
+    """Caches the heavy 40-iteration history loops so they don't fire on every dropdown change."""
+    return _predictor.get_team_rating_history(team_name)
+
+
+# ==========================================
 # 🌐 STREAMLIT WEB APP USER INTERFACE
 # ==========================================
 
@@ -468,14 +493,6 @@ st.markdown("""
     }
     </style>
 """, unsafe_allow_html=True)
-
-@st.cache_resource
-def load_predictor():
-    past_file = "games_2025.csv" if os.path.exists("games_2025.csv") else None
-    curr_file = "games_2026.csv" if os.path.exists("games_2026.csv") else None
-    if not past_file and not curr_file:
-        return None
-    return SeasonPredictor(past_file, curr_file, regression_factor=0.25, prior_weight=4)
 
 predictor = load_predictor()
 
@@ -529,7 +546,8 @@ else:
             if away == home:
                 st.warning("Please select two different teams.")
             else:
-                res = predictor.predict_matchup(away, home, num_simulations=sims)
+                # USE CACHED PREDICTION WRAPPER HERE
+                res = get_cached_prediction(predictor, away, home, sims)
                 
                 if res["path"]:
                     hops = len(res["path"]) - 1
@@ -647,7 +665,8 @@ else:
                             "location_prefix": location_prefix
                         })
 
-            history_data = predictor.get_team_rating_history(selected_team)
+            # USE CACHED HISTORY WRAPPER HERE
+            history_data = get_cached_history(predictor, selected_team)
             if len(history_data) > 1:
                 st.markdown("### 📈 Season Progression")
                 
@@ -693,7 +712,6 @@ else:
                         opacity=alt.condition(hover, alt.value(1), alt.value(0))
                     )
                     
-                    # Removed .interactive() to lock zoom and panning
                     st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings), use_container_width=True)
                     
                 with col_chart2:
@@ -722,10 +740,17 @@ else:
                         opacity=alt.condition(hover, alt.value(1), alt.value(0))
                     )
                     
-                    # Removed .interactive() to lock zoom and panning
                     st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
                 
-                df_table = df_hist[['Label', 'Power', 'Offense', 'Defense', 'Rank']].rename(columns={'Label': 'Date'})
+                # SAFE COLUMN FILTERING IMPLEMENTED HERE
+                desired_columns = ['Label', 'Date', 'Power', 'Offense', 'Defense', 'Rank']
+                available_columns = [col for col in desired_columns if col in df_hist.columns]
+                df_table = df_hist[available_columns]
+                
+                # Rename Label to Date if Label exists
+                if 'Label' in df_table.columns:
+                    df_table = df_table.rename(columns={'Label': 'Date'})
+                    
                 st.dataframe(df_table, use_container_width=True, hide_index=True)
             
             st.markdown("---")
@@ -744,7 +769,8 @@ else:
                     away_t = selected_team if not match["is_home"] else match["opp"]
                     home_t = match["opp"] if not match["is_home"] else selected_team
                     
-                    proj = predictor.predict_matchup(away_t, home_t, num_simulations=2000)
+                    # USE CACHED PREDICTION WRAPPER HERE
+                    proj = get_cached_prediction(predictor, away_t, home_t, 2000)
                     
                     win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
                     proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
