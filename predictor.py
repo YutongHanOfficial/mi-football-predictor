@@ -743,15 +743,17 @@ else:
                     st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
                 
                 # SAFE COLUMN FILTERING IMPLEMENTED HERE
-                desired_columns = ['Label', 'Date', 'Power', 'Offense', 'Defense', 'Rank']
+                # Remove the raw 'Date' column so we don't create duplicates when renaming 'Label'
+                desired_columns = ['Label', 'Power', 'Offense', 'Defense', 'Rank']
                 available_columns = [col for col in desired_columns if col in df_hist.columns]
-                df_table = df_hist[available_columns]
-                
-                # Rename Label to Date if Label exists
+                df_table = df_hist[available_columns].copy()
+
+                # Rename Label to Date for the clean UI presentation
                 if 'Label' in df_table.columns:
                     df_table = df_table.rename(columns={'Label': 'Date'})
-                    
-                st.dataframe(df_table, use_container_width=True, hide_index=True)
+    
+                # Render using the modern 'width' parameter to clear Streamlit console warnings
+                st.dataframe(df_table, width="stretch", hide_index=True)
             
             st.markdown("---")
             
