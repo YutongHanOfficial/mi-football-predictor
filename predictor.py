@@ -723,7 +723,7 @@ else:
                     st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings), use_container_width=True)
                     
                 with col_chart2:
-                    st.markdown("**Statewide Rank (Lower is Better)**")
+                    st.markdown("**State Rank")
                     
                     base_rank = alt.Chart(df_hist).encode(
                         x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
