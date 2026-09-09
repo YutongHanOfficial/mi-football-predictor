@@ -182,63 +182,82 @@ class SeasonPredictor:
             self.teams[team]["active_OSRS"] = ((self.prior_weight * pre_osrs) + (curr_games * curr_osrs)) / (self.prior_weight + curr_games)
             self.teams[team]["active_DSRS"] = ((self.prior_weight * pre_dsrs) + (curr_games * curr_dsrs)) / (self.prior_weight + curr_games)
 
-    def _calculate_basic_stats(self):
-        self.basic_stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0} for t in self.teams}
-        for g in self.current_games:
+    def _calc_stats(self, games):
+        stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0} for t in self.teams}
+        for g in games:
             if g.get("home_score") not in [None, ""]:
                 h, a = g["home"], g["away"]
                 hs, as_ = int(g["home_score"]), int(g["away_score"])
                 
-                if h not in self.basic_stats: self.basic_stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
-                if a not in self.basic_stats: self.basic_stats[a] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
+                if h not in stats: stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
+                if a not in stats: stats[a] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
 
-                self.basic_stats[h]["GP"] += 1
-                self.basic_stats[a]["GP"] += 1
-                self.basic_stats[h]["PF"] += hs
-                self.basic_stats[h]["PA"] += as_
-                self.basic_stats[a]["PF"] += as_
-                self.basic_stats[a]["PA"] += hs
+                stats[h]["GP"] += 1
+                stats[a]["GP"] += 1
+                stats[h]["PF"] += hs
+                stats[h]["PA"] += as_
+                stats[a]["PF"] += as_
+                stats[a]["PA"] += hs
 
                 if hs > as_:
-                    self.basic_stats[h]["W"] += 1
-                    self.basic_stats[a]["L"] += 1
+                    stats[h]["W"] += 1
+                    stats[a]["L"] += 1
                 elif as_ > hs:
-                    self.basic_stats[a]["W"] += 1
-                    self.basic_stats[h]["L"] += 1
-                    
+                    stats[a]["W"] += 1
+                    stats[h]["L"] += 1
+        return stats
+
+    def _calc_ranks(self, stats_dict):
         all_teams_stats = []
-        for t, s in self.basic_stats.items():
+        for t, s in stats_dict.items():
             gp = max(1, s["GP"])
             pf = s["PF"]
             pa = s["PA"]
-            diff = pf - pa
-            ppg = pf / gp
-            papg = pa / gp
-            win_pct = s["W"] / gp
-            
             all_teams_stats.append({
                 "team": t,
-                "win_pct": win_pct,
+                "win_pct": s["W"] / gp,
                 "pf": pf,
                 "pa": pa,
-                "diff": diff,
-                "ppg": ppg,
-                "papg": papg
+                "diff": pf - pa,
+                "ppg": pf / gp,
+                "papg": pa / gp
             })
 
         def get_ranks(sort_key, reverse=True):
             sorted_list = sorted(all_teams_stats, key=lambda x: x[sort_key], reverse=reverse)
-            ranks = {}
-            for i, item in enumerate(sorted_list):
-                ranks[item["team"]] = i + 1
-            return ranks
+            return {item["team"]: i + 1 for i, item in enumerate(sorted_list)}
         
-        self.ranks_win_pct = get_ranks("win_pct", True)
-        self.ranks_pf = get_ranks("pf", True)
-        self.ranks_pa = get_ranks("pa", False) 
-        self.ranks_diff = get_ranks("diff", True)
-        self.ranks_ppg = get_ranks("ppg", True)
-        self.ranks_papg = get_ranks("papg", False) 
+        return {
+            "win_pct": get_ranks("win_pct", True),
+            "pf": get_ranks("pf", True),
+            "pa": get_ranks("pa", False),
+            "diff": get_ranks("diff", True),
+            "ppg": get_ranks("ppg", True),
+            "papg": get_ranks("papg", False)
+        }
+
+    def _calculate_basic_stats(self):
+        # Generate stats for current and past datasets
+        self.basic_stats = self._calc_stats(self.current_games)
+        self.hist_basic_stats = self._calc_stats(self.historical_games)
+        
+        # Rankings for current year
+        curr_ranks = self._calc_ranks(self.basic_stats)
+        self.ranks_win_pct = curr_ranks["win_pct"]
+        self.ranks_pf = curr_ranks["pf"]
+        self.ranks_pa = curr_ranks["pa"]
+        self.ranks_diff = curr_ranks["diff"]
+        self.ranks_ppg = curr_ranks["ppg"]
+        self.ranks_papg = curr_ranks["papg"]
+
+        # Rankings for historical year
+        hist_ranks = self._calc_ranks(self.hist_basic_stats)
+        self.hist_ranks_win_pct = hist_ranks["win_pct"]
+        self.hist_ranks_pf = hist_ranks["pf"]
+        self.hist_ranks_pa = hist_ranks["pa"]
+        self.hist_ranks_diff = hist_ranks["diff"]
+        self.hist_ranks_ppg = hist_ranks["ppg"]
+        self.hist_ranks_papg = hist_ranks["papg"]
 
     def _find_connection_path(self, team_a, team_b):
         if team_a not in self.teams or team_b not in self.teams: return None
@@ -273,9 +292,6 @@ class SeasonPredictor:
         a_wins, h_wins, a_total_pts, h_total_pts = 0, 0, 0, 0
         all_home_margins, all_totals = [], []
         
-        # COMMENTED OUT TO BRING TRUE RANDOMNESS BACK FOR LOW SIMULATION COUNT Seed random for guaranteed consistency if somehow caching misses
-        # random.seed(f"{away_team}{home_team}{num_simulations}")
-
         for _ in range(num_simulations):
             score_a = generate_football_score(exp_pts_a)
             score_h = generate_football_score(exp_pts_h)
@@ -548,14 +564,11 @@ else:
             else:
                 # --- HYBRID CACHING ROUTER ---
                 if sims >= 10000:
-                    # Use cache for heavy loads to save server strain and lock in the "official" projection
                     res = get_cached_prediction(predictor, away, home, sims)
                     st.caption("🔒 *Displaying stable, cached projection for high-iteration run.*")
                 else:
-                    # Run live for small loads so users can see the Monte Carlo variance
                     res = predictor.predict_matchup(away, home, num_simulations=sims)
                     st.caption("🎲 *Live simulation complete. Expect variance at lower iteration counts!*")
-                # -----------------------------
                 
                 if res["path"]:
                     hops = len(res["path"]) - 1
@@ -609,14 +622,47 @@ else:
     with tab3:
         st.subheader("Team Schedule & Live Projections", anchor=False)
         
-        selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
+        col_hub_team, col_hub_season = st.columns([2, 1])
+        with col_hub_team:
+            selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
+        with col_hub_season:
+            st.write("") # Formatting spacer
+            season_view = st.radio("Season View", ["2026 Current", "2025 Archive"], horizontal=True, label_visibility="collapsed")
+            
+        is_archive = (season_view == "2025 Archive")
         
         if selected_team:
-            team_rank = get_rank(selected_team)
-            t_stats = predictor.teams[selected_team]
-            p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
-            
-            t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+            # Route all variables based on the active toggle
+            if is_archive:
+                hist_sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("hist_OSRS", 0) - x[1].get("hist_DSRS", 0)), reverse=True)
+                team_rank = next((i + 1 for i, (t, _) in enumerate(hist_sorted_teams) if t == selected_team), "N/A")
+                t_stats = predictor.teams[selected_team]
+                p_rating = round(t_stats.get("hist_OSRS", 0) - t_stats.get("hist_DSRS", 0), 2)
+                t_basic = predictor.hist_basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                
+                r_win_pct = predictor.hist_ranks_win_pct
+                r_ppg = predictor.hist_ranks_ppg
+                r_papg = predictor.hist_ranks_papg
+                r_pf = predictor.hist_ranks_pf
+                r_diff = predictor.hist_ranks_diff
+                
+                target_games = predictor.historical_games
+                display_year = "2025"
+            else:
+                team_rank = get_rank(selected_team)
+                t_stats = predictor.teams[selected_team]
+                p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
+                t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                
+                r_win_pct = predictor.ranks_win_pct
+                r_ppg = predictor.ranks_ppg
+                r_papg = predictor.ranks_papg
+                r_pf = predictor.ranks_pf
+                r_diff = predictor.ranks_diff
+                
+                target_games = predictor.current_games
+                display_year = "2026"
+
             gp = t_basic["GP"]
             safe_gp = max(1, gp)
             pf = t_basic["PF"]
@@ -630,23 +676,23 @@ else:
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Overall State Rank", f"#{team_rank}")
             m2.metric("Power Rating", f"{p_rating}")
-            m3.metric("2026 Record", f"{t_basic['W']}-{t_basic['L']}")
-            m4.metric(f"Win % (#{predictor.ranks_win_pct.get(selected_team, 'N/A')})", f"{win_pct:.3f}")
+            m3.metric(f"{display_year} Record", f"{t_basic['W']}-{t_basic['L']}")
+            m4.metric(f"Win % (#{r_win_pct.get(selected_team, 'N/A')})", f"{win_pct:.3f}")
             
             st.write("") 
             
             m5, m6, m7, m8 = st.columns(4)
-            m5.metric(f"Points Per Game (#{predictor.ranks_ppg.get(selected_team, 'N/A')})", f"{ppg:.1f}")
-            m6.metric(f"Pts Against / Gm (#{predictor.ranks_papg.get(selected_team, 'N/A')})", f"{papg:.1f}")
-            m7.metric(f"Total Points For (#{predictor.ranks_pf.get(selected_team, 'N/A')})", f"{pf}")
-            m8.metric(f"Point Diff (#{predictor.ranks_diff.get(selected_team, 'N/A')})", f"{'+' if diff > 0 else ''}{diff}")
+            m5.metric(f"Points Per Game (#{r_ppg.get(selected_team, 'N/A')})", f"{ppg:.1f}")
+            m6.metric(f"Pts Against / Gm (#{r_papg.get(selected_team, 'N/A')})", f"{papg:.1f}")
+            m7.metric(f"Total Points For (#{r_pf.get(selected_team, 'N/A')})", f"{pf}")
+            m8.metric(f"Point Diff (#{r_diff.get(selected_team, 'N/A')})", f"{'+' if diff > 0 else ''}{diff}")
             
             st.markdown("---")
             
             completed_schedule = []
             upcoming_schedule = []
             
-            for g in predictor.current_games:
+            for g in target_games:
                 if g["home"] == selected_team or g["away"] == selected_team:
                     is_home = (g["home"] == selected_team)
                     opp = g["away"] if is_home else g["home"]
@@ -673,130 +719,130 @@ else:
                             "location_prefix": location_prefix
                         })
 
-            # USE CACHED HISTORY WRAPPER HERE
-            history_data = get_cached_history(predictor, selected_team)
-            if len(history_data) > 1:
-                st.markdown("### 📈 Season Progression")
-                
-                df_hist = pd.DataFrame(history_data)
-                col_chart1, col_chart2 = st.columns(2)
-                
-                with col_chart1:
-                    st.markdown("**Team Ratings over Time**")
+            # History graph logic is skipped during 2025 Archive view as ratings are static for past seasons
+            if not is_archive:
+                history_data = get_cached_history(predictor, selected_team)
+                if len(history_data) > 1:
+                    st.markdown("### 📈 Season Progression")
                     
-                    hover = alt.selection_point(
-                        fields=['Date'],
-                        nearest=True,
-                        on='mouseover',
-                        empty=False
-                    )
+                    df_hist = pd.DataFrame(history_data)
+                    col_chart1, col_chart2 = st.columns(2)
                     
-                    base_ratings = alt.Chart(df_hist).encode(
-                        x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
-                    )
+                    with col_chart1:
+                        st.markdown("**Team Ratings over Time**")
+                        
+                        hover = alt.selection_point(
+                            fields=['Date'],
+                            nearest=True,
+                            on='mouseover',
+                            empty=False
+                        )
+                        
+                        base_ratings = alt.Chart(df_hist).encode(
+                            x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
+                        )
+                        
+                        lines_ratings = base_ratings.transform_fold(
+                            ['Power', 'Offense', 'Defense'],
+                            as_=['Metric', 'Rating']
+                        ).mark_line().encode(
+                            y=alt.Y('Rating:Q', title=None),
+                            color=alt.Color('Metric:N', legend=alt.Legend(orient="bottom", title=None))
+                        )
+                        
+                        selectors_ratings = base_ratings.mark_rule(opacity=0, size=30).encode(
+                            tooltip=[
+                                alt.Tooltip('Label:N', title='Date'),
+                                alt.Tooltip('Power:Q', title='Power'),
+                                alt.Tooltip('Offense:Q', title='Offense'),
+                                alt.Tooltip('Defense:Q', title='Defense')
+                            ]
+                        ).add_params(hover)
+                        
+                        rules_ratings = base_ratings.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                            opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
+                        )
+                        
+                        points_ratings = lines_ratings.mark_point(size=70, filled=True).encode(
+                            opacity=alt.condition(hover, alt.value(1), alt.value(0))
+                        )
+                        
+                        st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings), use_container_width=True)
+                        
+                    with col_chart2:
+                        st.markdown("**State Rank**")
+                        
+                        base_rank = alt.Chart(df_hist).encode(
+                            x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
+                        )
+                        
+                        line_rank = base_rank.mark_line(color='#66b3ff').encode(
+                            y=alt.Y('Rank:Q', title=None, scale=alt.Scale(reverse=True))
+                        )
+                        
+                        selectors_rank = base_rank.mark_rule(opacity=0, size=30).encode(
+                            tooltip=[
+                                alt.Tooltip('Label:N', title='Date'),
+                                alt.Tooltip('Rank:Q', title='State Rank')
+                            ]
+                        ).add_params(hover)
+                        
+                        rules_rank = base_rank.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                            opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
+                        )
+                        
+                        points_rank = line_rank.mark_point(size=70, filled=True, color='#66b3ff').encode(
+                            opacity=alt.condition(hover, alt.value(1), alt.value(0))
+                        )
+                        
+                        st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
                     
-                    lines_ratings = base_ratings.transform_fold(
-                        ['Power', 'Offense', 'Defense'],
-                        as_=['Metric', 'Rating']
-                    ).mark_line().encode(
-                        y=alt.Y('Rating:Q', title=None),
-                        color=alt.Color('Metric:N', legend=alt.Legend(orient="bottom", title=None))
-                    )
-                    
-                    selectors_ratings = base_ratings.mark_rule(opacity=0, size=30).encode(
-                        tooltip=[
-                            alt.Tooltip('Label:N', title='Date'),
-                            alt.Tooltip('Power:Q', title='Power'),
-                            alt.Tooltip('Offense:Q', title='Offense'),
-                            alt.Tooltip('Defense:Q', title='Defense')
-                        ]
-                    ).add_params(hover)
-                    
-                    rules_ratings = base_ratings.mark_rule(color='gray', strokeDash=[3, 3]).encode(
-                        opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
-                    )
-                    
-                    points_ratings = lines_ratings.mark_point(size=70, filled=True).encode(
-                        opacity=alt.condition(hover, alt.value(1), alt.value(0))
-                    )
-                    
-                    st.altair_chart((lines_ratings + rules_ratings + selectors_ratings + points_ratings), use_container_width=True)
-                    
-                with col_chart2:
-                    st.markdown("**State Rank**")
-                    
-                    base_rank = alt.Chart(df_hist).encode(
-                        x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
-                    )
-                    
-                    line_rank = base_rank.mark_line(color='#66b3ff').encode(
-                        y=alt.Y('Rank:Q', title=None, scale=alt.Scale(reverse=True))
-                    )
-                    
-                    selectors_rank = base_rank.mark_rule(opacity=0, size=30).encode(
-                        tooltip=[
-                            alt.Tooltip('Label:N', title='Date'),
-                            alt.Tooltip('Rank:Q', title='State Rank')
-                        ]
-                    ).add_params(hover)
-                    
-                    rules_rank = base_rank.mark_rule(color='gray', strokeDash=[3, 3]).encode(
-                        opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
-                    )
-                    
-                    points_rank = line_rank.mark_point(size=70, filled=True, color='#66b3ff').encode(
-                        opacity=alt.condition(hover, alt.value(1), alt.value(0))
-                    )
-                    
-                    st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
-                
-                # SAFE COLUMN FILTERING IMPLEMENTED HERE
-                # Remove the raw 'Date' column so we don't create duplicates when renaming 'Label'
-                desired_columns = ['Label', 'Power', 'Offense', 'Defense', 'Rank']
-                available_columns = [col for col in desired_columns if col in df_hist.columns]
-                df_table = df_hist[available_columns].copy()
+                    desired_columns = ['Label', 'Power', 'Offense', 'Defense', 'Rank']
+                    available_columns = [col for col in desired_columns if col in df_hist.columns]
+                    df_table = df_hist[available_columns].copy()
 
-                # Rename Label to Date for the clean UI presentation
-                if 'Label' in df_table.columns:
-                    df_table = df_table.rename(columns={'Label': 'Date'})
-    
-                # Render using the modern 'width' parameter to clear Streamlit console warnings
-                st.dataframe(df_table, width="stretch", hide_index=True)
+                    if 'Label' in df_table.columns:
+                        df_table = df_table.rename(columns={'Label': 'Date'})
+        
+                    st.dataframe(df_table, width="stretch", hide_index=True)
+                
+                st.markdown("---")
             
-            st.markdown("---")
-            
-            st.markdown("### 📜 2026 Season Schedule")
+            st.markdown(f"### 📜 {display_year} Season Schedule")
             if completed_schedule:
                 st.dataframe(completed_schedule, use_container_width=True, hide_index=True)
             else:
-                st.info("No completed games recorded yet for the 2026 season.")
+                st.info(f"No completed games recorded yet for the {display_year} season.")
                 
             st.markdown("---")
             
-            st.markdown("### 🔮 Upcoming Game Projections")
-            if upcoming_schedule:
-                for match in upcoming_schedule:
-                    away_t = selected_team if not match["is_home"] else match["opp"]
-                    home_t = match["opp"] if not match["is_home"] else selected_team
-                    
-                    # USE CACHED PREDICTION WRAPPER HERE
-                    proj = get_cached_prediction(predictor, away_t, home_t, 2000)
-                    
-                    win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
-                    proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
-                    proj_opp_pts = proj["avg_score_a"] if match["is_home"] else proj["avg_score_h"]
-                    
-                    with st.container():
-                        st.markdown(f"#### **{match['Date']}** {match['location_prefix']} **{match['opp']}**")
+            # Upcoming Projections are hidden during Archive view
+            if not is_archive:
+                st.markdown("### 🔮 Upcoming Game Projections")
+                if upcoming_schedule:
+                    for match in upcoming_schedule:
+                        away_t = selected_team if not match["is_home"] else match["opp"]
+                        home_t = match["opp"] if not match["is_home"] else selected_team
                         
-                        col1, col2, col3, col4 = st.columns([1, 2.5, 1, 1])
-                        col1.metric("Win Prob", f"{win_p*100:.1f}%")
-                        col2.metric("Spread", proj["spread_str"])
-                        col3.metric("Over/Under", f"{proj['median_total']:g}")
-                        col4.metric("Proj Score", f"{proj_team_pts}-{proj_opp_pts}")
-                        st.divider()
+                        proj = get_cached_prediction(predictor, away_t, home_t, 2000)
+                        
+                        win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
+                        proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
+                        proj_opp_pts = proj["avg_score_a"] if match["is_home"] else proj["avg_score_h"]
+                        
+                        with st.container():
+                            st.markdown(f"#### **{match['Date']}** {match['location_prefix']} **{match['opp']}**")
+                            
+                            col1, col2, col3, col4 = st.columns([1, 2.5, 1, 1])
+                            col1.metric("Win Prob", f"{win_p*100:.1f}%")
+                            col2.metric("Spread", proj["spread_str"])
+                            col3.metric("Over/Under", f"{proj['median_total']:g}")
+                            col4.metric("Proj Score", f"{proj_team_pts}-{proj_opp_pts}")
+                            st.divider()
+                else:
+                    st.info("No upcoming unplayed games found in the schedule.")
             else:
-                st.info("No upcoming unplayed games found in the schedule.")
+                st.info("ℹ️ Season Progression and Future Projections are hidden while viewing archived seasons.")
 
     # ----------------------------------------------------
     # TAB 4: SEASON LEADERBOARDS & STATS 
