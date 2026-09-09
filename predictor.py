@@ -2,6 +2,7 @@ import math
 import random
 import csv
 import os
+import re
 import statistics
 import pandas as pd
 import altair as alt
@@ -10,8 +11,22 @@ from collections import deque
 import streamlit as st
 
 # ==========================================
-# 🧮 MATHEMATICAL ENGINE & SIMULATOR
+# 🧮 HELPER FUNCTIONS
 # ==========================================
+
+def is_oos(team_name):
+    """
+    Detects out-of-state teams by looking for a state/province abbreviation 
+    in parentheses at the end of the name (e.g., '(OH)', '(IN)', '(CAN)').
+    """
+    if not isinstance(team_name, str):
+        return False
+    match = re.search(r'\(([A-Za-z]{2,4})\)$', team_name.strip())
+    if match:
+        state = match.group(1).upper()
+        if state != "MI":  # Just in case (MI) is explicitly passed
+            return True
+    return False
 
 def generate_poisson(lam):
     if lam <= 0: return 0
@@ -45,6 +60,10 @@ def convert_to_moneyline(win_prob):
         return f"+{int(ml)}"
     else:
         return "+100"
+
+# ==========================================
+# 🧮 MATHEMATICAL ENGINE & SIMULATOR
+# ==========================================
 
 class SeasonPredictor:
     def __init__(self, past_csv, current_csv=None, regression_factor=0.25, prior_weight=4):
@@ -224,8 +243,15 @@ class SeasonPredictor:
             })
 
         def get_ranks(sort_key, reverse=True):
-            sorted_list = sorted(all_teams_stats, key=lambda x: x[sort_key], reverse=reverse)
-            return {item["team"]: i + 1 for i, item in enumerate(sorted_list)}
+            in_state = [x for x in all_teams_stats if not is_oos(x["team"])]
+            sorted_list = sorted(in_state, key=lambda x: x[sort_key], reverse=reverse)
+            total = len(in_state)
+            
+            ranks = {item["team"]: f"{i + 1}/{total}" for i, item in enumerate(sorted_list)}
+            for x in all_teams_stats:
+                if is_oos(x["team"]):
+                    ranks[x["team"]] = "OOS"
+            return ranks
         
         return {
             "win_pct": get_ranks("win_pct", True),
@@ -237,11 +263,9 @@ class SeasonPredictor:
         }
 
     def _calculate_basic_stats(self):
-        # Generate stats for current and past datasets
         self.basic_stats = self._calc_stats(self.current_games)
         self.hist_basic_stats = self._calc_stats(self.historical_games)
         
-        # Rankings for current year
         curr_ranks = self._calc_ranks(self.basic_stats)
         self.ranks_win_pct = curr_ranks["win_pct"]
         self.ranks_pf = curr_ranks["pf"]
@@ -250,7 +274,6 @@ class SeasonPredictor:
         self.ranks_ppg = curr_ranks["ppg"]
         self.ranks_papg = curr_ranks["papg"]
 
-        # Rankings for historical year
         hist_ranks = self._calc_ranks(self.hist_basic_stats)
         self.hist_ranks_win_pct = hist_ranks["win_pct"]
         self.hist_ranks_pf = hist_ranks["pf"]
@@ -356,11 +379,19 @@ class SeasonPredictor:
         
         pre_ratings = []
         for t in self.teams:
-            p_osrs = self.teams[t].get("preseason_OSRS", 0.0)
-            p_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
-            pre_ratings.append((t, p_osrs - p_dsrs))
+            if not is_oos(t):
+                p_osrs = self.teams[t].get("preseason_OSRS", 0.0)
+                p_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
+                pre_ratings.append((t, p_osrs - p_dsrs))
         pre_ratings.sort(key=lambda x: x[1], reverse=True)
-        preseason_rank = next((i + 1 for i, v in enumerate(pre_ratings) if v[0] == team_name), "N/A")
+        total_in = len(pre_ratings)
+        
+        if is_oos(team_name):
+            preseason_rank = "OOS"
+            rank_num = "N/A"
+        else:
+            rank_num = next((i + 1 for i, v in enumerate(pre_ratings) if v[0] == team_name), "N/A")
+            preseason_rank = f"{rank_num}/{total_in}" if rank_num != "N/A" else "N/A"
         
         pre_osrs = self.teams.get(team_name, {}).get("preseason_OSRS", 0.0)
         pre_dsrs_raw = self.teams.get(team_name, {}).get("preseason_DSRS", 0.0)
@@ -371,7 +402,8 @@ class SeasonPredictor:
             "Power": round(pre_osrs - pre_dsrs_raw, 2),
             "Offense": round(pre_osrs, 2),
             "Defense": round(-pre_dsrs_raw, 2),
-            "Rank": preseason_rank
+            "Rank": preseason_rank,
+            "Rank_Num": rank_num if rank_num != "N/A" else None
         })
         
         games_by_date = {}
@@ -437,7 +469,8 @@ class SeasonPredictor:
                     t_act_dsrs = ((self.prior_weight * t_pre_dsrs) + (len(t_data["game_log"]) * t_data["DSRS"])) / (self.prior_weight + len(t_data["game_log"]))
                     
                     t_power = t_act_osrs - t_act_dsrs
-                    active_ratings.append((t, t_power))
+                    if not is_oos(t):
+                        active_ratings.append((t, t_power))
                     
                     if t == team_name:
                         last_power = round(t_power, 2)
@@ -445,7 +478,14 @@ class SeasonPredictor:
                         last_def = round(-t_act_dsrs, 2) 
                         
                 active_ratings.sort(key=lambda x: x[1], reverse=True)
-                last_rank = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
+                total_in = len(active_ratings)
+                
+                if is_oos(team_name):
+                    last_rank = "OOS"
+                    rank_num = "N/A"
+                else:
+                    rank_num = next((i + 1 for i, v in enumerate(active_ratings) if v[0] == team_name), "N/A")
+                    last_rank = f"{rank_num}/{total_in}" if rank_num != "N/A" else "N/A"
                 
             history.append({
                 "Date": current_dt,
@@ -453,7 +493,8 @@ class SeasonPredictor:
                 "Power": last_power,
                 "Offense": last_off,
                 "Defense": last_def,
-                "Rank": last_rank
+                "Rank": last_rank,
+                "Rank_Num": rank_num if rank_num != "N/A" else None
             })
             
             current_dt += timedelta(days=1)
@@ -490,7 +531,6 @@ def get_cached_history(_predictor, team_name):
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
-# CSS adjustments to wrap long team text and hide anchor links globally
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
@@ -500,7 +540,6 @@ st.markdown("""
         font-size: 1.75rem !important;
     }
     
-    /* Permanently hide all anchor links associated with headers */
     .stMarkdown a.header-anchor,
     .stMarkdown a.anchor,
     h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
@@ -519,39 +558,59 @@ if predictor is None:
 else:
     tab1, tab2, tab3, tab4 = st.tabs(["🎮 Matchup Simulator", "🏆 Power Rankings", "📅 Team Schedules & Hub", "📈 Season Leaderboards"])
 
+    # Global Rank Processing
     sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("active_OSRS", 0) - x[1].get("active_DSRS", 0)), reverse=True)
-    def get_rank(t_name):
-        return next((i + 1 for i, (t, _) in enumerate(sorted_teams) if t == t_name), "N/A")
+    in_state_teams = [t for t, _ in sorted_teams if not is_oos(t)]
+    total_in_state = len(in_state_teams)
+    
+    def get_rank_display(t_name):
+        if is_oos(t_name): return "OOS"
+        try:
+            return f"{in_state_teams.index(t_name) + 1}/{total_in_state}"
+        except ValueError:
+            return "N/A"
+
+    all_teams = sorted(list(predictor.teams.keys()))
+    
+    # Safely find default indices 
+    try:
+        gb_idx = all_teams.index("Grand Blanc")
+    except ValueError:
+        gb_idx = 0
+        
+    try:
+        dav_idx = all_teams.index("Davison")
+    except ValueError:
+        dav_idx = 1 if len(all_teams) > 1 else 0
 
     # ----------------------------------------------------
     # TAB 1: MATCHUP SIMULATOR
     # ----------------------------------------------------
     with tab1:
-        all_teams = sorted(list(predictor.teams.keys()))
-        
         col_a, col_b = st.columns(2)
         
         with col_a:
             st.markdown("### ✈️ Away Team")
-            away = st.selectbox("Away Team Select", all_teams, index=0 if all_teams else None, label_visibility="collapsed")
+            away = st.selectbox("Away Team Select", all_teams, index=gb_idx, label_visibility="collapsed")
             if away:
                 a_stats = predictor.basic_stats.get(away, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
                 a_pwr = round(predictor.teams[away].get("active_OSRS",0) - predictor.teams[away].get("active_DSRS",0), 2)
                 a_gp = max(1, a_stats["GP"])
                 
-                st.caption(f"🏆 **State Rank:** #{get_rank(away)} | ⚡ **Power Rating:** {a_pwr}")
+                rnk = get_rank_display(away)
+                st.caption(f"🏆 **State Rank:** {'#' if rnk != 'OOS' else ''}{rnk} | ⚡ **Power Rating:** {a_pwr}")
                 st.caption(f"📊 **Record:** {a_stats['W']}-{a_stats['L']} | 🟢 **PPG:** {a_stats['PF']/a_gp:.1f} | 🔴 **PA/G:** {a_stats['PA']/a_gp:.1f}")
 
         with col_b:
             st.markdown("### 🏠 Home Team")
-            default_h_idx = 1 if len(all_teams) > 1 else 0
-            home = st.selectbox("Home Team Select", all_teams, index=default_h_idx, label_visibility="collapsed")
+            home = st.selectbox("Home Team Select", all_teams, index=dav_idx, label_visibility="collapsed")
             if home:
                 h_stats = predictor.basic_stats.get(home, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
                 h_pwr = round(predictor.teams[home].get("active_OSRS",0) - predictor.teams[home].get("active_DSRS",0), 2)
                 h_gp = max(1, h_stats["GP"])
                 
-                st.caption(f"🏆 **State Rank:** #{get_rank(home)} | ⚡ **Power Rating:** {h_pwr}")
+                rnk_h = get_rank_display(home)
+                st.caption(f"🏆 **State Rank:** {'#' if rnk_h != 'OOS' else ''}{rnk_h} | ⚡ **Power Rating:** {h_pwr}")
                 st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp:.1f}")
 
         with st.expander("⚙️ Advanced Simulation Settings"):
@@ -562,7 +621,6 @@ else:
             if away == home:
                 st.warning("Please select two different teams.")
             else:
-                # --- HYBRID CACHING ROUTER ---
                 if sims >= 10000:
                     res = get_cached_prediction(predictor, away, home, sims)
                     st.caption("🔒 *Displaying stable, cached projection for high-iteration run.*")
@@ -593,6 +651,9 @@ else:
         
         rankings = []
         for t_name, t_data in predictor.teams.items():
+            if is_oos(t_name):
+                continue  # Hide out of state teams from statewide tables
+            
             o_rating = t_data.get("active_OSRS", 0.0)
             d_rating = t_data.get("active_DSRS", 0.0)
             net_power = o_rating - d_rating
@@ -605,14 +666,15 @@ else:
             })
             
         rankings.sort(key=lambda x: x["Power Rating"], reverse=True)
+        total_tbl = len(rankings)
         
         for idx, r in enumerate(rankings):
-            r["Rank"] = idx + 1
+            r["Rank"] = f"{idx + 1}/{total_tbl}"
             
         st.dataframe(
             rankings, 
             column_order=["Rank", "Team", "Power Rating", "Offense", "Defense"],
-            use_container_width=True, 
+            width="stretch", 
             hide_index=True
         )
 
@@ -624,18 +686,28 @@ else:
         
         col_hub_team, col_hub_season = st.columns([2, 1])
         with col_hub_team:
-            selected_team = st.selectbox("Select Team Hub:", all_teams, key="hub_team_select")
+            selected_team = st.selectbox("Select Team Hub:", all_teams, index=gb_idx, key="hub_team_select")
         with col_hub_season:
-            st.write("") # Formatting spacer
+            st.write("") 
             season_view = st.radio("Season View", ["2026 Current", "2025 Archive"], horizontal=True, label_visibility="collapsed")
             
         is_archive = (season_view == "2025 Archive")
         
         if selected_team:
-            # Route all variables based on the active toggle
             if is_archive:
                 hist_sorted_teams = sorted(predictor.teams.items(), key=lambda x: (x[1].get("hist_OSRS", 0) - x[1].get("hist_DSRS", 0)), reverse=True)
-                team_rank = next((i + 1 for i, (t, _) in enumerate(hist_sorted_teams) if t == selected_team), "N/A")
+                hist_in_state = [t for t, _ in hist_sorted_teams if not is_oos(t)]
+                total_hist = len(hist_in_state)
+                
+                if is_oos(selected_team):
+                    team_rank = "OOS"
+                else:
+                    try:
+                        r_idx = hist_in_state.index(selected_team) + 1
+                        team_rank = f"{r_idx}/{total_hist}"
+                    except ValueError:
+                        team_rank = "N/A"
+                        
                 t_stats = predictor.teams[selected_team]
                 p_rating = round(t_stats.get("hist_OSRS", 0) - t_stats.get("hist_DSRS", 0), 2)
                 t_basic = predictor.hist_basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
@@ -649,7 +721,7 @@ else:
                 target_games = predictor.historical_games
                 display_year = "2025"
             else:
-                team_rank = get_rank(selected_team)
+                team_rank = get_rank_display(selected_team)
                 t_stats = predictor.teams[selected_team]
                 p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
                 t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
@@ -674,7 +746,7 @@ else:
 
             st.markdown("### 📊 Team Dashboard")
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Overall State Rank", f"#{team_rank}")
+            m1.metric("Overall Rank", f"{'#' if team_rank != 'OOS' else ''}{team_rank}")
             m2.metric("Power Rating", f"{p_rating}")
             m3.metric(f"{display_year} Record", f"{t_basic['W']}-{t_basic['L']}")
             m4.metric(f"Win % (#{r_win_pct.get(selected_team, 'N/A')})", f"{win_pct:.3f}")
@@ -719,7 +791,6 @@ else:
                             "location_prefix": location_prefix
                         })
 
-            # History graph logic is skipped during 2025 Archive view as ratings are static for past seasons
             if not is_archive:
                 history_data = get_cached_history(predictor, selected_team)
                 if len(history_data) > 1:
@@ -771,31 +842,33 @@ else:
                         
                     with col_chart2:
                         st.markdown("**State Rank**")
-                        
-                        base_rank = alt.Chart(df_hist).encode(
-                            x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
-                        )
-                        
-                        line_rank = base_rank.mark_line(color='#66b3ff').encode(
-                            y=alt.Y('Rank:Q', title=None, scale=alt.Scale(reverse=True))
-                        )
-                        
-                        selectors_rank = base_rank.mark_rule(opacity=0, size=30).encode(
-                            tooltip=[
-                                alt.Tooltip('Label:N', title='Date'),
-                                alt.Tooltip('Rank:Q', title='State Rank')
-                            ]
-                        ).add_params(hover)
-                        
-                        rules_rank = base_rank.mark_rule(color='gray', strokeDash=[3, 3]).encode(
-                            opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
-                        )
-                        
-                        points_rank = line_rank.mark_point(size=70, filled=True, color='#66b3ff').encode(
-                            opacity=alt.condition(hover, alt.value(1), alt.value(0))
-                        )
-                        
-                        st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
+                        if is_oos(selected_team):
+                            st.info("Rank progression graph is hidden for out-of-state teams.")
+                        else:
+                            base_rank = alt.Chart(df_hist).encode(
+                                x=alt.X('Date:T', axis=alt.Axis(format='%m/%d', labelAngle=0, title=None))
+                            )
+                            
+                            line_rank = base_rank.mark_line(color='#66b3ff').encode(
+                                y=alt.Y('Rank_Num:Q', title=None, scale=alt.Scale(reverse=True))
+                            )
+                            
+                            selectors_rank = base_rank.mark_rule(opacity=0, size=30).encode(
+                                tooltip=[
+                                    alt.Tooltip('Label:N', title='Date'),
+                                    alt.Tooltip('Rank:N', title='State Rank')
+                                ]
+                            ).add_params(hover)
+                            
+                            rules_rank = base_rank.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                                opacity=alt.condition(hover, alt.value(0.5), alt.value(0))
+                            )
+                            
+                            points_rank = line_rank.mark_point(size=70, filled=True, color='#66b3ff').encode(
+                                opacity=alt.condition(hover, alt.value(1), alt.value(0))
+                            )
+                            
+                            st.altair_chart((line_rank + rules_rank + selectors_rank + points_rank), use_container_width=True)
                     
                     desired_columns = ['Label', 'Power', 'Offense', 'Defense', 'Rank']
                     available_columns = [col for col in desired_columns if col in df_hist.columns]
@@ -810,13 +883,12 @@ else:
             
             st.markdown(f"### 📜 {display_year} Season Schedule")
             if completed_schedule:
-                st.dataframe(completed_schedule, use_container_width=True, hide_index=True)
+                st.dataframe(completed_schedule, width="stretch", hide_index=True)
             else:
                 st.info(f"No completed games recorded yet for the {display_year} season.")
                 
             st.markdown("---")
             
-            # Upcoming Projections are hidden during Archive view
             if not is_archive:
                 st.markdown("### 🔮 Upcoming Game Projections")
                 if upcoming_schedule:
@@ -852,13 +924,16 @@ else:
         
         stat_rows = []
         for t in all_teams:
+            if is_oos(t):
+                continue
+                
             s = predictor.basic_stats.get(t, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
             gp = s["GP"]
             pf = s["PF"]
             pa = s["PA"]
             
             stat_rows.append({
-                "Rank": get_rank(t),
+                "Rank": get_rank_display(t),
                 "Team": t,
                 "GP": gp,
                 "Record": f"{s['W']}-{s['L']}",
@@ -870,11 +945,12 @@ else:
                 "PA/G": round(pa / gp, 1) if gp > 0 else 0.0
             })
             
-        stat_rows.sort(key=lambda x: (isinstance(x["Rank"], str), x["Rank"]))
+        # Parse out integer rank from "5/100" to sort leaderboards numerically 
+        stat_rows.sort(key=lambda x: int(x["Rank"].split('/')[0]) if x["Rank"] != "OOS" else 9999)
         
         st.dataframe(
             stat_rows, 
             column_order=["Rank", "Team", "Record", "Win %", "GP", "PF", "PA", "Diff", "PPG", "PA/G"],
-            use_container_width=True, 
+            width="stretch", 
             hide_index=True
         )
