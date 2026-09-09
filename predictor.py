@@ -636,7 +636,7 @@ else:
             sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
 
         st.write("") 
-        if st.button("🚀 Run Vegas Simulation", use_container_width=True, type="primary"):
+        if st.button("🚀 Run Simulation", use_container_width=True, type="primary"):
             if away == home:
                 st.warning("Please select two different teams.")
             else:
