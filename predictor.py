@@ -307,7 +307,7 @@ class SeasonPredictor:
                     queue.append((neighbor, path + [neighbor]))
         return None 
 
-    def predict_matchup(self, away_team, home_team, num_simulations=10000):
+    def predict_matchup(self, away_team, home_team, num_simulations=10000, mode="median"):
         a_off = self.teams[away_team]["active_OSRS"] if away_team in self.teams else 0.0
         a_def = self.teams[away_team]["active_DSRS"] if away_team in self.teams else 0.0
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
@@ -316,7 +316,8 @@ class SeasonPredictor:
         exp_pts_a = max(0.1, self.league_avg_points + a_off + h_def)
         exp_pts_h = max(0.1, self.league_avg_points + h_off + a_def)
         
-        a_wins, h_wins, a_total_pts, h_total_pts = 0, 0, 0, 0
+        a_wins, h_wins = 0, 0
+        all_score_a, all_score_h = [], []
         all_home_margins, all_totals = [], []
         
         for _ in range(num_simulations):
@@ -327,26 +328,39 @@ class SeasonPredictor:
                 if random.random() > 0.5: score_a += 7
                 else: score_h += 7
             
+            all_score_a.append(score_a)
+            all_score_h.append(score_h)
             all_home_margins.append(score_h - score_a)
             all_totals.append(score_h + score_a)
             
             if score_a > score_h: a_wins += 1
             else: h_wins += 1
-            
-            a_total_pts += score_a
-            h_total_pts += score_h
                 
         prob_a = a_wins / num_simulations
         prob_h = h_wins / num_simulations
-        median_home_margin = statistics.median(all_home_margins)
-        median_total = statistics.median(all_totals)
+
+        # Calculate everything completely synced based on user preference
+        if mode == "median":
+            final_score_a = statistics.median(all_score_a)
+            final_score_h = statistics.median(all_score_h)
+            calc_margin = statistics.median(all_home_margins)
+            calc_total = statistics.median(all_totals)
+        else: # mean
+            final_score_a = sum(all_score_a) / num_simulations
+            final_score_h = sum(all_score_h) / num_simulations
+            calc_margin = final_score_h - final_score_a
+            calc_total = final_score_h + final_score_a
         
-        if median_home_margin > 0:
-            spread_val = -median_home_margin
-            spread_str = f"{home_team} -{median_home_margin:g}"
-        elif median_home_margin < 0:
-            spread_val = abs(median_home_margin)
-            spread_str = f"{away_team} -{abs(median_home_margin):g}"
+        # Snap Spread and O/U strictly to .5 variants based on the selected calculation method
+        spread_val_raw = round(calc_margin * 2) / 2
+        ou_val = round(calc_total * 2) / 2
+
+        if spread_val_raw > 0:
+            spread_val = -spread_val_raw
+            spread_str = f"{home_team} -{spread_val_raw:g}"
+        elif spread_val_raw < 0:
+            spread_val = abs(spread_val_raw)
+            spread_str = f"{away_team} -{abs(spread_val_raw):g}"
         else:
             spread_val = 0
             spread_str = "PK"
@@ -357,9 +371,9 @@ class SeasonPredictor:
             "away_team": away_team, "home_team": home_team,
             "prob_a": prob_a, "prob_h": prob_h,
             "spread_str": spread_str, "spread_val": spread_val,
-            "median_total": median_total,
-            "avg_score_a": round(a_total_pts / num_simulations),
-            "avg_score_h": round(h_total_pts / num_simulations),
+            "median_total": ou_val,
+            "avg_score_a": round(final_score_a),
+            "avg_score_h": round(final_score_h),
             "path": path
         }
         
@@ -381,7 +395,6 @@ class SeasonPredictor:
         
         preseason_dt = start_dt - timedelta(days=1)
         
-        # Split Preseason Ratings into In-State and OOS pools
         pre_in_state, pre_oos = [], []
         for t in self.teams:
             p_osrs = self.teams[t].get("preseason_OSRS", 0.0)
@@ -468,7 +481,6 @@ class SeasonPredictor:
                         temp_teams[t]["OSRS"] = new_ratings[t]["OSRS"]
                         temp_teams[t]["DSRS"] = new_ratings[t]["DSRS"]
                         
-                # Split Active Ratings into In-State and OOS pools
                 act_in_state, act_oos = [], []
                 for t in self.teams:
                     t_pre_osrs = self.teams[t].get("preseason_OSRS", 0.0)
@@ -526,9 +538,9 @@ def load_predictor():
     return SeasonPredictor(past_file, curr_file, regression_factor=0.25, prior_weight=4)
 
 @st.cache_data
-def get_cached_prediction(_predictor, away_team, home_team, num_simulations):
+def get_cached_prediction(_predictor, away_team, home_team, num_simulations, mode="median"):
     """Caches matchup projections so all users see identical results and CPU strain drops."""
-    return _predictor.predict_matchup(away_team, home_team, num_simulations=num_simulations)
+    return _predictor.predict_matchup(away_team, home_team, num_simulations=num_simulations, mode=mode)
 
 @st.cache_data
 def get_cached_history(_predictor, team_name):
@@ -634,6 +646,8 @@ else:
 
         with st.expander("⚙️ Advanced Simulation Settings"):
             sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
+            sim_mode_ui = st.radio("Projection Math Method", ["Median (Recommended)", "Mean (Average)"], horizontal=True)
+            sim_mode = "median" if "Median" in sim_mode_ui else "mean"
 
         st.write("") 
         if st.button("🚀 Run Simulation", use_container_width=True, type="primary"):
@@ -641,11 +655,11 @@ else:
                 st.warning("Please select two different teams.")
             else:
                 if sims >= 10000:
-                    res = get_cached_prediction(predictor, away, home, sims)
-                    st.caption("🔒 *Displaying stable, cached projection for high-iteration run.*")
+                    res = get_cached_prediction(predictor, away, home, sims, sim_mode)
+                    st.caption(f"🔒 *Displaying stable, cached projection ({sim_mode.title()} Mode).*")
                 else:
-                    res = predictor.predict_matchup(away, home, num_simulations=sims)
-                    st.caption("🎲 *Live simulation complete. Expect variance at lower iteration counts!*")
+                    res = predictor.predict_matchup(away, home, num_simulations=sims, mode=sim_mode)
+                    st.caption(f"🎲 *Live simulation complete ({sim_mode.title()} Mode). Expect variance at lower iteration counts!*")
                 
                 if res["path"]:
                     hops = len(res["path"]) - 1
@@ -923,7 +937,8 @@ else:
                         away_t = selected_team if not match["is_home"] else match["opp"]
                         home_t = match["opp"] if not match["is_home"] else selected_team
                         
-                        proj = get_cached_prediction(predictor, away_t, home_t, 2000)
+                        # Defaulting automated Hub previews to the more accurate median mode
+                        proj = get_cached_prediction(predictor, away_t, home_t, 2000, "median")
                         
                         win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
                         proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
