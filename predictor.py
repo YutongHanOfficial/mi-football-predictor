@@ -114,19 +114,20 @@ class SeasonPredictor:
                         hs = int(hs_raw)
                         as_ = int(as_raw)
                         
-                        if (hs == 1 and as_ == 0) or (hs == 0 and as_ == 1):
-                            continue
+                        is_forfeit = (hs == 1 and as_ == 0) or (hs == 0 and as_ == 1)
                             
                         games.append({
                             "date": date,
                             "home": home, "away": away, 
-                            "home_score": hs, "away_score": as_
+                            "home_score": hs, "away_score": as_,
+                            "is_forfeit": is_forfeit
                         })
                     else:
                         games.append({
                             "date": date,
                             "home": home, "away": away, 
-                            "home_score": None, "away_score": None
+                            "home_score": None, "away_score": None,
+                            "is_forfeit": False
                         })
                 except (KeyError, ValueError):
                     pass
@@ -139,17 +140,22 @@ class SeasonPredictor:
         
         for game in games:
             home, away = game["home"], game["away"]
-            hs, as_ = game["home_score"], game["away_score"]
             
             for team in (home, away):
                 if team not in temp_teams:
                     temp_teams[team] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
             
+            # Skip mathematical scaling for forfeits
+            if game.get("is_forfeit"):
+                continue
+
+            hs, as_ = game["home_score"], game["away_score"]
             temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
             temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
             total_points += (hs + as_)
             
-        league_avg = total_points / (len(games) * 2) if games else 24.0
+        valid_games = [g for g in games if not g.get("is_forfeit")]
+        league_avg = total_points / (len(valid_games) * 2) if valid_games else 24.0
 
         for _ in range(iterations):
             new_ratings = {}
@@ -202,21 +208,19 @@ class SeasonPredictor:
             self.teams[team]["active_DSRS"] = ((self.prior_weight * pre_dsrs) + (curr_games * curr_dsrs)) / (self.prior_weight + curr_games)
 
     def _calc_stats(self, games):
-        stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0} for t in self.teams}
+        stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0, "GP_stats": 0} for t in self.teams}
         for g in games:
             if g.get("home_score") not in [None, ""]:
                 h, a = g["home"], g["away"]
                 hs, as_ = int(g["home_score"]), int(g["away_score"])
+                is_forfeit = g.get("is_forfeit", False)
                 
-                if h not in stats: stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
-                if a not in stats: stats[a] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0}
+                if h not in stats: stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0, "GP_stats": 0}
+                if a not in stats: stats[a] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0, "GP_stats": 0}
 
+                # GP determines overall W/L record
                 stats[h]["GP"] += 1
                 stats[a]["GP"] += 1
-                stats[h]["PF"] += hs
-                stats[h]["PA"] += as_
-                stats[a]["PF"] += as_
-                stats[a]["PA"] += hs
 
                 if hs > as_:
                     stats[h]["W"] += 1
@@ -224,12 +228,23 @@ class SeasonPredictor:
                 elif as_ > hs:
                     stats[a]["W"] += 1
                     stats[h]["L"] += 1
+
+                # GP_stats keeps forfeits out of points data
+                if not is_forfeit:
+                    stats[h]["GP_stats"] += 1
+                    stats[a]["GP_stats"] += 1
+                    stats[h]["PF"] += hs
+                    stats[h]["PA"] += as_
+                    stats[a]["PF"] += as_
+                    stats[a]["PA"] += hs
+
         return stats
 
     def _calc_ranks(self, stats_dict):
         all_teams_stats = []
         for t, s in stats_dict.items():
             gp = max(1, s["GP"])
+            gp_stats = max(1, s.get("GP_stats", 0))
             pf = s["PF"]
             pa = s["PA"]
             all_teams_stats.append({
@@ -238,8 +253,8 @@ class SeasonPredictor:
                 "pf": pf,
                 "pa": pa,
                 "diff": pf - pa,
-                "ppg": pf / gp,
-                "papg": pa / gp
+                "ppg": pf / gp_stats,
+                "papg": pa / gp_stats
             })
 
         def get_ranks(sort_key, reverse=True):
@@ -339,7 +354,6 @@ class SeasonPredictor:
         prob_a = a_wins / num_simulations
         prob_h = h_wins / num_simulations
 
-        # Calculate everything completely synced based on user preference
         if mode == "median":
             final_score_a = statistics.median(all_score_a)
             final_score_h = statistics.median(all_score_h)
@@ -351,7 +365,6 @@ class SeasonPredictor:
             calc_margin = final_score_h - final_score_a
             calc_total = final_score_h + final_score_a
         
-        # Snap Spread and O/U strictly to .5 variants based on the selected calculation method
         spread_val_raw = round(calc_margin * 2) / 2
         ou_val = round(calc_total * 2) / 2
 
@@ -451,17 +464,24 @@ class SeasonPredictor:
                 
                 temp_teams = {}
                 total_points = 0
+                valid_games_count = 0
+                
                 for g in cumulative_games:
                     home, away = g["home"], g["away"]
-                    hs, as_ = g["home_score"], g["away_score"]
                     for t in (home, away):
                         if t not in temp_teams:
                             temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
+                    
+                    if g.get("is_forfeit"):
+                        continue
+                        
+                    hs, as_ = g["home_score"], g["away_score"]
                     temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
                     temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
                     total_points += (hs + as_)
+                    valid_games_count += 1
                     
-                league_avg = total_points / (len(cumulative_games) * 2) if cumulative_games else 24.0
+                league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
                 
                 for _ in range(40): 
                     new_ratings = {}
@@ -624,25 +644,27 @@ else:
             st.markdown("### ✈️ Away Team")
             away = st.selectbox("Away Team Select", all_teams, index=gb_idx, label_visibility="collapsed")
             if away:
-                a_stats = predictor.basic_stats.get(away, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                a_stats = predictor.basic_stats.get(away, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 a_pwr = round(predictor.teams[away].get("active_OSRS",0) - predictor.teams[away].get("active_DSRS",0), 2)
-                a_gp = max(1, a_stats["GP"])
                 
                 rnk = get_rank_display(away)
                 st.caption(f"🏆 **Rank:** #{rnk} | ⚡ **Power Rating:** {a_pwr}")
-                st.caption(f"📊 **Record:** {a_stats['W']}-{a_stats['L']} | 🟢 **PPG:** {a_stats['PF']/a_gp:.1f} | 🔴 **PA/G:** {a_stats['PA']/a_gp:.1f}")
+                
+                a_gp_stats = max(1, a_stats.get("GP_stats", 0))
+                st.caption(f"📊 **Record:** {a_stats['W']}-{a_stats['L']} | 🟢 **PPG:** {a_stats['PF']/a_gp_stats:.1f} | 🔴 **PA/G:** {a_stats['PA']/a_gp_stats:.1f}")
 
         with col_b:
             st.markdown("### 🏠 Home Team")
             home = st.selectbox("Home Team Select", all_teams, index=dav_idx, label_visibility="collapsed")
             if home:
-                h_stats = predictor.basic_stats.get(home, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                h_stats = predictor.basic_stats.get(home, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 h_pwr = round(predictor.teams[home].get("active_OSRS",0) - predictor.teams[home].get("active_DSRS",0), 2)
-                h_gp = max(1, h_stats["GP"])
                 
                 rnk_h = get_rank_display(home)
                 st.caption(f"🏆 **Rank:** #{rnk_h} | ⚡ **Power Rating:** {h_pwr}")
-                st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp:.1f}")
+                
+                h_gp_stats = max(1, h_stats.get("GP_stats", 0))
+                st.caption(f"📊 **Record:** {h_stats['W']}-{h_stats['L']} | 🟢 **PPG:** {h_stats['PF']/h_gp_stats:.1f} | 🔴 **PA/G:** {h_stats['PA']/h_gp_stats:.1f}")
 
         with st.expander("⚙️ Advanced Simulation Settings"):
             sims = st.select_slider("Monte Carlo Iterations", options=[1, 10, 100, 1000, 5000, 10000, 50000, 100000], value=10000)
@@ -753,7 +775,7 @@ else:
                         
                 t_stats = predictor.teams[selected_team]
                 p_rating = round(t_stats.get("hist_OSRS", 0) - t_stats.get("hist_DSRS", 0), 2)
-                t_basic = predictor.hist_basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                t_basic = predictor.hist_basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 
                 r_win_pct = predictor.hist_ranks_win_pct
                 r_ppg = predictor.hist_ranks_ppg
@@ -767,7 +789,7 @@ else:
                 team_rank = get_rank_display(selected_team)
                 t_stats = predictor.teams[selected_team]
                 p_rating = round(t_stats.get("active_OSRS", 0) - t_stats.get("active_DSRS", 0), 2)
-                t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+                t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 
                 r_win_pct = predictor.ranks_win_pct
                 r_ppg = predictor.ranks_ppg
@@ -780,11 +802,13 @@ else:
 
             gp = t_basic["GP"]
             safe_gp = max(1, gp)
+            gp_stats = t_basic.get("GP_stats", 0)
+            safe_gp_stats = max(1, gp_stats)
             pf = t_basic["PF"]
             pa = t_basic["PA"]
             diff = pf - pa
-            ppg = pf / safe_gp if gp > 0 else 0.0
-            papg = pa / safe_gp if gp > 0 else 0.0
+            ppg = pf / safe_gp_stats if gp_stats > 0 else 0.0
+            papg = pa / safe_gp_stats if gp_stats > 0 else 0.0
             win_pct = t_basic["W"] / safe_gp if gp > 0 else 0.0
 
             st.markdown("### 📊 Team Dashboard")
@@ -819,10 +843,12 @@ else:
                         mov = team_score - opp_score
                         result = "W" if mov > 0 else "L"
                         
+                        score_display = "FORFEIT" if g.get("is_forfeit") else f"{team_score}-{opp_score}"
+                        
                         completed_schedule.append({
                             "Date": g.get("date", "-"),
                             "Opponent": f"{location_prefix} {opp}",
-                            "Score": f"{team_score}-{opp_score}",
+                            "Score": score_display,
                             "MOV": f"+{mov}" if mov > 0 else str(mov),
                             "Result": result
                         })
@@ -976,8 +1002,10 @@ else:
             if show_oos_lb != is_oos(t):
                 continue
                 
-            s = predictor.basic_stats.get(t, {"W":0, "L":0, "PF":0, "PA":0, "GP":0})
+            s = predictor.basic_stats.get(t, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
             gp = s["GP"]
+            gp_stats = s.get("GP_stats", 0)
+            safe_gp_stats = max(1, gp_stats)
             pf = s["PF"]
             pa = s["PA"]
             
@@ -990,8 +1018,8 @@ else:
                 "PF": pf,
                 "PA": pa,
                 "Diff": pf - pa,
-                "PPG": round(pf / gp, 1) if gp > 0 else 0.0,
-                "PA/G": round(pa / gp, 1) if gp > 0 else 0.0
+                "PPG": round(pf / safe_gp_stats, 1) if gp_stats > 0 else 0.0,
+                "PA/G": round(pa / safe_gp_stats, 1) if gp_stats > 0 else 0.0
             })
             
         def safe_rank_sort(rank_str):
