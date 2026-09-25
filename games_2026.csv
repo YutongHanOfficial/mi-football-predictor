@@ -845,7 +845,7 @@ date,home,away,home_score,away_score
 2026-09-18,Delton Kellogg,Kalamazoo Hackett Catholic Prep,0,42
 2026-09-18,Detroit Catholic Central,Warren De La Salle Collegiate,53,0
 2026-09-18,Detroit Central,Detroit Pershing,55,0
-2026-09-18,Detroit Cody,Detroit Denby,6,12
+2026-09-18,Detroit Cody,Detroit Denby,,
 2026-09-18,Detroit East English,Detroit Southeastern,0,6
 2026-09-18,Detroit Old Redford,Detroit Edison,0,1
 2026-09-18,Detroit U of D Jesuit,Bloomfield Hills Brother Rice,0,35
@@ -1006,7 +1006,7 @@ date,home,away,home_score,away_score
 2026-09-18,Schoolcraft,Constantine,21,41
 2026-09-18,South Haven,Coloma,27,6
 2026-09-18,South Lyon East,Livonia Churchill,34,0
-2026-09-18,Southfield Bradford Academy,Arts & Technology Academy of Pontiac,1,0
+2026-09-18,Southfield Bradford Academy,Arts & Technology Academy of Pontiac,2,0
 2026-09-18,St Clair Shores Lakeview,Warren Mott,62,14
 2026-09-18,St Joseph,Mattawan,43,0
 2026-09-18,St Louis,Sanford Meridian,0,56
@@ -1051,15 +1051,14 @@ date,home,away,home_score,away_score
 2026-09-19,Redford Union,Redford Thurston,6,47
 2026-09-19,Warren Woods Tower,Livonia Clarenceville,39,24
 2026-09-19,West Unity Hilltop (OH),Sand Creek,26,32
-2026-09-22,New Market Huron Heights (CN),Toronto Chaminade (CN),,
-2026-09-24,Carson City-Crystal,Vestaburg,,
-2026-09-24,Detroit Central,Detroit Osborn,,
+2026-09-22,New Market Huron Heights (CN),Toronto Chaminade (CN),51,4
+2026-09-24,Carson City-Crystal,Vestaburg,0,54
+2026-09-24,Detroit Central,Detroit Osborn,52,0
 2026-09-24,Detroit Communication Media Arts,Detroit Cody,,
-2026-09-24,Detroit Denby,Detroit Northwestern,,
+2026-09-24,Detroit Denby,Detroit Northwestern,68,0
 2026-09-24,Detroit Pershing,Detroit Douglass,,
 2026-09-24,Hoopa Valley (CA),Eureka St. Bernard (CA),,
 2026-09-24,Southfield Bradford Academy,Redford Westfield Prep,,
-2026-09-24,Windsor Holy Names (CN),Windsor Sandwich (CN),,
 2026-09-25,Addison,Napoleon,,
 2026-09-25,Adrian,Ypsilanti Lincoln,,
 2026-09-25,Adrian Madison,Ida,,
