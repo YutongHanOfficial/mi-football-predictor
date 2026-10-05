@@ -526,7 +526,7 @@ class SeasonPredictor:
                     hs, as_ = g["home_score"], g["away_score"]
                     
                     # --- APPLY MOV CAP FOR HISTORY CHART ---
-                    adj_hs, adj_as = apply_blowout_cap(hs, as_)
+                    adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
                     
                     temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
                     temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
