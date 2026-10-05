@@ -63,6 +63,7 @@ TEAM_DIVISIONS = {
     "Gibraltar Carlson": 2,
     "Caledonia": 2,
     "Bloomfield Hills Brother Rice": 2,
+    "Milford": 2,
     "Harper Woods": 3,
     "DeWitt": 3,
     "Chelsea": 3,
