@@ -811,6 +811,12 @@ def get_cached_history(_predictor, team_name):
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+with st.sidebar:
+    if st.button("🧹 Force Clear Cache"):
+        st.cache_resource.clear()
+        st.cache_data.clear()
+        st.rerun()
+
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
