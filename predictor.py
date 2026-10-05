@@ -21,16 +21,77 @@ MOV_METHOD = "tanh"
 # For Tanh & Piecewise: The asymptote/cap (35 = Michigan HS Running Clock trigger)
 MAX_MARGIN = 35.0  
 
+ENABLE_BAYESIAN_ANCHORS = True
+PRIOR_WEIGHT_GAMES = 4.0  # How strongly to pull teams toward their prior (4 is standard)
+
+# MHSAA Empirical Baselines (Point values relative to state average)
+DIVISION_BASELINES = {
+    1: 14.0, 
+    2: 10.0, 
+    3: 6.0, 
+    4: 2.0, 
+    5: -2.0, 
+    6: -6.0, 
+    7: -10.0, 
+    8: -14.0
+}
+
+# 🏛️ GRAVITY PILLARS
+# You only need to define the major outliers here. The math will auto-sort the rest 
+# of the state based on who plays these anchor teams.
+TEAM_DIVISIONS = {
+    "Detroit Catholic Central": 1, 
+    "Detroit Cass Tech": 1,
+    "Clarkston": 1,
+    "East Kentwood": 1,
+    "Saline": 1,
+    "Grand Blanc": 1,
+    "Davison": 1,
+    "Portage Central": 1,
+    "Oxford": 1,
+    "Howell": 1,
+    "Orchard Lake St Mary's": 2,
+    "Muskegon Mona Shores": 2,
+    "South Lyon": 2,
+    "Byron Center": 2,
+    "Gibraltar Carlson": 2,
+    "Harper Woods": 3,
+    "DeWitt": 3,
+    "Chelsea": 3,
+    "Detroit Martin Luther King": 3,
+    "Coopersville": 3,
+    "Zeeland West": 3,
+    "Mount Pleasant": 3,
+    "Dearborn Divine Child": 4,
+    "Goodrich": 4,
+    "Hudsonville Unity Christian": 4,
+    "Portland": 4,
+    "Ogemaw Heights": 5,
+    "Frankenmuth": 5,
+    "Grand Rapids Catholic Central": 5,
+    "Jackson Lumen Christi": 6,
+    "Kingsley": 6,
+    "Clinton": 6,
+    "Menominee": 7,
+    "Pewamo-Westphalia": 7,
+    "Ithaca": 7,
+    "Millington": 7,
+    "Beal City": 8,
+    "Hudson": 8,
+}
+
 # ==========================================
 # 🧮 HELPER FUNCTIONS
 # ==========================================
 
 def is_oos(team_name):
-    if not isinstance(team_name, str): return False
+    if not isinstance(team_name, str): 
+        return False
     match = re.search(r'\(([A-Za-z]{2,4})\)$', team_name.strip())
     if match:
         state = match.group(1).upper()
-        if state != "MI": return True
+        if state != "MI": 
+            return True
     return False
 
 def apply_blowout_diminishing_returns(home_score, away_score):
@@ -110,11 +171,10 @@ def convert_to_moneyline(win_prob):
 # ==========================================
 
 class SeasonPredictor:
-    def __init__(self, past_csv, current_csv=None, regression_factor=0.25, prior_weight=4):
+    def __init__(self, past_csv, current_csv=None, regression_factor=0.25):
         self.teams = {}
         self.league_avg_points = 24.0
         self.regression_factor = regression_factor 
-        self.prior_weight = prior_weight
         
         self.historical_games = self._load_and_dedupe_csv(past_csv)
         if self.historical_games:
@@ -181,6 +241,7 @@ class SeasonPredictor:
     def _build_srs_model(self, games, prefix, iterations=100):
         temp_teams = {}
         total_points = 0
+        valid_games_count = 0
         
         for game in games:
             home, away = game["home"], game["away"]
@@ -201,33 +262,67 @@ class SeasonPredictor:
             temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
             temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
             total_points += (adj_hs + adj_as)
+            valid_games_count += 1
             
-        valid_games = [g for g in games if not g.get("is_forfeit")]
-        league_avg = total_points / (len(valid_games) * 2) if valid_games else 24.0
+        league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
 
+        # --- 1. SET UP BAYESIAN PRIORS ---
+        for team in temp_teams:
+            if prefix == "hist_":
+                # Historical year anchors to Division baselines to fix the Island Effect
+                div = TEAM_DIVISIONS.get(team, 4) # Default to state average (D4) if not a Pillar
+                prior_power = DIVISION_BASELINES.get(div, 0.0)
+                prior_osrs = prior_power / 2.0
+                prior_dsrs = -prior_power / 2.0
+            else:
+                # Current year anchors to the team's OWN rating from last year
+                if team in self.teams and "preseason_OSRS" in self.teams[team]:
+                    prior_osrs = self.teams[team]["preseason_OSRS"]
+                    prior_dsrs = self.teams[team]["preseason_DSRS"]
+                else:
+                    # Fallback if team is brand new this year
+                    div = TEAM_DIVISIONS.get(team, 4)
+                    prior_power = DIVISION_BASELINES.get(div, 0.0)
+                    prior_osrs = prior_power / 2.0
+                    prior_dsrs = -prior_power / 2.0
+                
+            temp_teams[team]["prior_OSRS"] = prior_osrs
+            temp_teams[team]["prior_DSRS"] = prior_dsrs
+
+        # --- 2. BAYESIAN SRS ITERATIVE SOLVER ---
         for _ in range(iterations):
             new_ratings = {}
             for team, data in temp_teams.items():
-                sum_adj_off = league_avg
-                sum_adj_def = league_avg
-                num_games = len(data["game_log"]) + 1 
+                num_games = len(data["game_log"])
                 
+                # Start with prior data acting as "dummy games"
+                weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
+                total_games = num_games + weight
+                
+                # Pre-load the dummy points generated by the Prior
+                sum_adj_off = (temp_teams[team]["prior_OSRS"] + league_avg) * weight
+                sum_adj_def = (temp_teams[team]["prior_DSRS"] + league_avg) * weight
+                
+                # Add actual game data
                 for game in data["game_log"]:
                     opp = game["opponent"]
-                    sum_adj_off += (game["points_scored"] - temp_teams[opp]["DSRS"])
-                    sum_adj_def += (game["points_allowed"] - temp_teams[opp]["OSRS"])
+                    sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS": 0.0})["DSRS"])
+                    sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"])
                 
                 new_ratings[team] = {
-                    "OSRS": (sum_adj_off / num_games) - league_avg,
-                    "DSRS": (sum_adj_def / num_games) - league_avg
+                    "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else 0.0,
+                    "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else 0.0
                 }
                 
+            # Apply ratings for the next mathematical loop
             for team in temp_teams:
                 temp_teams[team]["OSRS"] = new_ratings[team]["OSRS"]
                 temp_teams[team]["DSRS"] = new_ratings[team]["DSRS"]
 
+        # --- 3. SAVE FINAL RATINGS ---
         for team, data in temp_teams.items():
-            if team not in self.teams: self.teams[team] = {}
+            if team not in self.teams: 
+                self.teams[team] = {}
             self.teams[team][f"{prefix}OSRS"] = data["OSRS"]
             self.teams[team][f"{prefix}DSRS"] = data["DSRS"]
             self.teams[team][f"{prefix}games"] = len(data["game_log"])
@@ -240,27 +335,40 @@ class SeasonPredictor:
         for team in self.teams:
             h_osrs = self.teams[team].get("hist_OSRS", 0.0)
             h_dsrs = self.teams[team].get("hist_DSRS", 0.0)
-            self.teams[team]["preseason_OSRS"] = h_osrs * (1 - self.regression_factor)
-            self.teams[team]["preseason_DSRS"] = h_dsrs * (1 - self.regression_factor)
+            
+            # Fetch division baseline prior
+            div = TEAM_DIVISIONS.get(team, 4)
+            div_prior = DIVISION_BASELINES.get(div, 0.0)
+            
+            off_prior = div_prior / 2.0
+            def_prior = -div_prior / 2.0
+            
+            self.teams[team]["preseason_OSRS"] = (h_osrs * (1 - self.regression_factor)) + (off_prior * self.regression_factor)
+            self.teams[team]["preseason_DSRS"] = (h_dsrs * (1 - self.regression_factor)) + (def_prior * self.regression_factor)
 
     def _blend_ratings(self):
+        """
+        Since priors are now injected directly into the active solver loop via dummy games, 
+        we simply map the current OSRS/DSRS to the active slot for frontend usage.
+        """
         for team in self.teams:
-            pre_osrs = self.teams[team].get("preseason_OSRS", 0.0)
-            pre_dsrs = self.teams[team].get("preseason_DSRS", 0.0)
-            
-            curr_osrs = self.teams[team].get("curr_OSRS", pre_osrs)
-            curr_dsrs = self.teams[team].get("curr_DSRS", pre_dsrs)
             curr_games = self.teams[team].get("curr_games", 0)
             
-            self.teams[team]["active_OSRS"] = ((self.prior_weight * pre_osrs) + (curr_games * curr_osrs)) / (self.prior_weight + curr_games)
-            self.teams[team]["active_DSRS"] = ((self.prior_weight * pre_dsrs) + (curr_games * curr_dsrs)) / (self.prior_weight + curr_games)
+            if curr_games > 0:
+                self.teams[team]["active_OSRS"] = self.teams[team].get("curr_OSRS", 0.0)
+                self.teams[team]["active_DSRS"] = self.teams[team].get("curr_DSRS", 0.0)
+            else:
+                self.teams[team]["active_OSRS"] = self.teams[team].get("preseason_OSRS", 0.0)
+                self.teams[team]["active_DSRS"] = self.teams[team].get("preseason_DSRS", 0.0)
 
     def _calc_stats(self, games):
         stats = {t: {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0, "GP_stats": 0} for t in self.teams}
         for g in games:
             if g.get("home_score") not in [None, ""]:
-                h, a = g["home"], g["away"]
-                hs, as_ = int(g["home_score"]), int(g["away_score"])
+                h = g["home"]
+                a = g["away"]
+                hs = int(g["home_score"])
+                as_ = int(g["away_score"])
                 is_forfeit = g.get("is_forfeit", False)
                 
                 if h not in stats: stats[h] = {"W": 0, "L": 0, "PF": 0, "PA": 0, "GP": 0, "GP_stats": 0}
@@ -350,20 +458,24 @@ class SeasonPredictor:
         self.hist_ranks_papg = hist_ranks["papg"]
 
     def _find_connection_path(self, team_a, team_b):
-        if team_a not in self.teams or team_b not in self.teams: return None
+        if team_a not in self.teams or team_b not in self.teams: 
+            return None
         
         graph = {}
         for team in self.teams:
             graph[team] = set()
-            for game in self.teams[team].get("hist_game_log", []): graph[team].add(game["opponent"])
-            for game in self.teams[team].get("curr_game_log", []): graph[team].add(game["opponent"])
+            for game in self.teams[team].get("hist_game_log", []): 
+                graph[team].add(game["opponent"])
+            for game in self.teams[team].get("curr_game_log", []): 
+                graph[team].add(game["opponent"])
             
         queue = deque([(team_a, [team_a])])
         visited = set([team_a])
         
         while queue:
             current_team, path = queue.popleft()
-            if current_team == team_b: return path 
+            if current_team == team_b: 
+                return path 
             for neighbor in graph.get(current_team, []):
                 if neighbor not in visited:
                     visited.add(neighbor)
@@ -379,25 +491,32 @@ class SeasonPredictor:
         exp_pts_a = max(0.1, self.league_avg_points + a_off + h_def)
         exp_pts_h = max(0.1, self.league_avg_points + h_off + a_def)
         
-        a_wins, h_wins = 0, 0
-        all_score_a, all_score_h = [], []
-        all_home_margins, all_totals = [], []
+        a_wins = 0
+        h_wins = 0
+        all_score_a = []
+        all_score_h = []
+        all_home_margins = []
+        all_totals = []
         
         for _ in range(num_simulations):
             score_a = generate_football_score(exp_pts_a)
             score_h = generate_football_score(exp_pts_h)
             
             if score_a == score_h:
-                if random.random() > 0.5: score_a += 7
-                else: score_h += 7
+                if random.random() > 0.5: 
+                    score_a += 7
+                else: 
+                    score_h += 7
             
             all_score_a.append(score_a)
             all_score_h.append(score_h)
             all_home_margins.append(score_h - score_a)
             all_totals.append(score_h + score_a)
             
-            if score_a > score_h: a_wins += 1
-            else: h_wins += 1
+            if score_a > score_h: 
+                a_wins += 1
+            else: 
+                h_wins += 1
                 
         prob_a = a_wins / num_simulations
         prob_h = h_wins / num_simulations
@@ -429,9 +548,12 @@ class SeasonPredictor:
         path = self._find_connection_path(away_team, home_team)
 
         return {
-            "away_team": away_team, "home_team": home_team,
-            "prob_a": prob_a, "prob_h": prob_h,
-            "spread_str": spread_str, "spread_val": spread_val,
+            "away_team": away_team, 
+            "home_team": home_team,
+            "prob_a": prob_a, 
+            "prob_h": prob_h,
+            "spread_str": spread_str, 
+            "spread_val": spread_val,
             "median_total": ou_val,
             "avg_score_a": round(final_score_a),
             "avg_score_h": round(final_score_h),
@@ -456,20 +578,25 @@ class SeasonPredictor:
         
         preseason_dt = start_dt - timedelta(days=1)
         
-        pre_in_state, pre_oos = [], []
+        pre_in_state = []
+        pre_oos = []
         for t in self.teams:
             p_osrs = self.teams[t].get("preseason_OSRS", 0.0)
             p_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
-            if is_oos(t): pre_oos.append((t, p_osrs - p_dsrs))
-            else: pre_in_state.append((t, p_osrs - p_dsrs))
+            if is_oos(t): 
+                pre_oos.append((t, p_osrs - p_dsrs))
+            else: 
+                pre_in_state.append((t, p_osrs - p_dsrs))
                 
         pre_in_state.sort(key=lambda x: x[1], reverse=True)
         pre_oos.sort(key=lambda x: x[1], reverse=True)
         
         if is_oos(team_name):
-            target_list, suffix = pre_oos, " (OOS)"
+            target_list = pre_oos
+            suffix = " (OOS)"
         else:
-            target_list, suffix = pre_in_state, ""
+            target_list = pre_in_state
+            suffix = ""
             
         total_pool = len(target_list)
         rank_num = next((i + 1 for i, v in enumerate(target_list) if v[0] == team_name), "N/A")
@@ -492,7 +619,8 @@ class SeasonPredictor:
         for g in self.current_games:
             if g.get("home_score") not in [None, ""]:
                 d = g["date"]
-                if d not in games_by_date: games_by_date[d] = []
+                if d not in games_by_date: 
+                    games_by_date[d] = []
                 games_by_date[d].append(g)
                 
         cumulative_games = []
@@ -515,7 +643,8 @@ class SeasonPredictor:
                 valid_games_count = 0
                 
                 for g in cumulative_games:
-                    home, away = g["home"], g["away"]
+                    home = g["home"]
+                    away = g["away"]
                     for t in (home, away):
                         if t not in temp_teams:
                             temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
@@ -523,7 +652,8 @@ class SeasonPredictor:
                     if g.get("is_forfeit"):
                         continue
                         
-                    hs, as_ = g["home_score"], g["away_score"]
+                    hs = g["home_score"]
+                    as_ = g["away_score"]
                     
                     # --- APPLY MOV CAP FOR HISTORY CHART ---
                     adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
@@ -535,48 +665,62 @@ class SeasonPredictor:
                     
                 league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
                 
+                # Setup Priors in History Chart
+                for t in temp_teams:
+                    p_osrs = self.teams.get(t, {}).get("preseason_OSRS", 0.0)
+                    p_dsrs = self.teams.get(t, {}).get("preseason_DSRS", 0.0)
+                    temp_teams[t]["prior_OSRS"] = p_osrs
+                    temp_teams[t]["prior_DSRS"] = p_dsrs
+
+                # Iterative Solver
                 for _ in range(40): 
                     new_ratings = {}
                     for t, data in temp_teams.items():
-                        sum_adj_off = league_avg
-                        sum_adj_def = league_avg
-                        num_games = len(data["game_log"]) + 1 
+                        num_games = len(data["game_log"])
+                        weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
+                        total_games = num_games + weight
+                        
+                        sum_adj_off = (temp_teams[t]["prior_OSRS"] + league_avg) * weight
+                        sum_adj_def = (temp_teams[t]["prior_DSRS"] + league_avg) * weight
+                        
                         for game in data["game_log"]:
                             opp = game["opponent"]
                             sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS":0})["DSRS"])
                             sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS":0})["OSRS"])
+                            
                         new_ratings[t] = {
-                            "OSRS": (sum_adj_off / num_games) - league_avg,
-                            "DSRS": (sum_adj_def / num_games) - league_avg
+                            "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else 0.0,
+                            "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else 0.0
                         }
+                        
                     for t in temp_teams:
                         temp_teams[t]["OSRS"] = new_ratings[t]["OSRS"]
                         temp_teams[t]["DSRS"] = new_ratings[t]["DSRS"]
                         
-                act_in_state, act_oos = [], []
+                act_in_state = []
+                act_oos = []
                 for t in self.teams:
-                    t_pre_osrs = self.teams[t].get("preseason_OSRS", 0.0)
-                    t_pre_dsrs = self.teams[t].get("preseason_DSRS", 0.0)
-                    t_data = temp_teams.get(t, {"OSRS": 0.0, "DSRS": 0.0, "game_log": []})
-                    t_act_osrs = ((self.prior_weight * t_pre_osrs) + (len(t_data["game_log"]) * t_data["OSRS"])) / (self.prior_weight + len(t_data["game_log"]))
-                    t_act_dsrs = ((self.prior_weight * t_pre_dsrs) + (len(t_data["game_log"]) * t_data["DSRS"])) / (self.prior_weight + len(t_data["game_log"]))
-                    
-                    t_power = t_act_osrs - t_act_dsrs
-                    if is_oos(t): act_oos.append((t, t_power))
-                    else: act_in_state.append((t, t_power))
+                    t_data = temp_teams.get(t, {"OSRS": self.teams[t].get("preseason_OSRS", 0.0), "DSRS": self.teams[t].get("preseason_DSRS", 0.0)})
+                    t_power = t_data["OSRS"] - t_data["DSRS"]
+                    if is_oos(t): 
+                        act_oos.append((t, t_power))
+                    else: 
+                        act_in_state.append((t, t_power))
                     
                     if t == team_name:
                         last_power = round(t_power, 2)
-                        last_off = round(t_act_osrs, 2)
-                        last_def = round(-t_act_dsrs, 2) 
+                        last_off = round(t_data["OSRS"], 2)
+                        last_def = round(-t_data["DSRS"], 2) 
                         
                 act_in_state.sort(key=lambda x: x[1], reverse=True)
                 act_oos.sort(key=lambda x: x[1], reverse=True)
                 
                 if is_oos(team_name):
-                    target_list, suffix = act_oos, " (OOS)"
+                    target_list = act_oos
+                    suffix = " (OOS)"
                 else:
-                    target_list, suffix = act_in_state, ""
+                    target_list = act_in_state
+                    suffix = ""
                     
                 total_pool = len(target_list)
                 rank_num = next((i + 1 for i, v in enumerate(target_list) if v[0] == team_name), "N/A")
@@ -607,7 +751,7 @@ def load_predictor():
     curr_file = "games_2026.csv" if os.path.exists("games_2026.csv") else None
     if not past_file and not curr_file:
         return None
-    return SeasonPredictor(past_file, curr_file, regression_factor=0.25, prior_weight=4)
+    return SeasonPredictor(past_file, curr_file, regression_factor=0.25)
 
 @st.cache_data
 def get_cached_prediction(_predictor, away_team, home_team, num_simulations, mode="median"):
