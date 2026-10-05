@@ -19,7 +19,7 @@ ENABLE_MOV_ADJUSTMENT = True
 MOV_METHOD = "tanh" 
 
 # For Tanh & Piecewise: The asymptote/cap (35 = Michigan HS Running Clock trigger)
-MAX_MARGIN = 35.0  
+MAX_MARGIN = 49.0  
 
 # ==========================================
 # 🧮 HELPER FUNCTIONS
