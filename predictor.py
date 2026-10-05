@@ -11,6 +11,13 @@ from collections import deque
 import streamlit as st
 
 # ==========================================
+# ⚙️ ENGINE CONFIGURATION
+# ==========================================
+ENABLE_BLOWOUT_CAP = True  # Set to False to use raw scores for power ratings
+BLOWOUT_CAP_MARGIN = 28    # Margin at which diminishing returns begin (28 = 4 TDs)
+
+
+# ==========================================
 # 🧮 HELPER FUNCTIONS
 # ==========================================
 
@@ -27,6 +34,29 @@ def is_oos(team_name):
         if state != "MI":  
             return True
     return False
+
+def apply_blowout_cap(home_score, away_score):
+    """
+    Applies a diminishing returns curve to blowouts.
+    Prevents lower-division teams from inflating their power rating by crushing weak opponents.
+    """
+    if not ENABLE_BLOWOUT_CAP:
+        return home_score, away_score
+        
+    margin = home_score - away_score
+    abs_margin = abs(margin)
+    
+    if abs_margin <= BLOWOUT_CAP_MARGIN:
+        return home_score, away_score
+        
+    # Apply diminishing returns to any points scored beyond the cap
+    excess = abs_margin - BLOWOUT_CAP_MARGIN
+    adj_margin = BLOWOUT_CAP_MARGIN + (math.sqrt(excess) * 2.0)
+    
+    if margin > 0:
+        return away_score + adj_margin, away_score
+    else:
+        return home_score, home_score + adj_margin
 
 def generate_poisson(lam):
     if lam <= 0: return 0
@@ -150,9 +180,13 @@ class SeasonPredictor:
                 continue
 
             hs, as_ = game["home_score"], game["away_score"]
-            temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
-            temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
-            total_points += (hs + as_)
+            
+            # --- APPLY MOV CAP FOR SRS ---
+            adj_hs, adj_as = apply_blowout_cap(hs, as_)
+            
+            temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
+            temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
+            total_points += (adj_hs + adj_as)
             
         valid_games = [g for g in games if not g.get("is_forfeit")]
         league_avg = total_points / (len(valid_games) * 2) if valid_games else 24.0
@@ -229,7 +263,7 @@ class SeasonPredictor:
                     stats[a]["W"] += 1
                     stats[h]["L"] += 1
 
-                # GP_stats keeps forfeits out of points data
+                # GP_stats keeps forfeits out of points data (Raw Scores Used for Stats)
                 if not is_forfeit:
                     stats[h]["GP_stats"] += 1
                     stats[a]["GP_stats"] += 1
@@ -476,9 +510,13 @@ class SeasonPredictor:
                         continue
                         
                     hs, as_ = g["home_score"], g["away_score"]
-                    temp_teams[home]["game_log"].append({"opponent": away, "points_scored": hs, "points_allowed": as_})
-                    temp_teams[away]["game_log"].append({"opponent": home, "points_scored": as_, "points_allowed": hs})
-                    total_points += (hs + as_)
+                    
+                    # --- APPLY MOV CAP FOR HISTORY CHART ---
+                    adj_hs, adj_as = apply_blowout_cap(hs, as_)
+                    
+                    temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
+                    temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
+                    total_points += (adj_hs + adj_as)
                     valid_games_count += 1
                     
                 league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
