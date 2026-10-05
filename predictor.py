@@ -1090,7 +1090,7 @@ else:
                 else:
                     st.info("No upcoming unplayed games found in the schedule.")
             else:
-                st.info("ℹ️️ Season Progression and Future Projections are hidden while viewing archived seasons.")
+                st.info("ℹ Season Progression and Future Projections are hidden while viewing archived seasons.")
 
     # ----------------------------------------------------
     # TAB 4: UPCOMING & TOP MATCHUPS (NEW)
@@ -1202,11 +1202,11 @@ else:
         st.dataframe(stat_rows, column_order=["Rank", "Team", "Record", "Win %", "GP", "PF", "PA", "Diff", "PPG", "PA/G"], width="stretch", hide_index=True)
 
     # ----------------------------------------------------
-    # TAB 6: MODEL ACCURACY (NEW - Image Replica)
+    # TAB 6: MODEL ACCURACY (CLEAN)
     # ----------------------------------------------------
     with tab6:
         st.subheader("Model Performance Backtest", anchor=False)
-        st.caption("Validates the model's predictive ability by evaluating all historical games using converged ratings[cite: 1].")
+        st.caption("Validates the model's predictive ability by evaluating all historical games using converged ratings.")
         
         bd = predictor.backtest_data
         
@@ -1219,30 +1219,30 @@ else:
             st.markdown(f"<div style='margin-bottom: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL-TIME · {bd['total_games']} GAMES RATED</div>", unsafe_allow_html=True)
             
             c1, c2, c3, c4, c5 = st.columns(5)
-            with c1: st.markdown(metric_card("WIN ACCURACY", f"{win_acc:.1f}%", "green"), unsafe_allow_html=True)[cite: 1]
-            with c2: st.markdown(metric_card("CORRECT PICKS", f"{bd['total_correct']}/{bd['total_games']}", "green"), unsafe_allow_html=True)[cite: 1]
-            with c3: st.markdown(metric_card("AVG SPREAD ERR", f"{bd['avg_spread_err']:.1f}", "orange"), unsafe_allow_html=True)[cite: 1]
-            with c4: st.markdown(metric_card("AVG TOTAL ERR", f"{bd['avg_total_err']:.1f}", "orange"), unsafe_allow_html=True)[cite: 1]
-            with c5: st.markdown(metric_card("AVG CONFIDENCE", f"{bd['avg_confidence']*100:.1f}%", "green"), unsafe_allow_html=True)[cite: 1]
+            with c1: st.markdown(metric_card("WIN ACCURACY", f"{win_acc:.1f}%", "green"), unsafe_allow_html=True)
+            with c2: st.markdown(metric_card("CORRECT PICKS", f"{bd['total_correct']}/{bd['total_games']}", "green"), unsafe_allow_html=True)
+            with c3: st.markdown(metric_card("AVG SPREAD ERR", f"{bd['avg_spread_err']:.1f}", "orange"), unsafe_allow_html=True)
+            with c4: st.markdown(metric_card("AVG TOTAL ERR", f"{bd['avg_total_err']:.1f}", "orange"), unsafe_allow_html=True)
+            with c5: st.markdown(metric_card("AVG CONFIDENCE", f"{bd['avg_confidence']*100:.1f}%", "green"), unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(f"<div style='margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WIN ACCURACY BY WEEK</div>", unsafe_allow_html=True)[cite: 1]
-            st.caption("Model win-pick accuracy per week number, averaged across all seasons.")[cite: 1]
+            st.markdown(f"<div style='margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WIN ACCURACY BY WEEK</div>", unsafe_allow_html=True)
+            st.caption("Model win-pick accuracy per week number, averaged across all seasons.")
             
             # Interactive Altair Chart
             weekly_df = bd["weekly_df"]
             
             base_chart = alt.Chart(weekly_df).encode(
                 x=alt.X('week_label:N', sort=None, title=None, axis=alt.Axis(labelAngle=-45))
-            )[cite: 1]
+            )
             
             line_weekly = base_chart.mark_line(color='#38bdf8', size=2, point=alt.OverlayMarkDef(color='#38bdf8', filled=True, size=50)).encode(
                 y=alt.Y('accuracy:Q', scale=alt.Scale(domain=[0.7, 1.0]), axis=alt.Axis(format='%', title=None))
-            )[cite: 1]
+            )
             
             line_cum = base_chart.mark_line(color='#f59e0b', size=2, point=alt.OverlayMarkDef(color='#f59e0b', filled=True, size=50)).encode(
                 y=alt.Y('cum_accuracy:Q')
-            )[cite: 1]
+            )
             
             # Hack for manual legend to match image exactly
             legend_df = pd.DataFrame([{"label": "Weekly Accuracy", "color": "#38bdf8"}, {"label": "Cumulative", "color": "#f59e0b"}])
@@ -1255,24 +1255,24 @@ else:
                     <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #38bdf8; border-radius: 3px;"></div> Weekly Accuracy</div>
                     <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #f59e0b; border-radius: 3px;"></div> Cumulative</div>
                 </div><br>""", unsafe_allow_html=True
-            )[cite: 1]
+            )
 
             # Weekly Breakdown Dataframe
-            st.markdown(f"<div style='margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WEEKLY BREAKDOWN</div>", unsafe_allow_html=True)[cite: 1]
+            st.markdown(f"<div style='margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WEEKLY BREAKDOWN</div>", unsafe_allow_html=True)
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
-            display_df.columns = ["WEEK", "GAMES", "CORRECT", "ACCURACY", "SPREAD ERR", "TOTAL ERR", "CUMUL. ACC"][cite: 1]
+            display_df.columns = ["WEEK", "GAMES", "CORRECT", "ACCURACY", "SPREAD ERR", "TOTAL ERR", "CUMUL. ACC"]
             
             st.dataframe(
                 display_df,
                 column_config={
-                    "WEEK": st.column_config.TextColumn(width="medium"),[cite: 1]
-                    "GAMES": st.column_config.NumberColumn(width="small"),[cite: 1]
-                    "CORRECT": st.column_config.NumberColumn(width="small"),[cite: 1]
-                    "ACCURACY": st.column_config.NumberColumn(format="%.1f%%", width="small"),[cite: 1]
-                    "SPREAD ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),[cite: 1]
-                    "TOTAL ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),[cite: 1]
-                    "CUMUL. ACC": st.column_config.NumberColumn(format="%.1f%%", width="small"),[cite: 1]
+                    "WEEK": st.column_config.TextColumn(width="medium"),
+                    "GAMES": st.column_config.NumberColumn(width="small"),
+                    "CORRECT": st.column_config.NumberColumn(width="small"),
+                    "ACCURACY": st.column_config.NumberColumn(format="%.1f%%", width="small"),
+                    "SPREAD ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),
+                    "TOTAL ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),
+                    "CUMUL. ACC": st.column_config.NumberColumn(format="%.1f%%", width="small")
                 },
                 hide_index=True,
                 width="stretch"
