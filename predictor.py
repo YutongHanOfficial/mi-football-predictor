@@ -13,50 +13,64 @@ import streamlit as st
 # ==========================================
 # ⚙️ ENGINE CONFIGURATION
 # ==========================================
-ENABLE_BLOWOUT_CAP = True  # Set to False to use raw scores for power ratings
-BLOWOUT_CAP_MARGIN = 28    # Margin at which diminishing returns begin (28 = 4 TDs)
+ENABLE_MOV_ADJUSTMENT = True
 
+# Select your mathematical curve: "tanh" (Recommended), "log", or "piecewise"
+MOV_METHOD = "tanh" 
+
+# For Tanh & Piecewise: The asymptote/cap (35 = Michigan HS Running Clock trigger)
+MAX_MARGIN = 35.0  
 
 # ==========================================
 # 🧮 HELPER FUNCTIONS
 # ==========================================
 
 def is_oos(team_name):
-    """
-    Detects out-of-state teams by looking for a state/province abbreviation 
-    in parentheses at the end of the name (e.g., '(OH)', '(IN)', '(CAN)').
-    """
-    if not isinstance(team_name, str):
-        return False
+    if not isinstance(team_name, str): return False
     match = re.search(r'\(([A-Za-z]{2,4})\)$', team_name.strip())
     if match:
         state = match.group(1).upper()
-        if state != "MI":  
-            return True
+        if state != "MI": return True
     return False
 
-def apply_blowout_cap(home_score, away_score):
+def apply_blowout_diminishing_returns(home_score, away_score):
     """
-    Applies a diminishing returns curve to blowouts.
-    Prevents lower-division teams from inflating their power rating by crushing weak opponents.
+    Applies mathematical curve to Margin of Victory to prevent blowout inflation.
+    Keeps the SRS model stable when lower division teams win 77-0.
     """
-    if not ENABLE_BLOWOUT_CAP:
+    if not ENABLE_MOV_ADJUSTMENT:
         return home_score, away_score
         
     margin = home_score - away_score
-    abs_margin = abs(margin)
+    raw_mov = abs(margin)
     
-    if abs_margin <= BLOWOUT_CAP_MARGIN:
+    if raw_mov == 0:
         return home_score, away_score
         
-    # Apply diminishing returns to any points scored beyond the cap
-    excess = abs_margin - BLOWOUT_CAP_MARGIN
-    adj_margin = BLOWOUT_CAP_MARGIN + (math.sqrt(excess) * 2.0)
-    
-    if margin > 0:
-        return away_score + adj_margin, away_score
+    # --- DIMINISHING RETURNS MATH ---
+    if MOV_METHOD == "tanh":
+        # Hyperbolic Tangent: Smooth curve, 1:1 at low margins, flat ceiling at MAX_MARGIN
+        adj_mov = MAX_MARGIN * math.tanh(raw_mov / MAX_MARGIN)
+        
+    elif MOV_METHOD == "log":
+        # Logarithmic: 538 Elo style. M * ln(MOV + 1). 
+        # Scaled (M=3.365) so a 7-point win is worth 7 adjusted points.
+        adj_mov = 3.365 * math.log(raw_mov + 1)
+        
+    elif MOV_METHOD == "piecewise":
+        # 1:1 up to the cap, then a harsh square root curve
+        if raw_mov <= MAX_MARGIN:
+            adj_mov = raw_mov
+        else:
+            adj_mov = MAX_MARGIN + (math.sqrt(raw_mov - MAX_MARGIN) * 2.0)
     else:
-        return home_score, home_score + adj_margin
+        adj_mov = raw_mov
+        
+    # Re-apply the adjusted margin to the winner
+    if margin > 0:
+        return away_score + adj_mov, away_score
+    else:
+        return home_score, home_score + adj_mov
 
 def generate_poisson(lam):
     if lam <= 0: return 0
@@ -182,7 +196,7 @@ class SeasonPredictor:
             hs, as_ = game["home_score"], game["away_score"]
             
             # --- APPLY MOV CAP FOR SRS ---
-            adj_hs, adj_as = apply_blowout_cap(hs, as_)
+            adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
             
             temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
             temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
