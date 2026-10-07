@@ -947,7 +947,7 @@ else:
     # TAB 3: TEAM SCHEDULES & HUB
     # ----------------------------------------------------
     with tab3:
-        st.subheader("Team Schedule & Live Projections", anchor=False)
+        st.subheader("Team Schedule", anchor=False)
         
         col_hub_team, col_hub_season = st.columns([2, 1])
         with col_hub_team: selected_team = st.selectbox("Select Team Hub:", all_teams, index=gb_idx, key="hub_team_select")
@@ -1094,7 +1094,7 @@ else:
     # TAB 4: UPCOMING & TOP MATCHUPS
     # ----------------------------------------------------
     with tab4:
-        st.subheader("Upcoming Game Projections & Hub", anchor=False)
+        st.subheader("Upcoming Game Projections", anchor=False)
         st.caption("Displays all unplayed games on the current schedule categorized by date and quality.")
         
         upcoming_raw = [g for g in predictor.current_games if g.get("home_score") in [None, ""]]
@@ -1164,7 +1164,7 @@ else:
     # ----------------------------------------------------
     with tab5:
         col_lb_title, col_lb_filter = st.columns([2, 1])
-        with col_lb_title: st.subheader("Season Leaderboards & Statistical Aggregates", anchor=False)
+        with col_lb_title: st.subheader("Season Leaderboards", anchor=False)
         with col_lb_filter:
             st.write("") 
             show_oos_lb = (st.radio("Region Filter", ["Michigan (In-State)", "Out of State (OOS)"], horizontal=True, label_visibility="collapsed", key="lb_filter") == "Out of State (OOS)")
@@ -1201,7 +1201,7 @@ else:
     # TAB 6: MODEL ACCURACY
     # ----------------------------------------------------
     with tab6:
-        st.subheader("Model Performance Backtest", anchor=False)
+        st.subheader("Model Accuracy", anchor=False)
         st.caption("Validates the model's predictive ability by evaluating all historical games using converged ratings.")
         
         bd = predictor.backtest_data
