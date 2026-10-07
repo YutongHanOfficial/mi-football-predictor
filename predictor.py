@@ -102,6 +102,7 @@ TEAM_DIVISIONS = {
     "Hudson": 8,
     "Detroit Douglass": 8,
     "Madison Heights Madison": 8,
+    "Allen Park Cabrini": 8,
 }
 
 # ==========================================
