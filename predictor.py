@@ -91,6 +91,7 @@ TEAM_DIVISIONS = {
     "Kingsley": 6,
     "Clinton": 6,
     "Almont": 6,
+    "Ecorse": 6,
     "Menominee": 7,
     "Pewamo-Westphalia": 7,
     "Ithaca": 7,
