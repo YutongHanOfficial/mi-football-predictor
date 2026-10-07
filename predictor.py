@@ -65,6 +65,7 @@ TEAM_DIVISIONS = {
     "Bloomfield Hills Brother Rice": 2,
     "Milford": 2,
     "Sterling Heights": 2,
+    "South Lyon East": 2,
     "Harper Woods": 3,
     "DeWitt": 3,
     "Chelsea": 3,
@@ -74,6 +75,7 @@ TEAM_DIVISIONS = {
     "Mount Pleasant": 3,
     "St Joseph": 3,
     "Lowell": 3,
+    "Port Huron": 3,
     "Dearborn Divine Child": 4,
     "Goodrich": 4,
     "Hudsonville Unity Christian": 4,
@@ -99,6 +101,7 @@ TEAM_DIVISIONS = {
     "Beal City": 8,
     "Hudson": 8,
     "Detroit Douglass": 8,
+    "Madison Heights Madison": 8,
 }
 
 # ==========================================
