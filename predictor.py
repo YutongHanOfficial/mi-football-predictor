@@ -469,18 +469,22 @@ class SeasonPredictor:
         for t in self.teams.keys():
             if is_hist: 
                 p = DIVISION_BASELINES.get(TEAM_DIVISIONS.get(t, 4), 0.0)
-                temp_teams[t] = {"prior_OSRS": p/2.0, "prior_DSRS": -p/2.0, "game_log": []}
+                temp_teams[t] = {"prior_OSRS": p/2.0, "prior_DSRS": -p/2.0, "OSRS": p/2.0, "DSRS": -p/2.0, "game_log": []}
             else: 
+                prior_o = self.teams.get(t, {}).get("preseason_OSRS", 0.0)
+                prior_d = self.teams.get(t, {}).get("preseason_DSRS", 0.0)
                 temp_teams[t] = {
-                    "prior_OSRS": self.teams.get(t, {}).get("preseason_OSRS", 0.0), 
-                    "prior_DSRS": self.teams.get(t, {}).get("preseason_DSRS", 0.0), 
+                    "prior_OSRS": prior_o, 
+                    "prior_DSRS": prior_d, 
+                    "OSRS": prior_o,
+                    "DSRS": prior_d,
                     "game_log": []
                 }
                 
         for g in training_games:
             h, a = g["home"], g["away"]
-            if h not in temp_teams: temp_teams[h] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "game_log": []}
-            if a not in temp_teams: temp_teams[a] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "game_log": []}
+            if h not in temp_teams: temp_teams[h] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "OSRS": 0.0, "DSRS": 0.0, "game_log": []}
+            if a not in temp_teams: temp_teams[a] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "OSRS": 0.0, "DSRS": 0.0, "game_log": []}
             
             adj_hs, adj_as = apply_blowout_diminishing_returns(g["home_score"], g["away_score"])
             temp_teams[h]["game_log"].append({"opponent": a, "points_scored": adj_hs, "points_allowed": adj_as})
