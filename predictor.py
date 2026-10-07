@@ -90,6 +90,7 @@ TEAM_DIVISIONS = {
     "Jackson Lumen Christi": 6,
     "Kingsley": 6,
     "Clinton": 6,
+    "Almont": 6,
     "Menominee": 7,
     "Pewamo-Westphalia": 7,
     "Ithaca": 7,
