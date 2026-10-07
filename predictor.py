@@ -15,10 +15,10 @@ import streamlit as st
 # ==========================================
 ENABLE_MOV_ADJUSTMENT = True
 
-# Select your mathematical curve: "tanh" (Recommended), "log", or "piecewise"
-MOV_METHOD = "tanh" 
+# Select your mathematical curve: "tanh", "log", "piecewise", or "soft_piecewise"
+MOV_METHOD = "soft_piecewise" 
 
-# For Tanh & Piecewise: The asymptote/cap (35 = Michigan HS Running Clock trigger)
+# The threshold where diminishing returns begin (35 = Michigan HS Running Clock)
 MAX_MARGIN = 35.0  
 
 ENABLE_BAYESIAN_ANCHORS = True
@@ -37,8 +37,6 @@ DIVISION_BASELINES = {
 }
 
 # 🏛️ GRAVITY PILLARS
-# You only need to define the major outliers here. The math will auto-sort the rest 
-# of the state based on who plays these anchor teams.
 TEAM_DIVISIONS = {
     "Detroit Catholic Central": 1, 
     "Detroit Cass Tech": 1,
@@ -120,10 +118,6 @@ def is_oos(team_name):
     return False
 
 def apply_blowout_diminishing_returns(home_score, away_score):
-    """
-    Applies mathematical curve to Margin of Victory to prevent blowout inflation.
-    Keeps the SRS model stable when lower division teams win 77-0.
-    """
     if not ENABLE_MOV_ADJUSTMENT:
         return home_score, away_score
         
@@ -133,7 +127,6 @@ def apply_blowout_diminishing_returns(home_score, away_score):
     if raw_mov == 0:
         return home_score, away_score
         
-    # --- DIMINISHING RETURNS MATH ---
     if MOV_METHOD == "tanh":
         adj_mov = MAX_MARGIN * math.tanh(raw_mov / MAX_MARGIN)
     elif MOV_METHOD == "log":
@@ -143,6 +136,12 @@ def apply_blowout_diminishing_returns(home_score, away_score):
             adj_mov = raw_mov
         else:
             adj_mov = MAX_MARGIN + (math.sqrt(raw_mov - MAX_MARGIN) * 2.0)
+    elif MOV_METHOD == "soft_piecewise":
+        if raw_mov <= MAX_MARGIN:
+            adj_mov = raw_mov
+        else:
+            # 1:1 up to 35, then 0.5x multiplier for every point after
+            adj_mov = MAX_MARGIN + ((raw_mov - MAX_MARGIN) * 0.5)
     else:
         adj_mov = raw_mov
         
@@ -185,11 +184,9 @@ def convert_to_moneyline(win_prob):
         return "+100"
 
 def norm_cdf(x):
-    """Fast approximation for win probability confidence using standard normal CDF"""
     return (1.0 + math.erf(x / math.sqrt(2.0))) / 2.0
 
 def metric_card(title, value, theme="green"):
-    """HTML Helper to render styling similar to the provided reference image"""
     if theme == "green":
         bg = "#ecfdf5"
         border = "#a7f3d0"
@@ -228,8 +225,6 @@ class SeasonPredictor:
         
         self._blend_ratings()
         self._calculate_basic_stats()
-        
-        # Build the backtest data once on init so Tab 6 runs instantly
         self.backtest_data = self._build_backtest_data()
 
     def _load_and_dedupe_csv(self, filename):
@@ -456,9 +451,7 @@ class SeasonPredictor:
         self.hist_ranks_papg = hist_ranks["papg"]
         
     def _build_backtest_data(self):
-        """Builds retroactive performance evaluation data to populate the Model Accuracy tab."""
         results = []
-        
         for season, games, pfx in [("2025", self.historical_games, "hist_"), ("2026", self.current_games, "active_")]:
             if not games: continue
             
@@ -474,7 +467,6 @@ class SeasonPredictor:
                 h, a = g["home"], g["away"]
                 act_h, act_a = int(g["home_score"]), int(g["away_score"])
 
-                # Use the converged/active ratings for mathematical evaluation of the model
                 if pfx == "hist_":
                     h_off = self.teams.get(h, {}).get("hist_OSRS", 0.0)
                     h_def = self.teams.get(h, {}).get("hist_DSRS", 0.0)
@@ -502,8 +494,6 @@ class SeasonPredictor:
                 correct = 1 if pred_winner == act_winner else 0
                 spread_err = abs(act_margin - pred_margin)
                 total_err = abs((act_h + act_a) - (exp_h + exp_a))
-
-                # Quick Standard Normal CDF mapped to typical FB margin volatility
                 confidence = norm_cdf(abs(pred_margin) / 13.5)
 
                 results.append({
@@ -519,8 +509,6 @@ class SeasonPredictor:
         if df.empty: return None
 
         df = df.sort_values(["season", "week_num"])
-        
-        # Calculate relative week for the season (making the first active week = Wk 1)
         min_weeks = df.groupby("season")["week_num"].min().to_dict()
         df["rel_week"] = df.apply(lambda row: row["week_num"] - min_weeks[row["season"]] + 1, axis=1)
         df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
@@ -821,12 +809,6 @@ def get_cached_history(_predictor, team_name):
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
-with st.sidebar:
-    if st.button("🧹 Force Clear Cache"):
-        st.cache_resource.clear()
-        st.cache_data.clear()
-        st.rerun()
-
 st.markdown("""
     <style>
     div[data-testid="stMetricValue"] > div {
@@ -1109,7 +1091,7 @@ else:
                 st.info("ℹ Season Progression and Future Projections are hidden while viewing archived seasons.")
 
     # ----------------------------------------------------
-    # TAB 4: UPCOMING & TOP MATCHUPS (NEW)
+    # TAB 4: UPCOMING & TOP MATCHUPS
     # ----------------------------------------------------
     with tab4:
         st.subheader("Upcoming Game Projections & Hub", anchor=False)
@@ -1122,7 +1104,6 @@ else:
         else:
             upcoming_processed = []
             
-            # Fast mathematical projection for sorting all upcoming games instantly
             for g in upcoming_raw:
                 h, a = g["home"], g["away"]
                 h_off = predictor.teams.get(h, {}).get("active_OSRS", 0.0)
@@ -1172,7 +1153,6 @@ else:
             st.markdown("---")
             st.markdown("### 🗓️ Master Calendar")
             
-            # Group by date for the calendar view
             dates = sorted(list(set([x["Date"] for x in upcoming_processed])))
             for d in dates:
                 with st.expander(f"📅 Games on {d}", expanded=(d == dates[0])):
@@ -1218,7 +1198,7 @@ else:
         st.dataframe(stat_rows, column_order=["Rank", "Team", "Record", "Win %", "GP", "PF", "PA", "Diff", "PPG", "PA/G"], width="stretch", hide_index=True)
 
     # ----------------------------------------------------
-    # TAB 6: MODEL ACCURACY (CLEAN)
+    # TAB 6: MODEL ACCURACY
     # ----------------------------------------------------
     with tab6:
         st.subheader("Model Performance Backtest", anchor=False)
@@ -1231,7 +1211,6 @@ else:
         else:
             win_acc = (bd["total_correct"] / bd["total_games"]) * 100
             
-            # Top KPI Cards
             st.markdown(f"<div style='margin-bottom: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL-TIME · {bd['total_games']} GAMES RATED</div>", unsafe_allow_html=True)
             
             c1, c2, c3, c4, c5 = st.columns(5)
@@ -1245,9 +1224,7 @@ else:
             st.markdown(f"<div style='margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WIN ACCURACY BY WEEK</div>", unsafe_allow_html=True)
             st.caption("Model win-pick accuracy per week number, averaged across all seasons.")
             
-            # Interactive Altair Chart
             weekly_df = bd["weekly_df"]
-            
             base_chart = alt.Chart(weekly_df).encode(
                 x=alt.X('week_label:N', sort=None, title=None, axis=alt.Axis(labelAngle=-45))
             )
@@ -1260,9 +1237,6 @@ else:
                 y=alt.Y('cum_accuracy:Q')
             )
             
-            # Hack for manual legend to match image exactly
-            legend_df = pd.DataFrame([{"label": "Weekly Accuracy", "color": "#38bdf8"}, {"label": "Cumulative", "color": "#f59e0b"}])
-            
             chart = alt.layer(line_weekly, line_cum).properties(height=350)
             st.altair_chart(chart, use_container_width=True)
             
@@ -1273,7 +1247,6 @@ else:
                 </div><br>""", unsafe_allow_html=True
             )
 
-            # Weekly Breakdown Dataframe
             st.markdown(f"<div style='margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WEEKLY BREAKDOWN</div>", unsafe_allow_html=True)
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
@@ -1293,3 +1266,14 @@ else:
                 hide_index=True,
                 width="stretch"
             )
+
+    # ----------------------------------------------------
+    # ADMIN TOOLS (Discreet bottom expander to replace sidebar)
+    # ----------------------------------------------------
+    st.markdown("---")
+    with st.expander("⚙️ Admin & Developer Tools"):
+        st.caption("Streamlit Cloud hides the native 'Clear Cache' menu for users who aren't logged in as the app author. Use this button to manually refresh data if needed.")
+        if st.button("🧹 Force Clear Cache", use_container_width=True):
+            st.cache_resource.clear()
+            st.cache_data.clear()
+            st.rerun()
