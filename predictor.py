@@ -24,6 +24,8 @@ MAX_MARGIN = 35.0
 
 ENABLE_BAYESIAN_ANCHORS = True
 PRIOR_WEIGHT_GAMES = 4.0  # How strongly to pull teams toward their prior (4 is standard)
+HOME_FIELD_ADVANTAGE = 2.0  # Point advantage given to home teams
+TIME_DECAY_PER_WEEK = 0.975 # Weight multiplier per week elapsed
 
 # MHSAA Empirical Baselines (Point values relative to state average)
 DIVISION_BASELINES = {
@@ -256,14 +258,21 @@ class SeasonPredictor:
                     if game_signature in unique_games:
                         continue
                     unique_games.add(game_signature)
+                    
+                    date_obj = None
+                    if date:
+                        try:
+                            date_obj = datetime.strptime(date, "%Y-%m-%d")
+                        except ValueError:
+                            pass
 
                     if hs_raw != "" and as_raw != "":
                         hs = int(hs_raw)
                         as_ = int(as_raw)
                         is_forfeit = (hs == 1 and as_ == 0) or (hs == 0 and as_ == 1)
-                        games.append({"date": date, "home": home, "away": away, "home_score": hs, "away_score": as_, "is_forfeit": is_forfeit})
+                        games.append({"date": date, "date_obj": date_obj, "home": home, "away": away, "home_score": hs, "away_score": as_, "is_forfeit": is_forfeit})
                     else:
-                        games.append({"date": date, "home": home, "away": away, "home_score": None, "away_score": None, "is_forfeit": False})
+                        games.append({"date": date, "date_obj": date_obj, "home": home, "away": away, "home_score": None, "away_score": None, "is_forfeit": False})
                 except (KeyError, ValueError):
                     pass
                     
@@ -273,6 +282,8 @@ class SeasonPredictor:
         temp_teams = {}
         total_points = 0
         valid_games_count = 0
+        
+        target_date = datetime.now() if prefix == "curr_" else max([g["date_obj"] for g in games if g.get("date_obj")], default=datetime.now())
         
         for game in games:
             home, away = game["home"], game["away"]
@@ -285,8 +296,16 @@ class SeasonPredictor:
             hs, as_ = game["home_score"], game["away_score"]
             adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
             
-            temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
-            temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
+            # Mathematical Upgrade: Time Decay
+            days_ago = (target_date - game["date_obj"]).days if game.get("date_obj") else 0
+            game_weight = max(0.1, TIME_DECAY_PER_WEEK ** (days_ago / 7.0))
+            
+            # Mathematical Upgrade: Neutralize Home Field Advantage
+            neut_hs = adj_hs - (HOME_FIELD_ADVANTAGE / 2.0)
+            neut_as = adj_as + (HOME_FIELD_ADVANTAGE / 2.0)
+            
+            temp_teams[home]["game_log"].append({"opponent": away, "points_scored": neut_hs, "points_allowed": neut_as, "weight": game_weight})
+            temp_teams[away]["game_log"].append({"opponent": home, "points_scored": neut_as, "points_allowed": neut_hs, "weight": game_weight})
             total_points += (adj_hs + adj_as)
             valid_games_count += 1
             
@@ -314,17 +333,17 @@ class SeasonPredictor:
         for _ in range(iterations):
             new_ratings = {}
             for team, data in temp_teams.items():
-                num_games = len(data["game_log"])
-                weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
-                total_games = num_games + weight
+                sum_weights = sum(g["weight"] for g in data["game_log"])
+                weight_prior = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
+                total_games = sum_weights + weight_prior
                 
-                sum_adj_off = (temp_teams[team]["prior_OSRS"] + league_avg) * weight
-                sum_adj_def = (temp_teams[team]["prior_DSRS"] + league_avg) * weight
+                sum_adj_off = (temp_teams[team]["prior_OSRS"] + league_avg) * weight_prior
+                sum_adj_def = (temp_teams[team]["prior_DSRS"] + league_avg) * weight_prior
                 
                 for game in data["game_log"]:
                     opp = game["opponent"]
-                    sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS": 0.0})["DSRS"])
-                    sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"])
+                    sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS": 0.0})["DSRS"]) * game["weight"]
+                    sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"]) * game["weight"]
                 
                 new_ratings[team] = {
                     "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else 0.0,
@@ -460,7 +479,7 @@ class SeasonPredictor:
     # 🔒 SECURE WALK-FORWARD ENGINE
     # ==========================================
     
-    def _calculate_point_in_time_ratings(self, training_games, is_hist):
+    def _calculate_point_in_time_ratings(self, training_games, is_hist, target_date_obj):
         """Calculates temporary, sealed ratings using ONLY games played strictly before prediction day."""
         temp_teams = {}
         total_points = 0
@@ -487,8 +506,15 @@ class SeasonPredictor:
             if a not in temp_teams: temp_teams[a] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "OSRS": 0.0, "DSRS": 0.0, "game_log": []}
             
             adj_hs, adj_as = apply_blowout_diminishing_returns(g["home_score"], g["away_score"])
-            temp_teams[h]["game_log"].append({"opponent": a, "points_scored": adj_hs, "points_allowed": adj_as})
-            temp_teams[a]["game_log"].append({"opponent": h, "points_scored": adj_as, "points_allowed": adj_hs})
+            
+            days_ago = (target_date_obj - g["date_obj"]).days if g.get("date_obj") else 0
+            game_weight = max(0.1, TIME_DECAY_PER_WEEK ** (days_ago / 7.0))
+            
+            neut_hs = adj_hs - (HOME_FIELD_ADVANTAGE / 2.0)
+            neut_as = adj_as + (HOME_FIELD_ADVANTAGE / 2.0)
+            
+            temp_teams[h]["game_log"].append({"opponent": a, "points_scored": neut_hs, "points_allowed": neut_as, "weight": game_weight})
+            temp_teams[a]["game_log"].append({"opponent": h, "points_scored": neut_as, "points_allowed": neut_hs, "weight": game_weight})
             total_points += (adj_hs + adj_as)
             valid_games_count += 1
             
@@ -497,17 +523,17 @@ class SeasonPredictor:
         for _ in range(30):
             new_ratings = {}
             for t, data in temp_teams.items():
-                num_games = len(data["game_log"])
-                weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
-                total_games = num_games + weight
+                sum_weights = sum(g["weight"] for g in data["game_log"])
+                weight_prior = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
+                total_games = sum_weights + weight_prior
                 
-                sum_adj_off = (data["prior_OSRS"] + league_avg) * weight
-                sum_adj_def = (data["prior_DSRS"] + league_avg) * weight
+                sum_adj_off = (data["prior_OSRS"] + league_avg) * weight_prior
+                sum_adj_def = (data["prior_DSRS"] + league_avg) * weight_prior
                 
                 for g in data["game_log"]:
                     opp = g["opponent"]
-                    sum_adj_off += (g["points_scored"] - temp_teams.get(opp, {"DSRS": 0.0})["DSRS"])
-                    sum_adj_def += (g["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"])
+                    sum_adj_off += (g["points_scored"] - temp_teams.get(opp, {"DSRS": 0.0})["DSRS"]) * g["weight"]
+                    sum_adj_def += (g["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"]) * g["weight"]
                     
                 new_ratings[t] = {
                     "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else data["prior_OSRS"],
@@ -525,11 +551,10 @@ class SeasonPredictor:
             # Sort chronologically and extract valid scored games
             valid = []
             for g in games:
-                if g.get("home_score") not in [None, ""] and not g.get("is_forfeit") and g.get("date"):
+                if g.get("home_score") not in [None, ""] and not g.get("is_forfeit") and g.get("date_obj"):
                     try:
-                        date_obj = datetime.strptime(g["date"], "%Y-%m-%d")
-                        week_num = date_obj.isocalendar()[1]
-                        valid.append({**g, "date_obj": date_obj, "week_num": week_num})
+                        week_num = g["date_obj"].isocalendar()[1]
+                        valid.append({**g, "week_num": week_num})
                     except ValueError: pass
                     
             valid.sort(key=lambda x: x["date_obj"])
@@ -543,9 +568,10 @@ class SeasonPredictor:
             
             for date_str in sorted(games_by_date.keys()):
                 todays_games = games_by_date[date_str]
+                target_date_obj = todays_games[0]["date_obj"]
                 
                 # A. Train SRS purely on history BEFORE today
-                pit_ratings, pit_league_avg = self._calculate_point_in_time_ratings(training_history, is_hist)
+                pit_ratings, pit_league_avg = self._calculate_point_in_time_ratings(training_history, is_hist, target_date_obj)
                 
                 # B. Generate out-of-sample predictions
                 for g in todays_games:
@@ -561,12 +587,13 @@ class SeasonPredictor:
                     a_off = pit_ratings.get(a, {}).get("OSRS", pit_ratings.get(a, {}).get("prior_OSRS", 0.0))
                     a_def = pit_ratings.get(a, {}).get("DSRS", pit_ratings.get(a, {}).get("prior_DSRS", 0.0))
                     
-                    exp_h = max(0.1, pit_league_avg + h_off + a_def)
-                    exp_a = max(0.1, pit_league_avg + a_off + h_def)
+                    exp_h = max(0.1, pit_league_avg + h_off + a_def + (HOME_FIELD_ADVANTAGE / 2.0))
+                    exp_a = max(0.1, pit_league_avg + a_off + h_def - (HOME_FIELD_ADVANTAGE / 2.0))
                     pred_margin = exp_h - exp_a
                     pred_winner = h if pred_margin > 0 else a
                     
-                    prob_h_win = norm_cdf(pred_margin / 15.5)
+                    # Mathematical Upgrade: Volatility curve flattened to 16.5
+                    prob_h_win = norm_cdf(pred_margin / 16.5)
                     confidence = prob_h_win if pred_winner == h else (1 - prob_h_win)
                     
                     # Point-In-Time Records Baseline
@@ -680,8 +707,9 @@ class SeasonPredictor:
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
         h_def = self.teams[home_team]["active_DSRS"] if home_team in self.teams else 0.0
         
-        exp_pts_a = max(0.1, self.league_avg_points + a_off + h_def)
-        exp_pts_h = max(0.1, self.league_avg_points + h_off + a_def)
+        # Mathematical Upgrade: Neutralize Home Field Advantage
+        exp_pts_a = max(0.1, self.league_avg_points + a_off + h_def - (HOME_FIELD_ADVANTAGE / 2.0))
+        exp_pts_h = max(0.1, self.league_avg_points + h_off + a_def + (HOME_FIELD_ADVANTAGE / 2.0))
         
         a_wins, h_wins = 0, 0
         all_score_a, all_score_h = [], []
@@ -819,42 +847,53 @@ class SeasonPredictor:
                     home, away = g["home"], g["away"]
                     for t in (home, away):
                         if t not in temp_teams:
-                            temp_teams[t] = {"OSRS": 0.0, "DSRS": 0.0, "game_log": []}
+                            # State fix applied here for OSRS/DSRS
+                            temp_teams[t] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "OSRS": 0.0, "DSRS": 0.0, "game_log": []}
                     
                     if g.get("is_forfeit"): continue
                         
                     hs, as_ = g["home_score"], g["away_score"]
                     adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
                     
-                    temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
-                    temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
+                    days_ago = (current_dt - g["date_obj"]).days if g.get("date_obj") else 0
+                    game_weight = max(0.1, TIME_DECAY_PER_WEEK ** (days_ago / 7.0))
+                    
+                    neut_hs = adj_hs - (HOME_FIELD_ADVANTAGE / 2.0)
+                    neut_as = adj_as + (HOME_FIELD_ADVANTAGE / 2.0)
+                    
+                    temp_teams[home]["game_log"].append({"opponent": away, "points_scored": neut_hs, "points_allowed": neut_as, "weight": game_weight})
+                    temp_teams[away]["game_log"].append({"opponent": home, "points_scored": neut_as, "points_allowed": neut_hs, "weight": game_weight})
                     total_points += (adj_hs + adj_as)
                     valid_games_count += 1
                     
                 league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
                 
                 for t in temp_teams:
-                    temp_teams[t]["prior_OSRS"] = self.teams.get(t, {}).get("preseason_OSRS", 0.0)
-                    temp_teams[t]["prior_DSRS"] = self.teams.get(t, {}).get("preseason_DSRS", 0.0)
+                    pr_o = self.teams.get(t, {}).get("preseason_OSRS", 0.0)
+                    pr_d = self.teams.get(t, {}).get("preseason_DSRS", 0.0)
+                    temp_teams[t]["prior_OSRS"] = pr_o
+                    temp_teams[t]["prior_DSRS"] = pr_d
+                    temp_teams[t]["OSRS"] = pr_o
+                    temp_teams[t]["DSRS"] = pr_d
 
                 for _ in range(40): 
                     new_ratings = {}
                     for t, data in temp_teams.items():
-                        num_games = len(data["game_log"])
-                        weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
-                        total_games = num_games + weight
+                        sum_weights = sum(gm["weight"] for gm in data["game_log"])
+                        weight_prior = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
+                        total_games = sum_weights + weight_prior
                         
-                        sum_adj_off = (temp_teams[t]["prior_OSRS"] + league_avg) * weight
-                        sum_adj_def = (temp_teams[t]["prior_DSRS"] + league_avg) * weight
+                        sum_adj_off = (temp_teams[t]["prior_OSRS"] + league_avg) * weight_prior
+                        sum_adj_def = (temp_teams[t]["prior_DSRS"] + league_avg) * weight_prior
                         
                         for game in data["game_log"]:
                             opp = game["opponent"]
-                            sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS":0})["DSRS"])
-                            sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS":0})["OSRS"])
+                            sum_adj_off += (game["points_scored"] - temp_teams.get(opp, {"DSRS":0})["DSRS"]) * game["weight"]
+                            sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS":0})["OSRS"]) * game["weight"]
                             
                         new_ratings[t] = {
-                            "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else 0.0,
-                            "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else 0.0
+                            "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else temp_teams[t]["prior_OSRS"],
+                            "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else temp_teams[t]["prior_DSRS"]
                         }
                         
                     for t in temp_teams:
@@ -1224,8 +1263,8 @@ else:
                 a_off = predictor.teams.get(a, {}).get("active_OSRS", 0.0)
                 a_def = predictor.teams.get(a, {}).get("active_DSRS", 0.0)
                 
-                exp_h = predictor.league_avg_points + h_off + a_def
-                exp_a = predictor.league_avg_points + a_off + h_def
+                exp_h = predictor.league_avg_points + h_off + a_def + (HOME_FIELD_ADVANTAGE / 2.0)
+                exp_a = predictor.league_avg_points + a_off + h_def - (HOME_FIELD_ADVANTAGE / 2.0)
                 
                 margin = exp_h - exp_a
                 abs_margin = abs(margin)
