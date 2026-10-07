@@ -837,7 +837,7 @@ else:
         "🎮 Matchup Simulator", 
         "🏆 Power Rankings", 
         "📅 Team Schedules", 
-        "📆 Upcoming & Top Matchups", 
+        "📆 Upcoming Matchups", 
         "📈 Season Leaderboards",
         "🎯 Model Accuracy"
     ])
