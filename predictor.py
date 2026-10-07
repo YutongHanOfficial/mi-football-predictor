@@ -11,8 +11,18 @@ from collections import deque
 import streamlit as st
 
 # ==========================================
-# ⚙️ CONSTANTS & BASELINES
+# ⚙️ ENGINE CONFIGURATION
 # ==========================================
+ENABLE_MOV_ADJUSTMENT = True
+
+# Select your mathematical curve: "tanh", "log", "piecewise", or "soft_piecewise"
+MOV_METHOD = "soft_piecewise" 
+
+# The threshold where diminishing returns begin (35 = Michigan HS Running Clock)
+MAX_MARGIN = 35.0  
+
+ENABLE_BAYESIAN_ANCHORS = True
+PRIOR_WEIGHT_GAMES = 4.0  # How strongly to pull teams toward their prior (4 is standard)
 
 # MHSAA Empirical Baselines (Point values relative to state average)
 DIVISION_BASELINES = {
@@ -107,8 +117,8 @@ def is_oos(team_name):
             return True
     return False
 
-def apply_blowout_diminishing_returns(home_score, away_score, mov_method, max_margin):
-    if mov_method == "none":
+def apply_blowout_diminishing_returns(home_score, away_score):
+    if not ENABLE_MOV_ADJUSTMENT:
         return home_score, away_score
         
     margin = home_score - away_score
@@ -117,21 +127,21 @@ def apply_blowout_diminishing_returns(home_score, away_score, mov_method, max_ma
     if raw_mov == 0:
         return home_score, away_score
         
-    if mov_method == "tanh":
-        adj_mov = max_margin * math.tanh(raw_mov / max_margin)
-    elif mov_method == "log":
+    if MOV_METHOD == "tanh":
+        adj_mov = MAX_MARGIN * math.tanh(raw_mov / MAX_MARGIN)
+    elif MOV_METHOD == "log":
         adj_mov = 3.365 * math.log(raw_mov + 1)
-    elif mov_method == "piecewise":
-        if raw_mov <= max_margin:
+    elif MOV_METHOD == "piecewise":
+        if raw_mov <= MAX_MARGIN:
             adj_mov = raw_mov
         else:
-            adj_mov = max_margin + (math.sqrt(raw_mov - max_margin) * 2.0)
-    elif mov_method == "soft_piecewise":
-        if raw_mov <= max_margin:
+            adj_mov = MAX_MARGIN + (math.sqrt(raw_mov - MAX_MARGIN) * 2.0)
+    elif MOV_METHOD == "soft_piecewise":
+        if raw_mov <= MAX_MARGIN:
             adj_mov = raw_mov
         else:
-            # 1:1 up to max, then 0.5x multiplier for every point after
-            adj_mov = max_margin + ((raw_mov - max_margin) * 0.5)
+            # 1:1 up to 35, then 0.5x multiplier for every point after
+            adj_mov = MAX_MARGIN + ((raw_mov - MAX_MARGIN) * 0.5)
     else:
         adj_mov = raw_mov
         
@@ -197,15 +207,10 @@ def metric_card(title, value, theme="green"):
 # ==========================================
 
 class SeasonPredictor:
-    def __init__(self, past_csv, current_csv=None, reg_factor=0.25, mov_method="soft_piecewise", max_margin=35.0, bayes_weight=4.0):
+    def __init__(self, past_csv, current_csv=None, regression_factor=0.25):
         self.teams = {}
         self.league_avg_points = 24.0
-        
-        # Hyperparameters
-        self.regression_factor = reg_factor 
-        self.mov_method = mov_method
-        self.max_margin = max_margin
-        self.bayes_weight = bayes_weight
+        self.regression_factor = regression_factor 
         
         self.historical_games = self._load_and_dedupe_csv(past_csv)
         if self.historical_games:
@@ -272,7 +277,7 @@ class SeasonPredictor:
             if game.get("is_forfeit"): continue
 
             hs, as_ = game["home_score"], game["away_score"]
-            adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_, self.mov_method, self.max_margin)
+            adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
             
             temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
             temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
@@ -304,7 +309,7 @@ class SeasonPredictor:
             new_ratings = {}
             for team, data in temp_teams.items():
                 num_games = len(data["game_log"])
-                weight = self.bayes_weight
+                weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
                 total_games = num_games + weight
                 
                 sum_adj_off = (temp_teams[team]["prior_OSRS"] + league_avg) * weight
@@ -706,7 +711,7 @@ class SeasonPredictor:
                     if g.get("is_forfeit"): continue
                         
                     hs, as_ = g["home_score"], g["away_score"]
-                    adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_, self.mov_method, self.max_margin)
+                    adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
                     
                     temp_teams[home]["game_log"].append({"opponent": away, "points_scored": adj_hs, "points_allowed": adj_as})
                     temp_teams[away]["game_log"].append({"opponent": home, "points_scored": adj_as, "points_allowed": adj_hs})
@@ -723,7 +728,7 @@ class SeasonPredictor:
                     new_ratings = {}
                     for t, data in temp_teams.items():
                         num_games = len(data["game_log"])
-                        weight = self.bayes_weight
+                        weight = PRIOR_WEIGHT_GAMES if ENABLE_BAYESIAN_ANCHORS else 0.0
                         total_games = num_games + weight
                         
                         sum_adj_off = (temp_teams[t]["prior_OSRS"] + league_avg) * weight
@@ -781,15 +786,13 @@ class SeasonPredictor:
 # ⚡ STREAMLIT CACHING WRAPPERS 
 # ==========================================
 
-# By adding the hyperparameters as arguments here, Streamlit will automatically
-# spin up and cache a completely new model whenever you change a slider.
-@st.cache_resource(show_spinner="Training Engine...")
-def load_predictor(reg_factor, mov_method, max_margin, bayes_weight):
+@st.cache_resource
+def load_predictor():
     past_file = "games_2025.csv" if os.path.exists("games_2025.csv") else None
     curr_file = "games_2026.csv" if os.path.exists("games_2026.csv") else None
     if not past_file and not curr_file:
         return None
-    return SeasonPredictor(past_file, curr_file, reg_factor, mov_method, max_margin, bayes_weight)
+    return SeasonPredictor(past_file, curr_file, regression_factor=0.25)
 
 @st.cache_data
 def get_cached_prediction(_predictor, away_team, home_team, num_simulations, mode="median"):
@@ -823,46 +826,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ----------------------------------------------------
-# 🔒 ADMIN PANEL (SIDEBAR)
-# ----------------------------------------------------
-
-# Initialize default session parameters so the app can boot
-if "mov_method" not in st.session_state: st.session_state.mov_method = "soft_piecewise"
-if "max_margin" not in st.session_state: st.session_state.max_margin = 35.0
-if "bayes_weight" not in st.session_state: st.session_state.bayes_weight = 4.0
-if "reg_factor" not in st.session_state: st.session_state.reg_factor = 0.25
-
-with st.sidebar:
-    st.markdown("### 🔒 Developer Access")
-    admin_pwd = st.text_input("Enter Passcode", type="password")
-    
-    if admin_pwd == "footballadmin":
-        st.markdown("---")
-        st.markdown("### ⚙️ Engine Tuning")
-        st.caption("Changes here instantly flush the cache and rebuild the model.")
-        
-        st.selectbox("MOV Method", ["soft_piecewise", "piecewise", "tanh", "log", "none"], key="mov_method")
-        st.slider("Max Margin / Threshold", 14.0, 70.0, key="max_margin", step=1.0)
-        st.slider("Prior Weight (Games)", 0.0, 10.0, key="bayes_weight", step=0.5)
-        st.slider("Year-over-Year Regress", 0.0, 1.0, key="reg_factor", step=0.05)
-        
-        st.markdown("---")
-        if st.button("🧹 Flush Cache / Hard Reload", use_container_width=True):
-            st.cache_resource.clear()
-            st.cache_data.clear()
-            st.rerun()
-    elif admin_pwd:
-        st.error("Incorrect passcode.")
-
-
-# Fetch the dynamic model based on the session state params
-predictor = load_predictor(
-    st.session_state.reg_factor,
-    st.session_state.mov_method,
-    st.session_state.max_margin,
-    st.session_state.bayes_weight
-)
+predictor = load_predictor()
 
 st.title("🏈 High School Football Predictor Engine", anchor=False)
 
@@ -1302,3 +1266,14 @@ else:
                 hide_index=True,
                 width="stretch"
             )
+
+    # ----------------------------------------------------
+    # ADMIN TOOLS (Discreet bottom expander to replace sidebar)
+    # ----------------------------------------------------
+    st.markdown("---")
+    with st.expander("⚙️ Admin & Developer Tools"):
+        st.caption("Streamlit Cloud hides the native 'Clear Cache' menu for users who aren't logged in as the app author. Use this button to manually refresh data if needed.")
+        if st.button("🧹 Force Clear Cache", use_container_width=True):
+            st.cache_resource.clear()
+            st.cache_data.clear()
+            st.rerun()
