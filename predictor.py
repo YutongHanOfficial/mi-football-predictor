@@ -23,7 +23,7 @@ MOV_METHOD = "soft_piecewise"
 MAX_MARGIN = 35.0  
 
 ENABLE_BAYESIAN_ANCHORS = True
-PRIOR_WEIGHT_GAMES = 4.0  # How strongly to pull teams toward their prior (4 is standard)
+PRIOR_WEIGHT_GAMES = 6.0  # Increased anchor weight to prevent isolated small-school blowout inflation
 HOME_FIELD_ADVANTAGE = 2.0  # Point advantage given to home teams
 TIME_DECAY_PER_WEEK = 0.975 # Weight multiplier per week elapsed
 
@@ -193,7 +193,7 @@ def norm_cdf(x):
 # ==========================================
 
 class SeasonPredictor:
-    def __init__(self, past_csv, current_csv=None, regression_factor=0.25):
+    def __init__(self, past_csv, current_csv=None, regression_factor=0.30):
         self.teams = {}
         self.league_avg_points = 24.0
         self.regression_factor = regression_factor 
@@ -276,11 +276,9 @@ class SeasonPredictor:
             hs, as_ = game["home_score"], game["away_score"]
             adj_hs, adj_as = apply_blowout_diminishing_returns(hs, as_)
             
-            # Mathematical Upgrade: Time Decay
             days_ago = (target_date - game["date_obj"]).days if game.get("date_obj") else 0
             game_weight = max(0.1, TIME_DECAY_PER_WEEK ** (days_ago / 7.0))
             
-            # Mathematical Upgrade: Neutralize Home Field Advantage
             neut_hs = adj_hs - (HOME_FIELD_ADVANTAGE / 2.0)
             neut_as = adj_as + (HOME_FIELD_ADVANTAGE / 2.0)
             
@@ -292,20 +290,14 @@ class SeasonPredictor:
         league_avg = total_points / (valid_games_count * 2) if valid_games_count else 24.0
 
         for team in temp_teams:
-            if prefix == "hist_":
-                div = TEAM_DIVISIONS.get(team, 4)
-                prior_power = DIVISION_BASELINES.get(div, 0.0)
-                prior_osrs = prior_power / 2.0
-                prior_dsrs = -prior_power / 2.0
-            else:
-                if team in self.teams and "preseason_OSRS" in self.teams[team]:
-                    prior_osrs = self.teams[team]["preseason_OSRS"]
-                    prior_dsrs = self.teams[team]["preseason_DSRS"]
-                else:
-                    div = TEAM_DIVISIONS.get(team, 4)
-                    prior_power = DIVISION_BASELINES.get(div, 0.0)
-                    prior_osrs = prior_power / 2.0
-                    prior_dsrs = -prior_power / 2.0
+            div = TEAM_DIVISIONS.get(team, 4)
+            prior_power = DIVISION_BASELINES.get(div, 0.0)
+            prior_osrs = prior_power / 2.0
+            prior_dsrs = -prior_power / 2.0
+            
+            if prefix != "hist_" and team in self.teams and "preseason_OSRS" in self.teams[team]:
+                prior_osrs = self.teams[team]["preseason_OSRS"]
+                prior_dsrs = self.teams[team]["preseason_DSRS"]
             
             temp_teams[team]["prior_OSRS"] = prior_osrs
             temp_teams[team]["prior_DSRS"] = prior_dsrs
@@ -326,8 +318,8 @@ class SeasonPredictor:
                     sum_adj_def += (game["points_allowed"] - temp_teams.get(opp, {"OSRS": 0.0})["OSRS"]) * game["weight"]
                 
                 new_ratings[team] = {
-                    "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else 0.0,
-                    "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else 0.0
+                    "OSRS": (sum_adj_off / total_games) - league_avg if total_games > 0 else temp_teams[team]["prior_OSRS"],
+                    "DSRS": (sum_adj_def / total_games) - league_avg if total_games > 0 else temp_teams[team]["prior_DSRS"]
                 }
                 
             for team in temp_teams:
@@ -359,9 +351,17 @@ class SeasonPredictor:
     def _blend_ratings(self):
         for team in self.teams:
             curr_games = self.teams[team].get("curr_games", 0)
+            div = TEAM_DIVISIONS.get(team, 4)
+            div_prior = DIVISION_BASELINES.get(div, 0.0)
+            
             if curr_games > 0:
-                self.teams[team]["active_OSRS"] = self.teams[team].get("curr_OSRS", 0.0)
-                self.teams[team]["active_DSRS"] = self.teams[team].get("curr_DSRS", 0.0)
+                # Blend with division baseline anchor to prevent runaway small-school ratings
+                raw_o = self.teams[team].get("curr_OSRS", 0.0)
+                raw_d = self.teams[team].get("curr_DSRS", 0.0)
+                div_anchor_w = max(0.0, 1.0 - (curr_games / 12.0)) * 0.20
+                
+                self.teams[team]["active_OSRS"] = (raw_o * (1.0 - div_anchor_w)) + ((div_prior / 2.0) * div_anchor_w)
+                self.teams[team]["active_DSRS"] = (raw_d * (1.0 - div_anchor_w)) + ((-div_prior / 2.0) * div_anchor_w)
             else:
                 self.teams[team]["active_OSRS"] = self.teams[team].get("preseason_OSRS", 0.0)
                 self.teams[team]["active_DSRS"] = self.teams[team].get("preseason_DSRS", 0.0)
@@ -456,11 +456,10 @@ class SeasonPredictor:
         self.hist_ranks_papg = hist_ranks["papg"]
 
     # ==========================================
-    # 🔒 SECURE WALK-FORWARD ENGINE
+    # 🔒 WALK-FORWARD ENGINE WITH SCOPE TAGGING
     # ==========================================
     
     def _calculate_point_in_time_ratings(self, training_games, is_hist, target_date_obj):
-        """Calculates temporary, sealed ratings using ONLY games played strictly before prediction day."""
         temp_teams = {}
         total_points = 0
         valid_games_count = 0
@@ -528,7 +527,6 @@ class SeasonPredictor:
         for season, games, is_hist in [("2025", self.historical_games, True), ("2026", self.current_games, False)]:
             if not games: continue
             
-            # Sort chronologically and extract valid scored games
             valid = []
             for g in games:
                 if g.get("home_score") not in [None, ""] and not g.get("is_forfeit") and g.get("date_obj"):
@@ -539,21 +537,18 @@ class SeasonPredictor:
                     
             valid.sort(key=lambda x: x["date_obj"])
             
-            # Batch strictly by date
             games_by_date = {}
             for g in valid: games_by_date.setdefault(g["date"], []).append(g)
                 
             training_history = []
-            point_in_time_records = {} # {team: [wins, losses]}
+            point_in_time_records = {} 
             
             for date_str in sorted(games_by_date.keys()):
                 todays_games = games_by_date[date_str]
                 target_date_obj = todays_games[0]["date_obj"]
                 
-                # A. Train SRS purely on history BEFORE today
                 pit_ratings, pit_league_avg = self._calculate_point_in_time_ratings(training_history, is_hist, target_date_obj)
                 
-                # B. Generate out-of-sample predictions
                 for g in todays_games:
                     h, a = g["home"], g["away"]
                     act_h, act_a = int(g["home_score"]), int(g["away_score"])
@@ -561,7 +556,15 @@ class SeasonPredictor:
                     act_winner = h if act_margin > 0 else (a if act_margin < 0 else "Tie")
                     if act_winner == "Tie": continue
                     
-                    # Point-in-Time OSRS/DSRS
+                    h_oos = is_oos(h)
+                    a_oos = is_oos(a)
+                    if not h_oos and not a_oos:
+                        matchup_scope = "In-State Only"
+                    elif h_oos != a_oos:
+                        matchup_scope = "Michigan vs. Out-of-State"
+                    else:
+                        matchup_scope = "OOS Only"
+
                     h_off = pit_ratings.get(h, {}).get("OSRS", pit_ratings.get(h, {}).get("prior_OSRS", 0.0))
                     h_def = pit_ratings.get(h, {}).get("DSRS", pit_ratings.get(h, {}).get("prior_DSRS", 0.0))
                     a_off = pit_ratings.get(a, {}).get("OSRS", pit_ratings.get(a, {}).get("prior_OSRS", 0.0))
@@ -572,11 +575,9 @@ class SeasonPredictor:
                     pred_margin = exp_h - exp_a
                     pred_winner = h if pred_margin > 0 else a
                     
-                    # Mathematical Upgrade: Volatility curve flattened to 16.5
                     prob_h_win = norm_cdf(pred_margin / 16.5)
                     confidence = prob_h_win if pred_winner == h else (1 - prob_h_win)
                     
-                    # Point-In-Time Records Baseline
                     h_rec, a_rec = point_in_time_records.get(h, [0,0]), point_in_time_records.get(a, [0,0])
                     h_wp = h_rec[0]/max(1, h_rec[0]+h_rec[1])
                     a_wp = a_rec[0]/max(1, a_rec[0]+a_rec[1])
@@ -584,7 +585,7 @@ class SeasonPredictor:
                     
                     results.append({
                         "season": season, "date": date_str, "week_num": g["week_num"],
-                        "home": h, "away": a,
+                        "home": h, "away": a, "matchup_scope": matchup_scope,
                         "pred_margin": pred_margin, "pred_total": exp_h + exp_a, 
                         "act_margin": act_margin, "act_total": act_total,
                         "pred_winner": pred_winner, "act_winner": act_winner, 
@@ -599,7 +600,6 @@ class SeasonPredictor:
                         "away_rating_before": round(a_off - a_def, 2)
                     })
                     
-                # C. Reveal results and update training history for tomorrow
                 training_history.extend(todays_games)
                 for g in todays_games:
                     gw = g["home"] if int(g["home_score"]) > int(g["away_score"]) else g["away"]
@@ -610,51 +610,7 @@ class SeasonPredictor:
                     point_in_time_records[gl][1] += 1
 
         df = pd.DataFrame(results)
-        if df.empty: return None
-
-        # Build Calibration Table
-        df['conf_bin'] = pd.cut(df['confidence'], bins=[0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
-        calib_table = df.groupby('conf_bin', observed=False).agg(
-            Count=('correct', 'count'),
-            Pred_Prob=('confidence', 'mean'),
-            Act_Win_Pct=('correct', 'mean')
-        ).reset_index()
-        calib_table['Calib_Error'] = calib_table['Pred_Prob'] - calib_table['Act_Win_Pct']
-
-        # Weekly Grouping
-        df = df.sort_values(["season", "week_num"])
-        min_weeks = df.groupby("season")["week_num"].min().to_dict()
-        df["rel_week"] = df.apply(lambda row: row["week_num"] - min_weeks[row["season"]] + 1, axis=1)
-        df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
-
-        weekly = df.groupby(["season", "rel_week", "week_label"]).agg(
-            games=("correct", "count"),
-            correct=("correct", "sum"),
-            spread_err=("spread_err", "mean"),
-            total_err=("total_err", "mean"),
-            confidence=("confidence", "mean")
-        ).reset_index()
-
-        weekly = weekly.sort_values(["season", "rel_week"])
-        weekly["cum_games"] = weekly["games"].cumsum()
-        weekly["cum_correct"] = weekly["correct"].cumsum()
-        weekly["cum_accuracy"] = weekly["cum_correct"] / weekly["cum_games"]
-        weekly["accuracy"] = weekly["correct"] / weekly["games"]
-
-        return {
-            "df": df,
-            "calib_table": calib_table,
-            "weekly_df": weekly,
-            "total_games": len(df),
-            "total_correct": int(df["correct"].sum()),
-            "win_acc": df["correct"].mean(),
-            "base_home_acc": df["base_home_correct"].mean(),
-            "base_rec_acc": df["base_rec_correct"].mean(),
-            "avg_spread_err": df["spread_err"].mean(),
-            "avg_total_err": df["total_err"].mean(),
-            "avg_confidence": df["confidence"].mean(),
-            "brier_score": df["brier_score"].mean()
-        }
+        return df if not df.empty else None
 
     def _find_connection_path(self, team_a, team_b):
         if team_a not in self.teams or team_b not in self.teams: 
@@ -687,7 +643,6 @@ class SeasonPredictor:
         h_off = self.teams[home_team]["active_OSRS"] if home_team in self.teams else 0.0
         h_def = self.teams[home_team]["active_DSRS"] if home_team in self.teams else 0.0
         
-        # Mathematical Upgrade: Neutralize Home Field Advantage
         exp_pts_a = max(0.1, self.league_avg_points + a_off + h_def - (HOME_FIELD_ADVANTAGE / 2.0))
         exp_pts_h = max(0.1, self.league_avg_points + h_off + a_def + (HOME_FIELD_ADVANTAGE / 2.0))
         
@@ -827,7 +782,6 @@ class SeasonPredictor:
                     home, away = g["home"], g["away"]
                     for t in (home, away):
                         if t not in temp_teams:
-                            # State fix applied here for OSRS/DSRS
                             temp_teams[t] = {"prior_OSRS": 0.0, "prior_DSRS": 0.0, "OSRS": 0.0, "DSRS": 0.0, "game_log": []}
                     
                     if g.get("is_forfeit"): continue
@@ -924,7 +878,7 @@ def load_predictor():
     curr_file = "games_2026.csv" if os.path.exists("games_2026.csv") else None
     if not past_file and not curr_file:
         return None
-    return SeasonPredictor(past_file, curr_file, regression_factor=0.25)
+    return SeasonPredictor(past_file, curr_file, regression_factor=0.30)
 
 @st.cache_data
 def get_cached_prediction(_predictor, away_team, home_team, num_simulations, mode="median"):
@@ -934,21 +888,129 @@ def get_cached_prediction(_predictor, away_team, home_team, num_simulations, mod
 def get_cached_history(_predictor, team_name):
     return _predictor.get_team_rating_history(team_name)
 
+def compute_filtered_accuracy_metrics(full_df, scope_selection):
+    if full_df is None or full_df.empty:
+        return None
+        
+    if scope_selection == "In-State Only":
+        df = full_df[full_df["matchup_scope"] == "In-State Only"].copy()
+    elif scope_selection == "Michigan vs. Out-of-State":
+        df = full_df[full_df["matchup_scope"] == "Michigan vs. Out-of-State"].copy()
+    else:
+        df = full_df.copy()
+        
+    if df.empty:
+        return None
+        
+    df['conf_bin'] = pd.cut(df['confidence'], bins=[0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0])
+    calib_table = df.groupby('conf_bin', observed=False).agg(
+        Count=('correct', 'count'),
+        Pred_Prob=('confidence', 'mean'),
+        Act_Win_Pct=('correct', 'mean')
+    ).reset_index()
+    calib_table['Calib_Error'] = calib_table['Pred_Prob'] - calib_table['Act_Win_Pct']
+
+    df = df.sort_values(["season", "week_num"])
+    min_weeks = df.groupby("season")["week_num"].min().to_dict()
+    df["rel_week"] = df.apply(lambda row: row["week_num"] - min_weeks[row["season"]] + 1, axis=1)
+    df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
+
+    weekly = df.groupby(["season", "rel_week", "week_label"]).agg(
+        games=("correct", "count"),
+        correct=("correct", "sum"),
+        spread_err=("spread_err", "mean"),
+        total_err=("total_err", "mean"),
+        confidence=("confidence", "mean")
+    ).reset_index()
+
+    weekly = weekly.sort_values(["season", "rel_week"])
+    weekly["cum_games"] = weekly["games"].cumsum()
+    weekly["cum_correct"] = weekly["correct"].cumsum()
+    weekly["cum_accuracy"] = weekly["cum_correct"] / weekly["cum_games"]
+    weekly["accuracy"] = weekly["correct"] / weekly["games"]
+
+    return {
+        "df": df,
+        "calib_table": calib_table,
+        "weekly_df": weekly,
+        "total_games": len(df),
+        "total_correct": int(df["correct"].sum()),
+        "win_acc": df["correct"].mean(),
+        "base_home_acc": df["base_home_correct"].mean(),
+        "base_rec_acc": df["base_rec_correct"].mean(),
+        "avg_spread_err": df["spread_err"].mean(),
+        "avg_total_err": df["total_err"].mean(),
+        "avg_confidence": df["confidence"].mean(),
+        "brier_score": df["brier_score"].mean()
+    }
+
 
 # ==========================================
-# 🌐 STREAMLIT WEB APP USER INTERFACE
+# 🌐 STREAMLIT UI & MODERN DESIGN SYSTEM
 # ==========================================
 
 st.set_page_config(page_title="High School Football Predictor", page_icon="🏈", layout="wide")
 
+# Custom Modern CSS Styling (Glassmorphism Cards, Dark Elevation, Vibrant Accents)
 st.markdown("""
     <style>
-    div[data-testid="stMetricValue"] > div {
-        white-space: normal !important;
-        word-wrap: break-word !important;
-        line-height: 1.2 !important;
-        font-size: 1.75rem !important;
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
     }
+    
+    /* Smooth Container Cards */
+    .stCard {
+        background-color: #121318;
+        border: 1px solid #262833;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+    
+    /* Header Polish */
+    .main-header {
+        font-size: 2.25rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #38bdf8 0%, #818cf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.25rem;
+    }
+    
+    /* Metric Card Fixes */
+    div[data-testid="stMetric"] {
+        background-color: #181920;
+        border: 1px solid #2a2d3d;
+        padding: 14px 18px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    
+    div[data-testid="stMetricValue"] > div {
+        font-size: 1.65rem !important;
+        font-weight: 700 !important;
+        color: #f3f4f6 !important;
+    }
+
+    div[data-testid="stMetricLabel"] > div {
+        font-size: 0.78rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #9ca3af !important;
+    }
+
+    /* Tab Polish */
+    button[data-baseweb="tab"] {
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        padding: 10px 18px !important;
+        border-radius: 8px !important;
+    }
+    
     .stMarkdown a.header-anchor,
     .stMarkdown a.anchor,
     h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
@@ -960,7 +1022,9 @@ st.markdown("""
 
 predictor = load_predictor()
 
-st.title("🏈 High School Football Predictor Engine", anchor=False)
+st.markdown("<h1 class='main-header'>🏈 High School Football Predictor Engine</h1>", unsafe_allow_html=True)
+st.caption("Advanced SRS Power Ratings, Monte Carlo Matchup Simulations & Predictive Performance Analysis")
+st.write("")
 
 if predictor is None:
     st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your repository.")
@@ -1223,11 +1287,11 @@ else:
                 st.info("ℹ Season Progression and Future Projections are hidden while viewing archived seasons.")
 
     # ----------------------------------------------------
-    # TAB 4: UPCOMING & TOP MATCHUPS
+    # TAB 4: UPCOMING & TOP MATCHUPS (UN-NESTED & FULL WIDTH)
     # ----------------------------------------------------
     with tab4:
         st.subheader("Upcoming Game Projections", anchor=False)
-        st.caption("Displays all unplayed games on the current schedule categorized by date and quality.")
+        st.caption("Displays all unplayed games on the current schedule categorized by quality and match date.")
         
         upcoming_raw = [g for g in predictor.current_games if g.get("home_score") in [None, ""]]
         
@@ -1269,14 +1333,15 @@ else:
                 })
 
             st.markdown("### 🔥 Top Tier Matchups")
-            st.caption("Highest combined power ratings")
+            st.caption("Highest combined power ratings across upcoming games")
             top_quality = sorted(upcoming_processed, key=lambda x: x["_quality"], reverse=True)[:10]
-            st.dataframe(pd.DataFrame(top_quality).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
+            st.dataframe(pd.DataFrame(top_quality).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch")
             
+            st.markdown("---")
             st.markdown("### ⚔️ Closest Projections")
-            st.caption("Tightest mathematical spreads")
+            st.caption("Tightest predicted point spreads")
             top_close = sorted(upcoming_processed, key=lambda x: x["_abs_margin"])[:10]
-            st.dataframe(pd.DataFrame(top_close).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
+            st.dataframe(pd.DataFrame(top_close).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch")
 
             st.markdown("---")
             st.markdown("### 🗓️ Master Calendar")
@@ -1285,7 +1350,7 @@ else:
             for d in dates:
                 with st.expander(f"📅 Games on {d}", expanded=(d == dates[0])):
                     day_games = [x for x in upcoming_processed if x["Date"] == d]
-                    st.dataframe(pd.DataFrame(day_games).drop(columns=["Date", "_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
+                    st.dataframe(pd.DataFrame(day_games).drop(columns=["Date", "_abs_margin", "_quality"]), hide_index=True, width="stretch")
 
     # ----------------------------------------------------
     # TAB 5: SEASON LEADERBOARDS
@@ -1326,20 +1391,29 @@ else:
         st.dataframe(stat_rows, column_order=["Rank", "Team", "Record", "Win %", "GP", "PF", "PA", "Diff", "PPG", "PA/G"], width="stretch", hide_index=True)
 
     # ----------------------------------------------------
-    # TAB 6: MODEL ACCURACY AUDIT
+    # TAB 6: MODEL ACCURACY (WITH DYNAMIC SCOPE TOGGLE)
     # ----------------------------------------------------
     with tab6:
-        st.subheader("Model Accuracy Audit", anchor=False)
+        st.subheader("Model Accuracy", anchor=False)
         st.caption("Validates predictive power using a strict chronological walk-forward system. Every game is predicted using ONLY data available before kickoff.")
         
-        bd = predictor.backtest_data
+        col_scope_title, col_scope_toggle = st.columns([1, 2])
+        with col_scope_toggle:
+            scope_selection = st.radio(
+                "Filter Matchup Scope:",
+                ["In-State Only", "Michigan vs. Out-of-State", "All Games"],
+                horizontal=True,
+                index=0
+            )
+            
+        bd = compute_filtered_accuracy_metrics(predictor.backtest_data, scope_selection)
         
         if bd is None or bd["total_games"] == 0:
-            st.warning("Not enough scored historical data to generate accuracy backtest.")
+            st.warning(f"No historical prediction data available for the selected scope: **{scope_selection}**.")
         else:
             win_acc = bd["win_acc"] * 100
             
-            st.markdown(f"**ALL-TIME OUT-OF-SAMPLE · {bd['total_games']} GAMES RATED**")
+            st.markdown(f"**OUT-OF-SAMPLE ACCURACY · {bd['total_games']} GAMES ({scope_selection.upper()})**")
             
             c1, c2, c3, c4, c5 = st.columns(5)
             c1.metric("WALK-FORWARD ACC", f"{win_acc:.1f}%")
@@ -1375,7 +1449,7 @@ else:
             )
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("**ALL YEARS — WIN ACCURACY BY WEEK**")
+            st.markdown(f"**WEEKLY WIN ACCURACY ({scope_selection.upper()})**")
             
             weekly_df = bd["weekly_df"]
             base_chart = alt.Chart(weekly_df).encode(
@@ -1383,7 +1457,7 @@ else:
             )
             
             line_weekly = base_chart.mark_line(color='#38bdf8', size=2, point=alt.OverlayMarkDef(color='#38bdf8', filled=True, size=50)).encode(
-                y=alt.Y('accuracy:Q', scale=alt.Scale(domain=[0.5, 1.0]), axis=alt.Axis(format='%', title=None))
+                y=alt.Y('accuracy:Q', scale=alt.Scale(domain=[0.4, 1.0]), axis=alt.Axis(format='%', title=None))
             )
             
             line_cum = base_chart.mark_line(color='#f59e0b', size=2, point=alt.OverlayMarkDef(color='#f59e0b', filled=True, size=50)).encode(
@@ -1401,7 +1475,7 @@ else:
             )
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown("**ALL YEARS — WEEKLY BREAKDOWN**")
+            st.markdown(f"**WEEKLY BREAKDOWN LOG ({scope_selection.upper()})**")
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
             display_df.columns = ["WEEK", "GAMES", "CORRECT", "ACCURACY", "SPREAD ERR", "TOTAL ERR", "CUMUL. ACC"]
