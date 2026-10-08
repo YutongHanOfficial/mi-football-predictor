@@ -1395,7 +1395,7 @@ else:
     # ----------------------------------------------------
     with tab6:
         st.subheader("Model Accuracy", anchor=False)
-        st.caption("Validates predictive power using a strict chronological walk-forward system. Every game is predicted using ONLY data available before kickoff.")
+        st.caption("Tests the model's accuracy by predicting past games using only the information that was available right before kickoff. This proves how well the model works in real-world scenarios.")
         
         col_scope_title, col_scope_toggle = st.columns([1, 2])
         with col_scope_toggle:
@@ -1413,26 +1413,38 @@ else:
         else:
             win_acc = bd["win_acc"] * 100
             
-            st.markdown(f"**OUT-OF-SAMPLE ACCURACY · {bd['total_games']} GAMES ({scope_selection.upper()})**")
+            st.markdown(f"### 🎯 Real-World Accuracy · {bd['total_games']} Games ({scope_selection})")
             
             c1, c2, c3, c4, c5 = st.columns(5)
-            c1.metric("WALK-FORWARD ACC", f"{win_acc:.1f}%")
-            c2.metric("CORRECT PICKS", f"{bd['total_correct']}/{bd['total_games']}")
-            c3.metric("SPREAD MAE", f"{bd['avg_spread_err']:.1f}")
-            c4.metric("TOTAL SCORE MAE", f"{bd['avg_total_err']:.1f}")
-            c5.metric("BRIER SCORE", f"{bd['brier_score']:.3f}")
+            c1.metric("Accuracy", f"{win_acc:.1f}%")
+            c2.metric("Correct Picks", f"{bd['total_correct']}/{bd['total_games']}")
+            c3.metric(
+                "Avg Spread Error", 
+                f"{bd['avg_spread_err']:.1f}", 
+                help="Average point difference between the predicted spread and the actual game margin. Lower is better."
+            )
+            c4.metric(
+                "Avg Total Error", 
+                f"{bd['avg_total_err']:.1f}", 
+                help="Average point difference between the predicted total points and the actual total points scored. Lower is better."
+            )
+            c5.metric(
+                "Brier Score", 
+                f"{bd['brier_score']:.3f}", 
+                help="Measures how accurate the win probabilities are. A score closer to 0 is better. If the model says a team has an 80% chance to win, they should actually win 80% of the time."
+            )
 
             st.markdown("---")
             st.markdown("### 📈 Baseline Comparisons")
-            st.caption("Measures model value added against simple naive algorithms.")
+            st.caption("Compares the model's accuracy against simple guessing strategies to show its true value.")
             b1, b2, b3 = st.columns(3)
             b1.metric("Always Pick Home Team", f"{bd['base_home_acc']*100:.1f}%")
             b2.metric("Always Pick Better Record", f"{bd['base_rec_acc']*100:.1f}%")
-            b3.metric("Your SRS Engine", f"{win_acc:.1f}%")
+            b3.metric("SRS Engine (This Model)", f"{win_acc:.1f}%")
 
             st.markdown("---")
             st.markdown("### 📊 Probability Calibration Table")
-            st.caption("Verifies if predicted confidence matches actual real-world win rates.")
+            st.caption("Checks if the model's confidence is realistic. For example, when the model predicts a 70% chance of winning, do those teams actually win about 70% of the time?")
             
             calib = bd["calib_table"].copy()
             calib["conf_bin"] = calib["conf_bin"].astype(str)
@@ -1449,7 +1461,7 @@ else:
             )
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(f"**WEEKLY WIN ACCURACY ({scope_selection.upper()})**")
+            st.markdown(f"### 📅 Weekly Win Accuracy ({scope_selection})")
             
             weekly_df = bd["weekly_df"]
             base_chart = alt.Chart(weekly_df).encode(
@@ -1475,21 +1487,21 @@ else:
             )
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(f"**WEEKLY BREAKDOWN LOG ({scope_selection.upper()})**")
+            st.markdown(f"### 📋 Weekly Breakdown Log ({scope_selection})")
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
-            display_df.columns = ["WEEK", "GAMES", "CORRECT", "ACCURACY", "SPREAD ERR", "TOTAL ERR", "CUMUL. ACC"]
+            display_df.columns = ["Week", "Games", "Correct", "Accuracy", "Spread Error", "Total Error", "Cumul. Acc"]
             
             st.dataframe(
                 display_df,
                 column_config={
-                    "WEEK": st.column_config.TextColumn(width="medium"),
-                    "GAMES": st.column_config.NumberColumn(width="small"),
-                    "CORRECT": st.column_config.NumberColumn(width="small"),
-                    "ACCURACY": st.column_config.NumberColumn(format="%.1f%%", width="small"),
-                    "SPREAD ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),
-                    "TOTAL ERR": st.column_config.NumberColumn(format="%.1f pts", width="small"),
-                    "CUMUL. ACC": st.column_config.NumberColumn(format="%.1f%%", width="small")
+                    "Week": st.column_config.TextColumn(width="medium"),
+                    "Games": st.column_config.NumberColumn(width="small"),
+                    "Correct": st.column_config.NumberColumn(width="small"),
+                    "Accuracy": st.column_config.NumberColumn(format="%.1f%%", width="small"),
+                    "Spread Error": st.column_config.NumberColumn(format="%.1f pts", width="small"),
+                    "Total Error": st.column_config.NumberColumn(format="%.1f pts", width="small"),
+                    "Cumul. Acc": st.column_config.NumberColumn(format="%.1f%%", width="small")
                 },
                 hide_index=True,
                 width="stretch"
