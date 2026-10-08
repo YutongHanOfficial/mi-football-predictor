@@ -188,26 +188,6 @@ def convert_to_moneyline(win_prob):
 def norm_cdf(x):
     return (1.0 + math.erf(x / math.sqrt(2.0))) / 2.0
 
-def metric_card(title, value, theme="green"):
-    if theme == "green":
-        bg = "#ecfdf5"
-        border = "#a7f3d0"
-        text = "#059669"
-    elif theme == "orange":
-        bg = "#fffbeb"
-        border = "#fde68a"
-        text = "#d97706"
-    else:
-        bg = "#f3f4f6"
-        border = "#e5e7eb"
-        text = "#4b5563"
-    return f"""
-    <div style="background-color: {bg}; border: 1px solid {border}; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 15px; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
-        <h2 style="color: {text}; margin: 0; font-size: 26px; font-weight: 800;">{value}</h2>
-        <p style="color: {text}; margin: 0; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">{title}</p>
-    </div>
-    """
-
 # ==========================================
 # 🧮 MATHEMATICAL ENGINE & SIMULATOR
 # ==========================================
@@ -1288,19 +1268,15 @@ else:
                     "_quality": quality
                 })
 
-            col_best1, col_best2 = st.columns(2)
+            st.markdown("### 🔥 Top Tier Matchups")
+            st.caption("Highest combined power ratings")
+            top_quality = sorted(upcoming_processed, key=lambda x: x["_quality"], reverse=True)[:10]
+            st.dataframe(pd.DataFrame(top_quality).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
             
-            with col_best1:
-                st.markdown("### 🔥 Top Tier Matchups")
-                st.caption("Highest combined power ratings")
-                top_quality = sorted(upcoming_processed, key=lambda x: x["_quality"], reverse=True)[:10]
-                st.dataframe(pd.DataFrame(top_quality).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch")
-                
-            with col_best2:
-                st.markdown("### ⚔️ Closest Projections")
-                st.caption("Tightest mathematical spreads")
-                top_close = sorted(upcoming_processed, key=lambda x: x["_abs_margin"])[:10]
-                st.dataframe(pd.DataFrame(top_close).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch")
+            st.markdown("### ⚔️ Closest Projections")
+            st.caption("Tightest mathematical spreads")
+            top_close = sorted(upcoming_processed, key=lambda x: x["_abs_margin"])[:10]
+            st.dataframe(pd.DataFrame(top_close).drop(columns=["_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
 
             st.markdown("---")
             st.markdown("### 🗓️ Master Calendar")
@@ -1309,7 +1285,7 @@ else:
             for d in dates:
                 with st.expander(f"📅 Games on {d}", expanded=(d == dates[0])):
                     day_games = [x for x in upcoming_processed if x["Date"] == d]
-                    st.dataframe(pd.DataFrame(day_games).drop(columns=["Date", "_abs_margin", "_quality"]), hide_index=True, width="stretch")
+                    st.dataframe(pd.DataFrame(day_games).drop(columns=["Date", "_abs_margin", "_quality"]), hide_index=True, width="stretch", use_container_width=True)
 
     # ----------------------------------------------------
     # TAB 5: SEASON LEADERBOARDS
@@ -1363,14 +1339,14 @@ else:
         else:
             win_acc = bd["win_acc"] * 100
             
-            st.markdown(f"<div style='margin-bottom: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL-TIME OUT-OF-SAMPLE · {bd['total_games']} GAMES RATED</div>", unsafe_allow_html=True)
+            st.markdown(f"**ALL-TIME OUT-OF-SAMPLE · {bd['total_games']} GAMES RATED**")
             
             c1, c2, c3, c4, c5 = st.columns(5)
-            with c1: st.markdown(metric_card("WALK-FORWARD ACC", f"{win_acc:.1f}%", "green"), unsafe_allow_html=True)
-            with c2: st.markdown(metric_card("CORRECT PICKS", f"{bd['total_correct']}/{bd['total_games']}", "green"), unsafe_allow_html=True)
-            with c3: st.markdown(metric_card("SPREAD MAE", f"{bd['avg_spread_err']:.1f}", "orange"), unsafe_allow_html=True)
-            with c4: st.markdown(metric_card("TOTAL SCORE MAE", f"{bd['avg_total_err']:.1f}", "orange"), unsafe_allow_html=True)
-            with c5: st.markdown(metric_card("BRIER SCORE", f"{bd['brier_score']:.3f}", "gray"), unsafe_allow_html=True)
+            c1.metric("WALK-FORWARD ACC", f"{win_acc:.1f}%")
+            c2.metric("CORRECT PICKS", f"{bd['total_correct']}/{bd['total_games']}")
+            c3.metric("SPREAD MAE", f"{bd['avg_spread_err']:.1f}")
+            c4.metric("TOTAL SCORE MAE", f"{bd['avg_total_err']:.1f}")
+            c5.metric("BRIER SCORE", f"{bd['brier_score']:.3f}")
 
             st.markdown("---")
             st.markdown("### 📈 Baseline Comparisons")
@@ -1399,7 +1375,7 @@ else:
             )
 
             st.markdown("<br>", unsafe_allow_html=True)
-            st.markdown(f"<div style='margin-bottom: 10px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WIN ACCURACY BY WEEK</div>", unsafe_allow_html=True)
+            st.markdown("**ALL YEARS — WIN ACCURACY BY WEEK**")
             
             weekly_df = bd["weekly_df"]
             base_chart = alt.Chart(weekly_df).encode(
@@ -1418,13 +1394,14 @@ else:
             st.altair_chart(chart, use_container_width=True)
             
             st.markdown(
-                """<div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; font-weight: bold; color: #4b5563; margin-top: -15px;">
+                """<div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; font-weight: bold; color: var(--text-color); margin-top: -15px;">
                     <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #38bdf8; border-radius: 3px;"></div> Weekly Accuracy</div>
                     <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #f59e0b; border-radius: 3px;"></div> Cumulative</div>
                 </div><br>""", unsafe_allow_html=True
             )
 
-            st.markdown(f"<div style='margin-bottom: 15px; margin-top: 25px; font-weight: bold; font-size: 14px; color: #78350f;'>ALL YEARS — WEEKLY BREAKDOWN</div>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown("**ALL YEARS — WEEKLY BREAKDOWN**")
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
             display_df.columns = ["WEEK", "GAMES", "CORRECT", "ACCURACY", "SPREAD ERR", "TOTAL ERR", "CUMUL. ACC"]
@@ -1446,14 +1423,3 @@ else:
 
             with st.expander("🔍 View Raw Out-Of-Sample Predictions Log"):
                 st.dataframe(bd["df"])
-
-    # ----------------------------------------------------
-    # ADMIN TOOLS
-    # ----------------------------------------------------
-    st.markdown("---")
-    with st.expander("⚙️ Admin & Developer Tools"):
-        st.caption("Streamlit Cloud hides the native 'Clear Cache' menu for users who aren't logged in as the app author. Use this button to manually refresh data if needed.")
-        if st.button("🧹 Force Clear Cache", use_container_width=True):
-            st.cache_resource.clear()
-            st.cache_data.clear()
-            st.rerun()
