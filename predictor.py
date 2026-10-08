@@ -1411,7 +1411,7 @@ else:
         if bd is None or bd["total_games"] == 0:
             st.warning(f"No historical prediction data available for the selected scope: **{scope_selection}**.")
         else:
-            win_acc = bd["win_acc"] * 100
+            win_acc = bd["win_acc"] * 1
             
             st.markdown(f"### 🎯 Real-World Accuracy · {bd['total_games']} Games ({scope_selection})")
             
