@@ -722,7 +722,12 @@ class SeasonPredictor:
         
         current_real_dt = datetime.now()
         end_dt = max(last_game_dt, current_real_dt) if current_real_dt.year == last_game_dt.year else last_game_dt
-        preseason_dt = start_dt - timedelta(days=1)
+        
+        # Calculate the Wednesday strictly before the first game
+        days_to_wed = (start_dt.weekday() - 2) % 7
+        if days_to_wed == 0: 
+            days_to_wed = 7
+        preseason_dt = start_dt - timedelta(days=days_to_wed)
         
         pre_in_state, pre_oos = [], []
         for t in self.teams:
@@ -1233,9 +1238,17 @@ else:
                     # Filtering for Weekly View
                     if graph_freq == "Weekly":
                         df_hist = df_hist.sort_values("Date")
+                        
                         # Shift by 2 days so the week boundary groups starting on Wednesday
                         df_hist['YearWeek'] = (df_hist['Date'] - pd.Timedelta(days=2)).dt.isocalendar().week
-                        df_hist = df_hist.groupby('YearWeek').tail(1).reset_index(drop=True)
+                        
+                        # Protect the Preseason data point from being overwritten by the end-of-week groupby
+                        is_pre = df_hist['Label'].str.contains("(Pre)", regex=False)
+                        preseason_df = df_hist[is_pre]
+                        season_df = df_hist[~is_pre].groupby('YearWeek').tail(1)
+                        
+                        # Recombine and sort chronologically 
+                        df_hist = pd.concat([preseason_df, season_df]).sort_values("Date").reset_index(drop=True)
 
                     col_chart1, col_chart2 = st.columns(2)
                     
