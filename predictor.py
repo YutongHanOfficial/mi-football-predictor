@@ -1313,32 +1313,25 @@ else:
             
             for g in upcoming_raw:
                 h, a = g["home"], g["away"]
+                
+                # Route through the Monte Carlo simulation engine for 100% consistency with Tab 3
+                proj = get_cached_prediction(predictor, a, h, 2000, "median")
+                
                 h_off = predictor.teams.get(h, {}).get("active_OSRS", 0.0)
                 h_def = predictor.teams.get(h, {}).get("active_DSRS", 0.0)
                 a_off = predictor.teams.get(a, {}).get("active_OSRS", 0.0)
                 a_def = predictor.teams.get(a, {}).get("active_DSRS", 0.0)
-                
-                exp_h = predictor.league_avg_points + h_off + a_def + (HOME_FIELD_ADVANTAGE / 2.0)
-                exp_a = predictor.league_avg_points + a_off + h_def - (HOME_FIELD_ADVANTAGE / 2.0)
-                
-                margin = exp_h - exp_a
-                abs_margin = abs(margin)
                 quality = (h_off - h_def) + (a_off - a_def)
                 
-                if margin > 0:
-                    spread_str = f"{h} -{round(margin*2)/2:g}"
-                elif margin < 0:
-                    spread_str = f"{a} -{round(abs_margin*2)/2:g}"
-                else:
-                    spread_str = "PK"
+                abs_margin = abs(proj["spread_val"])
 
                 upcoming_processed.append({
                     "Date": g.get("date", "Unknown"),
                     "Away": a,
                     "Home": h,
-                    "Spread": spread_str,
-                    "Total": round((exp_h + exp_a)*2)/2,
-                    "Proj Score": f"{max(0, round(exp_a))}-{max(0, round(exp_h))}",
+                    "Spread": proj["spread_str"],
+                    "Total": proj["median_total"],
+                    "Proj Score": f"{proj['avg_score_a']}-{proj['avg_score_h']}",
                     "_abs_margin": abs_margin,
                     "_quality": quality
                 })
