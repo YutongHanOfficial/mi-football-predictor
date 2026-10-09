@@ -1239,8 +1239,9 @@ else:
                     if graph_freq == "Weekly":
                         df_hist = df_hist.sort_values("Date")
                         
-                        # Shift by 2 days so the week boundary groups starting on Wednesday
-                        df_hist['YearWeek'] = (df_hist['Date'] - pd.Timedelta(days=2)).dt.isocalendar().week
+                        # Monday=0, Tuesday=1, Wednesday=2
+                        # This strictly filters the dataframe to only keep Wednesdays 
+                        df_hist = df_hist[df_hist['Date'].dt.weekday == 2].reset_index(drop=True)
                         
                         # Protect the Preseason data point from being overwritten by the end-of-week groupby
                         is_pre = df_hist['Label'].str.contains("(Pre)", regex=False)
