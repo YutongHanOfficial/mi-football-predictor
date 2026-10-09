@@ -531,7 +531,9 @@ class SeasonPredictor:
             for g in games:
                 if g.get("home_score") not in [None, ""] and not g.get("is_forfeit") and g.get("date_obj"):
                     try:
-                        week_num = g["date_obj"].isocalendar()[1]
+                        # Shift date back 2 days so Wednesday acts as the start of the week
+                        shifted_date = g["date_obj"] - timedelta(days=2)
+                        week_num = shifted_date.isocalendar()[1]
                         valid.append({**g, "week_num": week_num})
                     except ValueError: pass
                     
@@ -1231,7 +1233,8 @@ else:
                     # Filtering for Weekly View
                     if graph_freq == "Weekly":
                         df_hist = df_hist.sort_values("Date")
-                        df_hist['YearWeek'] = df_hist['Date'].dt.strftime('%Y-%U')
+                        # Shift by 2 days so the week boundary groups starting on Wednesday
+                        df_hist['YearWeek'] = (df_hist['Date'] - pd.Timedelta(days=2)).dt.isocalendar().week
                         df_hist = df_hist.groupby('YearWeek').tail(1).reset_index(drop=True)
 
                     col_chart1, col_chart2 = st.columns(2)
