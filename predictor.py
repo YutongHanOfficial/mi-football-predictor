@@ -1110,7 +1110,7 @@ else:
                 m4.metric(f"{home} Win Prob", f"{res['prob_h']*100:.1f}%", convert_to_moneyline(res['prob_h']))
 
     # ----------------------------------------------------
-    # TAB 2: POWER RANKINGS
+    # TAB 2: POWER Rankings
     # ----------------------------------------------------
     with tab2:
         col_title, col_filter = st.columns([2, 1])
@@ -1221,8 +1221,19 @@ else:
             if not is_archive:
                 history_data = get_cached_history(predictor, selected_team)
                 if len(history_data) > 1:
-                    st.markdown("### 📈 Season Progression")
                     df_hist = pd.DataFrame(history_data)
+                    df_hist["Date"] = pd.to_datetime(df_hist["Date"])
+                    
+                    col_title, col_freq = st.columns([3, 1])
+                    with col_title: st.markdown("### 📈 Season Progression")
+                    with col_freq: graph_freq = st.radio("Update Frequency", ["Weekly", "Daily"], horizontal=True)
+                    
+                    # Filtering for Weekly View
+                    if graph_freq == "Weekly":
+                        df_hist = df_hist.sort_values("Date")
+                        df_hist['YearWeek'] = df_hist['Date'].dt.strftime('%Y-%U')
+                        df_hist = df_hist.groupby('YearWeek').tail(1).reset_index(drop=True)
+
                     col_chart1, col_chart2 = st.columns(2)
                     
                     hover = alt.selection_point(fields=['Date'], nearest=True, on='mouseover', empty=False)
@@ -1413,7 +1424,7 @@ else:
         else:
             win_acc = bd["win_acc"] * 100
             
-            st.markdown(f"### 🎯 Real-World Accuracy · {bd['total_games']} Games ({scope_selection})")
+            st.markdown(f"### 🎯 Accuracy · {bd['total_games']} Games ({scope_selection})")
             
             c1, c2, c3, c4, c5 = st.columns(5)
             c1.metric("Accuracy", f"{win_acc:.1f}%")
@@ -1464,19 +1475,41 @@ else:
             st.markdown(f"### 📅 Weekly Win Accuracy ({scope_selection})")
             
             weekly_df = bd["weekly_df"]
+            
+            # Interactive hover selector for combined tooltip
+            hover_acc = alt.selection_point(fields=['week_label'], nearest=True, on='mouseover', empty=False)
+
             base_chart = alt.Chart(weekly_df).encode(
                 x=alt.X('week_label:N', sort=None, title=None, axis=alt.Axis(labelAngle=-45))
             )
             
-            line_weekly = base_chart.mark_line(color='#38bdf8', size=2, point=alt.OverlayMarkDef(color='#38bdf8', filled=True, size=50)).encode(
+            line_weekly = base_chart.mark_line(color='#38bdf8', size=2).encode(
                 y=alt.Y('accuracy:Q', scale=alt.Scale(domain=[0.4, 1.0]), axis=alt.Axis(format='%', title=None))
             )
-            
-            line_cum = base_chart.mark_line(color='#f59e0b', size=2, point=alt.OverlayMarkDef(color='#f59e0b', filled=True, size=50)).encode(
-                y=alt.Y('cum_accuracy:Q')
+            points_weekly = line_weekly.mark_point(color='#38bdf8', filled=True, size=50).encode(
+                opacity=alt.condition(hover_acc, alt.value(1), alt.value(0))
             )
             
-            chart = alt.layer(line_weekly, line_cum).properties(height=350)
+            line_cum = base_chart.mark_line(color='#f59e0b', size=2).encode(
+                y=alt.Y('cum_accuracy:Q')
+            )
+            points_cum = line_cum.mark_point(color='#f59e0b', filled=True, size=50).encode(
+                opacity=alt.condition(hover_acc, alt.value(1), alt.value(0))
+            )
+
+            selectors_acc = base_chart.mark_rule(opacity=0, size=30).encode(
+                tooltip=[
+                    alt.Tooltip('week_label:N', title='Week'),
+                    alt.Tooltip('accuracy:Q', title='Weekly Accuracy', format='.1%'),
+                    alt.Tooltip('cum_accuracy:Q', title='Cumulative Acc', format='.1%')
+                ]
+            ).add_params(hover_acc)
+            
+            rules_acc = base_chart.mark_rule(color='gray', strokeDash=[3, 3]).encode(
+                opacity=alt.condition(hover_acc, alt.value(0.5), alt.value(0))
+            )
+            
+            chart = alt.layer(line_weekly, points_weekly, line_cum, points_cum, rules_acc, selectors_acc).properties(height=350)
             st.altair_chart(chart, use_container_width=True)
             
             st.markdown(
@@ -1491,6 +1524,10 @@ else:
             
             display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
             display_df.columns = ["Week", "Games", "Correct", "Accuracy", "Spread Error", "Total Error", "Cumul. Acc"]
+            
+            # Formatting correction: Convert to literal percentages before rendering
+            display_df["Accuracy"] = display_df["Accuracy"] * 100
+            display_df["Cumul. Acc"] = display_df["Cumul. Acc"] * 100
             
             st.dataframe(
                 display_df,
