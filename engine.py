@@ -34,12 +34,15 @@ class EngineConfig:
     mov_cap: float = 99.0
     mov_slope: float = 0.25
     # Weekly time decay applied to games within a season
-    decay_per_week: float = 0.98
-    # Prior strength in pseudo-games, for teams with/without last-season data
-    prior_games_known: float = 0.5
+    decay_per_week: float = 1.0
+    # Prior strength in pseudo-games, for teams with/without last-season data.
+    # 1.25 is close to the empirical-Bayes value (game noise^2 / true year-to-year
+    # change^2 ~ 1.1 games): stronger priors calm the ratings but cost accuracy.
+    prior_games_known: float = 1.25
     prior_games_new: float = 0.1
     # Fraction of last season's rating carried into the new preseason prior
-    carryover: float = 0.8
+    # (measured year-to-year slope is ~0.85)
+    carryover: float = 0.85
     # Prior strength for the points (offense/defense) model
     pts_prior_games_known: float = 5.0
     pts_prior_games_new: float = 1.0
@@ -57,6 +60,12 @@ class EngineConfig:
     # Prior mean for teams never seen before (MI vs. out-of-state)
     new_team_prior: float = -15.0
     new_oos_prior: float = 6.0
+    # Schedule-strength prior: pull each preseason prior toward the average prior
+    # of the team's regular-season opponents (a data-driven stand-in for division /
+    # league level). Known teams move SCHED_WEIGHT of the way; new teams NEW_SCHED_WEIGHT.
+    sched_weight: float = 0.0
+    new_sched_weight: float = 1.0
+    sched_days: int = 63
 
     def to_dict(self):
         return asdict(self)
@@ -114,6 +123,12 @@ class Ratings:
     hfa_pts: float
     games_played: np.ndarray
     cfg: EngineConfig = field(repr=False, default=None)
+
+    def team_power(self):
+        """Each team's contribution to a projected margin vs. an average team (points)."""
+        c = self.cfg
+        return (c.margin_blend * c.spread_scale * self.power
+                + (1 - c.margin_blend) * (self.off - self.deff))
 
     def predict(self, home, away, neutral=False, unknown_prior=0.0):
         """Return dict with expected margin (home - away), total, scores and win prob."""
@@ -246,10 +261,31 @@ class Engine:
             return new_prior.copy(), np.zeros(nT), np.zeros(nT), np.zeros(nT, dtype=bool)
         prev = self._final[self.seasons[i - 1]]
         played = prev.games_played > 0
-        power = np.where(played, c.carryover * prev.power, new_prior)
+        power = np.where(played, c.carryover * prev.power, np.nan)
         off = np.where(played, c.pts_carryover * prev.off, 0.0)
         deff = np.where(played, c.pts_carryover * prev.deff, 0.0)
+        opp = self._schedule_opponent_mean(season, power)
+        has_opp = ~np.isnan(opp)
+        power = np.where(played & has_opp, power + c.sched_weight * (opp - power), power)
+        new_val = np.where(has_opp, c.new_sched_weight * opp + (1 - c.new_sched_weight) * new_prior, new_prior)
+        power = np.where(played, power, new_val)
         return power, off, deff, played
+
+    def _schedule_opponent_mean(self, season, base):
+        """Average `base` rating of each team's published regular-season opponents."""
+        g = self.games[self.games["season"] == season]
+        g = g[g["date_obj"] < g["date_obj"].min() + timedelta(days=self.cfg.sched_days)]
+        nT = len(self.teams)
+        hi = g["home"].map(self.index).to_numpy()
+        ai = g["away"].map(self.index).to_numpy()
+        tot, cnt = np.zeros(nT), np.zeros(nT)
+        for me, opp in ((hi, ai), (ai, hi)):
+            v = base[opp]
+            ok = ~np.isnan(v)
+            np.add.at(tot, me[ok], v[ok])
+            np.add.at(cnt, me[ok], 1)
+        with np.errstate(invalid="ignore"):
+            return np.where(cnt > 0, tot / np.maximum(cnt, 1), np.nan)
 
     def ratings(self, season, as_of=None):
         """Ratings for `season` using games before `as_of` (default: all completed)."""

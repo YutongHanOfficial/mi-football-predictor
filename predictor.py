@@ -74,9 +74,7 @@ class SeasonPredictor:
     def _team_split(self, ratings):
         """Per-team (offense, -defense) whose difference is the team's contribution to
         the projected margin, so Power = Offense + Defense in the UI tables."""
-        c = self.cfg
-        power = (c.margin_blend * c.spread_scale * ratings.power
-                 + (1 - c.margin_blend) * (ratings.off - ratings.deff))
+        power = ratings.team_power()
         adj = power - (ratings.off - ratings.deff)
         return ratings.off + adj / 2, ratings.deff - adj / 2
 
@@ -186,6 +184,9 @@ class SeasonPredictor:
             return None
         # Shift date back 2 days so Wednesday acts as the start of the week
         df["week_num"] = (df["date_obj"] - pd.Timedelta(days=2)).dt.isocalendar().week.astype(int)
+        # Week 1 = first week of Michigan games (out-of-state teams often start a week earlier)
+        mi_start = df[df["matchup_scope"] == "In-State Only"].groupby("season")["week_num"].min()
+        df["rel_week"] = df["week_num"] - df["season"].map(mi_start).fillna(df["week_num"].min()).astype(int) + 1
 
         # Baselines: always pick home team / pick team with better record so far
         df["base_home_correct"] = (df["act_winner"] == df["home"]).astype(int)
@@ -334,7 +335,7 @@ def get_cached_history(_predictor, team_name):
     return _predictor.get_team_rating_history(team_name)
 
 
-def compute_filtered_accuracy_metrics(full_df, scope_selection):
+def compute_filtered_accuracy_metrics(full_df, scope_selection, skip_early_weeks=False):
     if full_df is None or full_df.empty:
         return None
         
@@ -344,7 +345,10 @@ def compute_filtered_accuracy_metrics(full_df, scope_selection):
         df = full_df[full_df["matchup_scope"] == "Michigan vs. Out-of-State"].copy()
     else:
         df = full_df.copy()
-        
+
+    if skip_early_weeks:
+        df = df[df["rel_week"] >= 4]
+
     if df.empty:
         return None
         
@@ -357,8 +361,6 @@ def compute_filtered_accuracy_metrics(full_df, scope_selection):
     calib_table['Calib_Error'] = calib_table['Pred_Prob'] - calib_table['Act_Win_Pct']
 
     df = df.sort_values(["season", "week_num"])
-    min_weeks = df.groupby("season")["week_num"].min().to_dict()
-    df["rel_week"] = df.apply(lambda row: row["week_num"] - min_weeks[row["season"]] + 1, axis=1)
     df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
 
     weekly = df.groupby(["season", "rel_week", "week_label"]).agg(
@@ -849,15 +851,21 @@ else:
                 horizontal=True,
                 index=0
             )
-            
-        bd = compute_filtered_accuracy_metrics(predictor.backtest_data, scope_selection)
+            skip_early = st.toggle(
+                "Skip weeks 1–3",
+                value=False,
+                help="Most public models (e.g. goosepoop.io) report accuracy from week 4 on, once teams have played a few games."
+            )
+
+        bd = compute_filtered_accuracy_metrics(predictor.backtest_data, scope_selection, skip_early)
+        weeks_note = ", Weeks 4+" if skip_early else ""
         
         if bd is None or bd["total_games"] == 0:
             st.warning(f"No historical prediction data available for the selected scope: **{scope_selection}**.")
         else:
             win_acc = bd["win_acc"] * 100
             
-            st.markdown(f"### 🎯 Accuracy · {bd['total_games']} Games ({scope_selection})")
+            st.markdown(f"### 🎯 Accuracy · {bd['total_games']} Games ({scope_selection}{weeks_note})")
             
             c1, c2, c3, c4, c5 = st.columns(5)
             c1.metric("Accuracy", f"{win_acc:.1f}%")
