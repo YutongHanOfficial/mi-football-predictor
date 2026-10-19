@@ -24,6 +24,8 @@ from datetime import timedelta
 
 import numpy as np
 import pandas as pd
+import scipy.sparse as sp
+import scipy.sparse.linalg as spla
 
 
 @dataclass
@@ -145,64 +147,42 @@ class Ratings:
         }
 
 
+def _ridge(X, y, w, prior_prec, prior_mean):
+    """Solve min sum w(y - Xb)^2 + sum prec_j (b_j - mean_j)^2 with sparse matrices."""
+    Xt_w = X.T.multiply(w).tocsr()
+    A = (Xt_w @ X + sp.diags(prior_prec)).tocsc()
+    rhs = Xt_w @ y + prior_prec * prior_mean
+    return spla.spsolve(A, rhs)
+
+
 def _solve_margin(nT, hi, ai, y, w, prior, lam):
     """Ridge: min sum w(y - hfa - r_h + r_a)^2 + sum lam_i (r_i - prior_i)^2."""
-    n = nT + 1  # last column = HFA
-    A = np.zeros((n, n))
-    b = np.zeros(n)
-    # Accumulate X'WX with X row = e_h - e_a + e_hfa
-    np.add.at(A, (hi, hi), w)
-    np.add.at(A, (ai, ai), w)
-    np.add.at(A, (hi, ai), -w)
-    np.add.at(A, (ai, hi), -w)
-    np.add.at(A, (hi, np.full_like(hi, nT)), w)
-    np.add.at(A, (np.full_like(hi, nT), hi), w)
-    np.add.at(A, (ai, np.full_like(ai, nT)), -w)
-    np.add.at(A, (np.full_like(ai, nT), ai), -w)
-    A[nT, nT] += w.sum()
-    np.add.at(b, hi, w * y)
-    np.add.at(b, ai, -w * y)
-    b[nT] += (w * y).sum()
-    A[np.arange(nT), np.arange(nT)] += lam
-    b[:nT] += lam * prior
+    n_g = len(hi)
+    rows = np.repeat(np.arange(n_g), 3)
+    cols = np.column_stack([hi, ai, np.full(n_g, nT)]).ravel()
+    vals = np.tile([1.0, -1.0, 1.0], n_g)
+    X = sp.csr_matrix((vals, (rows, cols)), shape=(n_g, nT + 1))
     # Weak prior on HFA (~2.5 pts) so it is stable early in the season
-    A[nT, nT] += 20.0
-    b[nT] += 20.0 * 2.5
-    sol = np.linalg.solve(A, b)
+    sol = _ridge(X, y, w, np.append(lam, 20.0), np.append(prior, 2.5))
     return sol[:nT], sol[nT]
 
 
 def _solve_points(nT, hi, ai, ph, pa, w, prior_o, prior_d, lam):
     """Ridge on points scored. Unknowns: O (nT), D (nT), MU, HFA_p."""
-    n = 2 * nT + 2
+    n_g = len(hi)
     iMU, iH = 2 * nT, 2 * nT + 1
-    A = np.zeros((n, n))
-    b = np.zeros(n)
-
-    def add_rows(oi, di, sign, y):
-        cols = [oi, nT + di, np.full_like(oi, iMU)]
-        vals = [1.0, 1.0, 1.0]
-        for c1, v1 in zip(cols, vals):
-            for c2, v2 in zip(cols, vals):
-                np.add.at(A, (c1, c2), w * v1 * v2)
-            np.add.at(A, (c1, np.full_like(oi, iH)), w * v1 * sign * 0.5)
-            np.add.at(A, (np.full_like(oi, iH), c1), w * v1 * sign * 0.5)
-            np.add.at(b, c1, w * v1 * y)
-        A[iH, iH] += (w * 0.25).sum()
-        b[iH] += (w * sign * 0.5 * y).sum()
-
-    add_rows(hi, ai, 1.0, ph)
-    add_rows(ai, hi, -1.0, pa)
-    idx = np.arange(nT)
-    A[idx, idx] += lam
-    A[nT + idx, nT + idx] += lam
-    b[:nT] += lam * prior_o
-    b[nT:2 * nT] += lam * prior_d
-    A[iMU, iMU] += 1.0
-    b[iMU] += 1.0 * 25.0
-    A[iH, iH] += 20.0
-    b[iH] += 20.0 * 2.5
-    sol = np.linalg.solve(A, b)
+    # One row per team-game: pts = MU + O_scorer + D_opponent +/- HFA_p/2
+    off_idx = np.concatenate([hi, ai])
+    def_idx = nT + np.concatenate([ai, hi])
+    side = np.concatenate([np.full(n_g, 0.5), np.full(n_g, -0.5)])
+    n_r = 2 * n_g
+    rows = np.repeat(np.arange(n_r), 4)
+    cols = np.column_stack([off_idx, def_idx, np.full(n_r, iMU), np.full(n_r, iH)]).ravel()
+    vals = np.column_stack([np.ones(n_r), np.ones(n_r), np.ones(n_r), side]).ravel()
+    X = sp.csr_matrix((vals, (rows, cols)), shape=(n_r, 2 * nT + 2))
+    prec = np.concatenate([lam, lam, [1.0, 20.0]])
+    mean = np.concatenate([prior_o, prior_d, [25.0, 2.5]])
+    sol = _ridge(X, np.concatenate([ph, pa]), np.concatenate([w, w]), prec, mean)
     return sol[:nT], sol[nT:2 * nT], sol[iMU], sol[iH]
 
 
