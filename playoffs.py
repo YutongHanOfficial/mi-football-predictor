@@ -21,6 +21,11 @@ Regions are built from school locations (school_locations.csv: each school's tow
 from US Census gazetteer coordinates): each division's 32 qualifiers are split into
 four balanced geographic groups of 8. MHSAA draws the official Regions by hand, so
 they can differ at the edges.
+
+Once MHSAA publishes the brackets (Selection Sunday), brackets_2026.csv (see
+refresh_brackets.py) replaces all of that: the official field, Regions and seeds are
+used as-is and only the bracket is simulated. Playoff results added to the game data
+fix those winners, so the odds update week by week.
 """
 
 from collections import defaultdict
@@ -36,11 +41,31 @@ BONUS_MULT = {1: 6, 2: 6, 3: 5, 4: 5, 5: 4, 6: 4, 7: 3, 8: 3}
 FIELD_PER_DIVISION = 32
 MIN_GAMES = 7
 ROUNDS = ["District Semifinal", "District Final", "Regional Final", "Semifinal", "Final"]
+# Official bracket: Regions 1 and 2 meet in one Semifinal, 3 and 4 in the other
+OFFICIAL_SEMIS = ((0, 1), (2, 3))
 
 
 def load_divisions(path):
     df = pd.read_csv(path)
     return df.set_index("school")
+
+
+def load_brackets(path):
+    """Official brackets (division, region, seed, school[, pop]); checks every Region is seeded 1-8."""
+    df = pd.read_csv(path)
+    df["school"] = df["school"].str.strip()
+    problems = []
+    for d, g in df.groupby("division"):
+        for r in range(1, 5):
+            seeds = sorted(g.loc[g["region"] == r, "seed"])
+            if seeds != list(range(1, 9)):
+                problems.append(f"Division {d} Region {r} has seeds {seeds}")
+    dupes = df["school"][df["school"].duplicated()].tolist()
+    if dupes:
+        problems.append(f"listed twice: {dupes}")
+    if problems:
+        raise ValueError(f"{path}: " + "; ".join(problems))
+    return df
 
 
 # ------------------------------------------------------------------
@@ -132,7 +157,7 @@ def split_regions(points, n_regions=4, size=8, iters=8):
 # ------------------------------------------------------------------
 
 class PlayoffSimulator:
-    def __init__(self, engine, divisions_df, locations, season="2026", last_regular_date="2026-10-24"):
+    def __init__(self, engine, divisions_df, locations, season="2026", last_regular_date="2026-10-24", brackets=None):
         self.engine = engine
         self.ratings = engine.current()
         self.season = season
@@ -173,6 +198,40 @@ class PlayoffSimulator:
         self.rem_p = np.array([self.ratings.predict(h, a)["prob_home"] for h, a in zip(rem["home"], rem["away"])])
         self._region_cache = {}
         self._prob_cache = {}
+
+        # Completed playoff games (after the regular season) fix their winners
+        self.results = {}
+        played = season_games[(season_games["date_obj"] > self.last_date) & season_games["completed"]]
+        for _, g in played.iterrows():
+            if g["home"] in self.pp.index and g["away"] in self.pp.index and g["home_score"] != g["away_score"]:
+                h, a = self.pp.index[g["home"]], self.pp.index[g["away"]]
+                self.results[frozenset((h, a))] = h if g["home_score"] > g["away_score"] else a
+
+        self.official_bracket = brackets is not None
+        if self.official_bracket:
+            self._load_official(brackets)
+
+    def _load_official(self, brackets):
+        missing = sorted(set(brackets["school"]) - set(self.pp.index))
+        if missing:
+            raise ValueError(f"Bracket schools not found in the game data: {missing}")
+        # {division: [Region 1..4 as team indices in seed order]}
+        self.field = {}
+        for d, g in brackets.groupby("division"):
+            g = g.sort_values(["region", "seed"])
+            self.field[int(d)] = [g.loc[g["region"] == r, "school"].map(self.pp.index).to_numpy(int) for r in range(1, 5)]
+            for t in g["school"]:
+                self.pp.div[self.pp.index[t]] = int(d)  # the bracket is the final word on divisions
+        # Hosting goes to the higher POP at selection
+        self.bracket_pop = self.current_pop.copy()
+        if "pop" in brackets:
+            for t, p in zip(brackets["school"], brackets["pop"]):
+                if pd.notna(p):
+                    self.bracket_pop[self.pp.index[t]] = p
+        # Seeds are POP order within a Region; make sure hosting agrees with them
+        for regions in self.field.values():
+            for seeds in regions:
+                self.bracket_pop[seeds] = np.maximum.accumulate(self.bracket_pop[seeds][::-1])[::-1] + np.linspace(8e-6, 1e-6, 8)
 
     def _crossover_games(self, divisions_df, rem):
         """League crossover games whose opponents are not set yet (e.g. "KLAA crossover").
@@ -260,9 +319,32 @@ class PlayoffSimulator:
         return self._region_cache[key]
 
     def _game(self, a, b, pop, rng, neutral=False):
-        """Higher POP hosts unless neutral. Returns winner index."""
+        """Higher POP hosts unless neutral. Returns winner index; games already played keep their result."""
+        done = self.results.get(frozenset((int(a), int(b))))
+        if done is not None:
+            return done
         home, away = (a, b) if pop[a] >= pop[b] else (b, a)
         return home if rng.random() < self._prob(home, away, neutral) else away
+
+    def _play_division(self, regions, semis, pop, rng, reach, top_seed):
+        """Play one division's bracket. `regions` = 4 arrays of team indices in seed order."""
+        champs = {}
+        for reg, seeds in enumerate(regions):
+            top_seed[seeds[0]] += 1
+            s = {k + 1: seeds[k] for k in range(8)}
+            reach[seeds, 0] += 1
+            semis_won = [self._game(s[a], s[b], pop, rng) for a, b in ((1, 8), (4, 5), (2, 7), (3, 6))]
+            reach[semis_won, 1] += 1
+            d1 = self._game(semis_won[0], semis_won[1], pop, rng)
+            d2 = self._game(semis_won[2], semis_won[3], pop, rng)
+            reach[[d1, d2], 2] += 1
+            champs[reg] = self._game(d1, d2, pop, rng)
+            reach[champs[reg], 3] += 1
+        finalists = [self._game(champs[a], champs[b], pop, rng, neutral=True) for a, b in semis]
+        for t in finalists:
+            reach[t, 4] += 1
+        champion = self._game(finalists[0], finalists[1], pop, rng, neutral=True)
+        reach[champion, 5] += 1
 
     def run(self, n_sims=1000, seed=7):
         rng = np.random.default_rng(seed)
@@ -272,6 +354,16 @@ class PlayoffSimulator:
         top_seed = np.zeros(T)
         reach = np.zeros((T, len(ROUNDS) + 1))  # reach[:, k] = won k playoff games
         divisions = self.pp.div
+        if self.official_bracket:
+            # Field, Regions and seeds are set: play out only the bracket
+            for d, regions in self.field.items():
+                qualify[np.concatenate(regions)] = n_sims
+            pop_sum[:] = self.bracket_pop * n_sims
+            for _ in range(n_sims):
+                for regions in self.field.values():
+                    self._play_division(regions, OFFICIAL_SEMIS, self.bracket_pop, rng, reach, top_seed)
+            self._results = (qualify, pop_sum, top_seed, reach, n_sims)
+            return self.summary()
         for _ in range(n_sims):
             home_wins = rng.random(len(self.rem_p)) < self.rem_p
             w = np.concatenate([self.w, np.where(home_wins, self.rem_h, self.rem_a)])
@@ -290,33 +382,25 @@ class PlayoffSimulator:
                     continue
                 region_of, semis = self._regions(d, field)
                 labels = np.array([region_of[int(t)] for t in field])
-                champs = {}
+                regions = []
                 for reg in range(4):
                     teams = field[labels == reg]
-                    seeds = teams[np.argsort(-(pop[teams] + noise[teams]))]
-                    top_seed[seeds[0]] += 1
-                    s = {k + 1: seeds[k] for k in range(8)}
-                    reach[seeds, 0] += 1
-                    semis_won = [self._game(s[a], s[b], pop, rng) for a, b in ((1, 8), (4, 5), (2, 7), (3, 6))]
-                    reach[semis_won, 1] += 1
-                    d1 = self._game(semis_won[0], semis_won[1], pop, rng)
-                    d2 = self._game(semis_won[2], semis_won[3], pop, rng)
-                    reach[[d1, d2], 2] += 1
-                    champs[reg] = self._game(d1, d2, pop, rng)
-                    reach[champs[reg], 3] += 1
-                finalists = [self._game(champs[a], champs[b], pop, rng, neutral=True) for a, b in semis]
-                for t in finalists:
-                    reach[t, 4] += 1
-                champion = self._game(finalists[0], finalists[1], pop, rng, neutral=True)
-                reach[champion, 5] += 1
+                    regions.append(teams[np.argsort(-(pop[teams] + noise[teams]))])
+                self._play_division(regions, semis, pop, rng, reach, top_seed)
         self._results = (qualify, pop_sum, top_seed, reach, n_sims)
         return self.summary()
 
     def projected_bracket(self, division):
-        """Most likely field: top 32 by projected POP, split into Regions and seeded.
+        """The official bracket once published; before that the most likely field (top 32
+        by projected POP), split into Regions and seeded.
 
-        Returns a list of 4 Regions, each a list of (seed, team, projected POP), plus
-        the Region pairings for the semifinals."""
+        Returns a list of 4 Regions, each a list of (seed, team, POP), plus the Region
+        pairings for the semifinals."""
+        if self.official_bracket:
+            if division not in self.field:
+                return [], []
+            return ([[(k + 1, self.teams[t], self.bracket_pop[t]) for k, t in enumerate(seeds)]
+                     for seeds in self.field[division]], OFFICIAL_SEMIS)
         qualify, pop_sum, _, _, n = self._results
         proj = pop_sum / n
         elig = np.where(self.mi_mask & (self.pp.div == division))[0]
@@ -332,9 +416,21 @@ class PlayoffSimulator:
             regions.append([(k + 1, self.teams[t], proj[t]) for k, t in enumerate(seeds)])
         return regions, semis
 
+    def eliminated(self):
+        """Teams that have lost a completed playoff game."""
+        return {self.teams[t] for pair, w in self.results.items() for t in pair if t != w}
+
+    def result(self, team_a, team_b):
+        """Winner of a completed playoff game between the two teams, else None."""
+        w = self.results.get(frozenset((self.pp.index[team_a], self.pp.index[team_b])))
+        return None if w is None else self.teams[w]
+
     def matchup_prob(self, team_a, team_b, pop_a, pop_b, neutral=False):
         """Win probability for team_a, with the higher POP hosting unless neutral."""
         a, b = self.pp.index[team_a], self.pp.index[team_b]
+        done = self.results.get(frozenset((a, b)))
+        if done is not None:
+            return float(done == a)
         if neutral or pop_a >= pop_b:
             return self._prob(a, b, neutral)
         return 1 - self._prob(b, a, neutral)
