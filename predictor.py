@@ -320,18 +320,25 @@ class SeasonPredictor:
 # ⚡ STREAMLIT CACHING WRAPPERS
 # ==========================================
 
-@st.cache_resource
-def load_predictor():
+def code_version():
+    """Changes whenever the model code or data changes, so cached results are rebuilt."""
+    parts = []
+    for f in ["engine.py", "predictor.py"] + [f for _, f in SEASON_FILES]:
+        parts.append(f"{f}:{os.path.getmtime(f) if os.path.exists(f) else 0}:{os.path.getsize(f) if os.path.exists(f) else 0}")
+    return "|".join(parts)
+
+@st.cache_resource(max_entries=1)
+def load_predictor(version):
     if not any(os.path.exists(f) for _, f in SEASON_FILES):
         return None
     return SeasonPredictor(SEASON_FILES)
 
-@st.cache_data
-def get_cached_prediction(_predictor, away_team, home_team, neutral=False):
+@st.cache_data(max_entries=5000)
+def get_cached_prediction(_predictor, away_team, home_team, neutral=False, version=None):
     return _predictor.predict_matchup(away_team, home_team, neutral=neutral)
 
-@st.cache_data
-def get_cached_history(_predictor, team_name):
+@st.cache_data(max_entries=500)
+def get_cached_history(_predictor, team_name, version=None):
     return _predictor.get_team_rating_history(team_name)
 
 
@@ -468,7 +475,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-predictor = load_predictor()
+VERSION = code_version()
+predictor = load_predictor(VERSION)
 
 st.markdown("<h1 class='main-header'>🏈 High School Football Predictor Engine</h1>", unsafe_allow_html=True)
 st.caption("Bayesian Power Ratings, Calibrated Matchup Projections & Walk-Forward Accuracy Tracking")
@@ -533,7 +541,7 @@ else:
             if away == home:
                 st.warning("Please select two different teams.")
             else:
-                res = get_cached_prediction(predictor, away, home, neutral_site)
+                res = get_cached_prediction(predictor, away, home, neutral_site, version=VERSION)
 
                 if res["path"]:
                     hops = len(res["path"]) - 1
@@ -659,7 +667,7 @@ else:
                         upcoming_schedule.append({"Date": g.get("date", "-"), "is_home": is_home, "opp": opp, "location_prefix": location_prefix})
 
             if not is_archive:
-                history_data = get_cached_history(predictor, selected_team)
+                history_data = get_cached_history(predictor, selected_team, version=VERSION)
                 if len(history_data) > 1:
                     df_hist = pd.DataFrame(history_data)
                     df_hist["Date"] = pd.to_datetime(df_hist["Date"])
@@ -721,7 +729,7 @@ else:
                         away_t = selected_team if not match["is_home"] else match["opp"]
                         home_t = match["opp"] if not match["is_home"] else selected_team
                         
-                        proj = get_cached_prediction(predictor, away_t, home_t)
+                        proj = get_cached_prediction(predictor, away_t, home_t, version=VERSION)
                         win_p = proj["prob_h"] if match["is_home"] else proj["prob_a"]
                         proj_team_pts = proj["avg_score_h"] if match["is_home"] else proj["avg_score_a"]
                         proj_opp_pts = proj["avg_score_a"] if match["is_home"] else proj["avg_score_h"]
@@ -757,7 +765,7 @@ else:
                 h, a = g["home"], g["away"]
                 
                 # Same projection path as the Team Schedule tab
-                proj = get_cached_prediction(predictor, a, h)
+                proj = get_cached_prediction(predictor, a, h, version=VERSION)
                 
                 h_off = predictor.teams.get(h, {}).get("active_OSRS", 0.0)
                 h_def = predictor.teams.get(h, {}).get("active_DSRS", 0.0)
