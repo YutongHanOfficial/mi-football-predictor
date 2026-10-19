@@ -7,6 +7,7 @@ from collections import deque
 import streamlit as st
 
 from engine import Engine, EngineConfig, is_oos
+from playoffs import PlayoffSimulator, load_divisions, load_locations, FIELD_PER_DIVISION
 
 # ==========================================
 # ⚙️ ENGINE CONFIGURATION
@@ -16,6 +17,11 @@ from engine import Engine, EngineConfig, is_oos
 ENGINE_CONFIG = EngineConfig()
 
 SEASON_FILES = [("2025", "games_2025.csv"), ("2026", "games_2026.csv")]
+# Official MHSAA divisions, enrollments and playoff points (from mhsaa.com Playoff Point Summary)
+DIVISIONS_FILE = "mhsaa_2026.csv"
+# Town coordinates for each school (US Census gazetteer), used to draw Regions
+LOCATIONS_FILE = "school_locations.csv"
+PLAYOFF_SIMS = 2000
 
 # ==========================================
 # 🧮 HELPER FUNCTIONS
@@ -323,7 +329,7 @@ class SeasonPredictor:
 def code_version():
     """Changes whenever the model code or data changes, so cached results are rebuilt."""
     parts = []
-    for f in ["engine.py", "predictor.py"] + [f for _, f in SEASON_FILES]:
+    for f in ["engine.py", "predictor.py", "playoffs.py", DIVISIONS_FILE, LOCATIONS_FILE] + [f for _, f in SEASON_FILES]:
         parts.append(f"{f}:{os.path.getmtime(f) if os.path.exists(f) else 0}:{os.path.getsize(f) if os.path.exists(f) else 0}")
     return "|".join(parts)
 
@@ -340,6 +346,14 @@ def get_cached_prediction(_predictor, away_team, home_team, neutral=False, versi
 @st.cache_data(max_entries=500)
 def get_cached_history(_predictor, team_name, version=None):
     return _predictor.get_team_rating_history(team_name)
+
+@st.cache_resource(max_entries=1)
+def load_playoff_sim(_predictor, version):
+    if not os.path.exists(DIVISIONS_FILE):
+        return None
+    sim = PlayoffSimulator(_predictor.engine, load_divisions(DIVISIONS_FILE), load_locations(LOCATIONS_FILE))
+    sim.run(PLAYOFF_SIMS)
+    return sim
 
 
 def compute_filtered_accuracy_metrics(full_df, scope_selection, skip_early_weeks=False):
@@ -485,11 +499,12 @@ st.write("")
 if predictor is None:
     st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your repository.")
 else:
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    tab1, tab2, tab3, tab4, tab_playoffs, tab5, tab6 = st.tabs([
         "🎮 Matchup Simulator", 
         "🏆 Power Rankings", 
         "📅 Team Schedules", 
         "📆 Upcoming Matchups", 
+        "🏟️ Playoff Predictor",
         "📈 Season Leaderboards",
         "🎯 Model Accuracy"
     ])
@@ -995,3 +1010,94 @@ else:
 
             with st.expander("🔍 View Raw Out-Of-Sample Predictions Log"):
                 st.dataframe(bd["df"])
+
+    # ----------------------------------------------------
+    # TAB: PLAYOFF PREDICTOR
+    # ----------------------------------------------------
+    with tab_playoffs:
+        st.subheader("Playoff Predictor", anchor=False)
+        st.caption(f"Simulates the rest of the regular season {PLAYOFF_SIMS:,} times, computes official MHSAA playoff-point averages (POP), selects the top {FIELD_PER_DIVISION} in each division, then plays out the bracket with the rating engine.")
+
+        sim = load_playoff_sim(predictor, VERSION)
+        if sim is None:
+            st.warning(f"Playoff data not found. Add `{DIVISIONS_FILE}` to the repository.")
+        else:
+            summary = sim.summary()
+            official = sim.official
+            summary["Record"] = summary["Team"].map(lambda t: f"{official.loc[t, 'official_wins']}-{official.loc[t, 'official_losses']}" if t in official.index else "")
+
+            col_div, col_view = st.columns([1, 2])
+            with col_div:
+                division = st.selectbox("Division", list(range(1, 9)), format_func=lambda d: f"Division {d}", key="playoff_div")
+            with col_view:
+                st.write("")
+                view = st.radio("View", ["Playoff Odds", "Projected Bracket"], horizontal=True, label_visibility="collapsed", key="playoff_view")
+
+            div_df = summary[summary["Div"] == division].sort_values(["Make Playoffs", "Proj POP"], ascending=False).reset_index(drop=True)
+            locks = int((div_df["Make Playoffs"] >= 0.995).sum())
+            bubble = div_df[(div_df["Make Playoffs"] > 0.02) & (div_df["Make Playoffs"] < 0.98)]
+            fav = div_df.sort_values("Win Title", ascending=False).iloc[0]
+
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Teams in Division", len(div_df))
+            m2.metric("Locked In (>99%)", locks)
+            m3.metric("On the Bubble", len(bubble))
+            m4.metric("Title Favorite", f"{fav['Win Title']*100:.1f}%", fav["Team"], delta_color="off", delta_arrow="off")
+
+            if view == "Playoff Odds":
+                pct_cols = ["Make Playoffs", "Region #1 Seed", "Win 1st Round", "Win District", "Win Regional", "Reach Final", "Win Title"]
+                show = div_df[["Team", "Record", "Current POP", "Proj POP"] + pct_cols].copy()
+                show.insert(0, "Rank", range(1, len(show) + 1))
+                for c in pct_cols:
+                    show[c] = show[c] * 100
+                st.dataframe(
+                    show,
+                    column_config={
+                        "Current POP": st.column_config.NumberColumn(format="%.3f", help="Official MHSAA playoff-point average right now"),
+                        "Proj POP": st.column_config.NumberColumn(format="%.2f", help="Average POP after the remaining regular-season games"),
+                        **{c: st.column_config.ProgressColumn(c, format="%.1f%%", min_value=0, max_value=100) for c in pct_cols},
+                    },
+                    hide_index=True, width="stretch", height=min(38 * len(show) + 40, 900)
+                )
+                if not bubble.empty:
+                    st.markdown("#### 🫧 Bubble Watch")
+                    st.caption("Teams whose playoff fate depends on the remaining games")
+                    b = bubble[["Team", "Record", "Current POP", "Proj POP", "Make Playoffs"]].copy()
+                    b["Make Playoffs"] = b["Make Playoffs"] * 100
+                    st.dataframe(b, column_config={"Make Playoffs": st.column_config.ProgressColumn("Make Playoffs", format="%.1f%%", min_value=0, max_value=100)}, hide_index=True, width="stretch")
+            else:
+                regions, semis = sim.projected_bracket(division)
+                if not regions:
+                    st.info("Not enough eligible teams to build a bracket for this division.")
+                else:
+                    st.caption("Most likely field (top 32 by projected POP). Seeds 1-8 by POP within each Region; District 1 = 1v8 & 4v5, District 2 = 2v7 & 3v6. The higher seed has the higher POP and hosts.")
+                    for r_i, region in enumerate(regions):
+                        seeds = {seed: (team, pop) for seed, team, pop in region}
+                        st.markdown(f"##### Region {r_i + 1}")
+                        rows = []
+                        for district, pairs in (("District 1", ((1, 8), (4, 5))), ("District 2", ((2, 7), (3, 6)))):
+                            for a, b in pairs:
+                                ta, pa = seeds[a]
+                                tb, pb = seeds[b]
+                                rows.append({
+                                    "District": district,
+                                    "Higher Seed": f"#{a} {ta}",
+                                    "Lower Seed": f"#{b} {tb}",
+                                    "Higher Seed Win %": sim.matchup_prob(ta, tb, pa, pb) * 100,
+                                })
+                        st.dataframe(pd.DataFrame(rows), column_config={"Higher Seed Win %": st.column_config.ProgressColumn("Higher Seed Win %", format="%.0f%%", min_value=0, max_value=100)}, hide_index=True, width="stretch")
+                    st.caption(f"Semifinals pair Region {semis[0][0] + 1} with Region {semis[0][1] + 1}, and Region {semis[1][0] + 1} with Region {semis[1][1] + 1}.")
+
+            with st.expander("ℹ️ How the playoff predictor works"):
+                st.markdown(f"""
+**Playoff-point average (2026 MHSAA rules)**
+- *Base:* win points by opponent division (D1 60, D2 55, D3 50, D4 45, D5 40, D6 35, D7 30, D8 25) divided by games played.
+- *Bonus:* for every opponent, a multiplier by its division (D1–2: 6, D3–4: 5, D5–6: 4, D7–8: 3) × that opponent's wins ÷ its games. An opponent's win over you doesn't count, and a school gets no bonus for a game it forfeited.
+- This reproduces MHSAA's published averages exactly for {sim.match_rate*100:.0f}% of teams; the rest differ because of unreported or forfeited games in the score data, so each team's current gap to the official number is carried forward.
+
+**Selection and bracket**
+- Divisions are set by enrollment before the season. The top {FIELD_PER_DIVISION} by POP in each division qualify (minimum 7 games); there are no automatic qualifiers.
+- Each division is split into four geographic Regions of 8 using each school's town location. MHSAA draws the official Regions by hand, so they can differ at the edges.
+- Out-of-state opponents get the Michigan division that best reproduces the official averages. League crossover games without a set opponent (e.g. KLAA crossovers) are filled with a nearby school of similar strength.
+- Every game is decided with the rating engine's win probability. Higher POP hosts through the Regional final; Semifinals and Ford Field Finals are treated as neutral sites.
+""")
