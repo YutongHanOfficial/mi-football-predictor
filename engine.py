@@ -33,6 +33,16 @@ class EngineConfig:
     # Margin compression: margins past CAP count at SLOPE (running clock / garbage time)
     mov_cap: float = 99.0
     mov_slope: float = 0.25
+    # Censored blowouts: a win by >= CENSOR_MARGIN (running-clock territory) only says
+    # the winner is AT LEAST that much better, so the winner is never penalized for
+    # not winning by more than the model expected. 0 = off.
+    censor_margin: float = 35.0
+    # Projected spreads past SPREAD_CAP grow at SPREAD_CAP_SLOPE (real blowouts top out
+    # around 60-70 because of the running clock). 0 = off. Win probability is unaffected.
+    spread_cap: float = 35.0
+    spread_cap_slope: float = 0.5
+    # Extra credit for winning, added to the margin (rewards W/L, not just margin)
+    win_bonus: float = 0.0
     # Weekly time decay applied to games within a season
     decay_per_week: float = 1.0
     # Prior strength in pseudo-games, for teams with/without last-season data.
@@ -148,11 +158,13 @@ class Ratings:
         exp_a = self.mu - hfa_p / 2 + o_a + d_h
         p_margin = exp_h - exp_a
         margin = c.margin_blend * m_margin + (1 - c.margin_blend) * p_margin
+        p_home = 0.5 * (1 + math.erf(margin / (c.win_sigma * math.sqrt(2))))
+        if c.spread_cap > 0:
+            margin = float(compress_margin(margin, c.spread_cap, c.spread_cap_slope))
         total = max(7.0, 2 * self.mu + c.total_shift + c.total_scale * (exp_h + exp_a - 2 * self.mu))
         # Split the total so the projected score agrees with the blended margin
         score_h = max(0.0, (total + margin) / 2)
         score_a = max(0.0, (total - margin) / 2)
-        p_home = 0.5 * (1 + math.erf(margin / (c.win_sigma * math.sqrt(2))))
         return {
             "margin": margin,
             "total": score_h + score_a,
@@ -215,8 +227,18 @@ def fit_ratings(teams, index, games, as_of, prior_power, prior_off, prior_def,
         as_ = g["away_score"].to_numpy(float)
         weeks_ago = (as_of - g["date_obj"]).dt.days.to_numpy() / 7.0
         w = np.power(cfg.decay_per_week, weeks_ago)
-        y = compress_margin(hs - as_, cfg.mov_cap, cfg.mov_slope)
+        raw = hs - as_
+        y = compress_margin(raw, cfg.mov_cap, cfg.mov_slope) + cfg.win_bonus * np.sign(raw)
         power, hfa = _solve_margin(nT, hi, ai, y, w, prior_power, lam_m)
+        if cfg.censor_margin > 0:
+            blowout = np.abs(raw) >= cfg.censor_margin
+            for _ in range(5):
+                pred = hfa + power[hi] - power[ai]
+                # Winner expected to win by even more than it did: no penalty
+                under = blowout & (np.sign(pred) == np.sign(y)) & (np.abs(pred) > np.abs(y))
+                if not under.any():
+                    break
+                power, hfa = _solve_margin(nT, hi, ai, np.where(under, pred, y), w, prior_power, lam_m)
         off, deff, mu, hfa_p = _solve_points(
             nT, hi, ai, np.minimum(hs, cfg.pts_cap), np.minimum(as_, cfg.pts_cap),
             w, prior_off, prior_def, lam_p)
