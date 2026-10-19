@@ -8,9 +8,10 @@ the Model Accuracy tab works.
 """
 import sys
 
-from engine import Engine, EngineConfig, summarize
+from engine import Engine, EngineConfig, discover_seasons, summarize
 
-SEASON_FILES = [("2025", "games_2025.csv"), ("2026", "games_2026.csv")]
+# Most recent seasons on disk; the oldest one only seeds the ratings
+SEASON_FILES = discover_seasons()
 
 
 def main():

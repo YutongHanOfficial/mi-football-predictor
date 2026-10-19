@@ -112,6 +112,18 @@ def load_games(path, season):
     return df.reset_index(drop=True)
 
 
+def discover_seasons(folder=".", max_seasons=4):
+    """[(season, path)] for the most recent games_<season>.csv files, oldest first."""
+    import glob
+    import os
+    found = []
+    for path in glob.glob(os.path.join(folder, "games_*.csv")):
+        m = re.fullmatch(r"games_(\d{4})\.csv", os.path.basename(path))
+        if m:
+            found.append((m.group(1), path))
+    return sorted(found)[-max_seasons:]
+
+
 # ------------------------------------------------------------------
 # Core model
 # ------------------------------------------------------------------
@@ -327,10 +339,13 @@ class Engine:
     def current(self):
         return self._final[self.seasons[-1]]
 
-    def backtest(self):
-        """Strict walk-forward: each game day is predicted using only earlier games."""
+    def backtest(self, include_first=False):
+        """Strict walk-forward: each game day is predicted using only earlier games.
+
+        The oldest season is a warm-up (no prior season to start from), so it is left
+        out unless `include_first` is set."""
         rows = []
-        for s in self.seasons:
+        for s in self.seasons[(0 if include_first or len(self.seasons) == 1 else 1):]:
             g = self.season_games(s)
             for date, day in g.groupby("date_obj", sort=True):
                 r = self.ratings(s, as_of=date)
