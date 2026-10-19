@@ -19,6 +19,7 @@ win-probability sigma) using parameters tuned by walk-forward backtesting.
 
 import math
 import re
+import sys
 from dataclasses import dataclass, field, asdict
 from datetime import timedelta
 
@@ -100,7 +101,9 @@ def load_games(path, season):
     df = pd.read_csv(path, encoding="utf-8-sig", dtype=str).fillna("")
     for c in ("date", "home", "away", "home_score", "away_score"):
         df[c] = df[c].str.strip()
-    key = df.apply(lambda r: (r["date"],) + tuple(sorted([r["home"], r["away"]])), axis=1)
+    first = np.where(df["home"] < df["away"], df["home"], df["away"])
+    second = np.where(df["home"] < df["away"], df["away"], df["home"])
+    key = df["date"] + "|" + pd.Series(first, index=df.index) + "|" + pd.Series(second, index=df.index)
     df = df[~key.duplicated()].copy()
     df["season"] = str(season)
     df["date_obj"] = pd.to_datetime(df["date"], errors="coerce")
@@ -112,7 +115,15 @@ def load_games(path, season):
     return df.reset_index(drop=True)
 
 
-def discover_seasons(folder=".", max_seasons=4):
+def config_hash(cfg):
+    """Fingerprint of the model settings and engine code, to spot stale saved results."""
+    import hashlib
+    import inspect
+    src = inspect.getsource(sys.modules[__name__])
+    return hashlib.sha1((repr(sorted(cfg.to_dict().items())) + src).encode()).hexdigest()[:12]
+
+
+def discover_seasons(folder=".", max_seasons=None):
     """[(season, path)] for the most recent games_<season>.csv files, oldest first."""
     import glob
     import os
@@ -121,7 +132,8 @@ def discover_seasons(folder=".", max_seasons=4):
         m = re.fullmatch(r"games_(\d{4})\.csv", os.path.basename(path))
         if m:
             found.append((m.group(1), path))
-    return sorted(found)[-max_seasons:]
+    found = sorted(found)
+    return found[-max_seasons:] if max_seasons else found
 
 
 # ------------------------------------------------------------------
@@ -232,33 +244,40 @@ def fit_ratings(teams, index, games, as_of, prior_power, prior_off, prior_def,
     lam_m = np.where(has_history, cfg.prior_games_known, cfg.prior_games_new)
     lam_p = np.where(has_history, cfg.pts_prior_games_known, cfg.pts_prior_games_new)
     g = games
+    power, off, deff = prior_power.copy(), prior_off.copy(), prior_def.copy()
+    gp = np.zeros(nT, dtype=int)
     if len(g):
-        hi = g["home"].map(index).to_numpy()
-        ai = g["away"].map(index).to_numpy()
+        hi_full = g["home"].map(index).to_numpy()
+        ai_full = g["away"].map(index).to_numpy()
+        # Only teams that played carry information; everyone else stays at their prior.
+        # Solving the smaller system gives identical answers, much faster.
+        active, inv = np.unique(np.concatenate([hi_full, ai_full]), return_inverse=True)
+        hi, ai = inv[:len(hi_full)], inv[len(hi_full):]
+        nA = len(active)
         hs = g["home_score"].to_numpy(float)
         as_ = g["away_score"].to_numpy(float)
         weeks_ago = (as_of - g["date_obj"]).dt.days.to_numpy() / 7.0
         w = np.power(cfg.decay_per_week, weeks_ago)
         raw = hs - as_
         y = compress_margin(raw, cfg.mov_cap, cfg.mov_slope) + cfg.win_bonus * np.sign(raw)
-        power, hfa = _solve_margin(nT, hi, ai, y, w, prior_power, lam_m)
+        p_act, lam_act = prior_power[active], lam_m[active]
+        pw, hfa = _solve_margin(nA, hi, ai, y, w, p_act, lam_act)
         if cfg.censor_margin > 0:
             blowout = np.abs(raw) >= cfg.censor_margin
             for _ in range(5):
-                pred = hfa + power[hi] - power[ai]
+                pred = hfa + pw[hi] - pw[ai]
                 # Winner expected to win by even more than it did: no penalty
                 under = blowout & (np.sign(pred) == np.sign(y)) & (np.abs(pred) > np.abs(y))
                 if not under.any():
                     break
-                power, hfa = _solve_margin(nT, hi, ai, np.where(under, pred, y), w, prior_power, lam_m)
-        off, deff, mu, hfa_p = _solve_points(
-            nT, hi, ai, np.minimum(hs, cfg.pts_cap), np.minimum(as_, cfg.pts_cap),
-            w, prior_off, prior_def, lam_p)
-        gp = np.bincount(hi, minlength=nT) + np.bincount(ai, minlength=nT)
+                pw, hfa = _solve_margin(nA, hi, ai, np.where(under, pred, y), w, p_act, lam_act)
+        o, d, mu, hfa_p = _solve_points(
+            nA, hi, ai, np.minimum(hs, cfg.pts_cap), np.minimum(as_, cfg.pts_cap),
+            w, prior_off[active], prior_def[active], lam_p[active])
+        power[active], off[active], deff[active] = pw, o, d
+        gp[active] = np.bincount(hi, minlength=nA) + np.bincount(ai, minlength=nA)
     else:
-        power, hfa = prior_power.copy(), 2.5
-        off, deff, mu, hfa_p = prior_off.copy(), prior_def.copy(), 25.0, 2.5
-        gp = np.zeros(nT, dtype=int)
+        hfa, mu, hfa_p = 2.5, 25.0, 2.5
     return Ratings(list(teams), index, power, off, deff, hfa, mu, hfa_p, gp, cfg)
 
 
@@ -339,13 +358,14 @@ class Engine:
     def current(self):
         return self._final[self.seasons[-1]]
 
-    def backtest(self, include_first=False):
+    def backtest(self, include_first=False, seasons=None):
         """Strict walk-forward: each game day is predicted using only earlier games.
 
         The oldest season is a warm-up (no prior season to start from), so it is left
-        out unless `include_first` is set."""
+        out unless `include_first` is set. `seasons` limits the run to those seasons."""
         rows = []
-        for s in self.seasons[(0 if include_first or len(self.seasons) == 1 else 1):]:
+        default = self.seasons[(0 if include_first or len(self.seasons) == 1 else 1):]
+        for s in ([str(x) for x in seasons] if seasons is not None else default):
             g = self.season_games(s)
             for date, day in g.groupby("date_obj", sort=True):
                 r = self.ratings(s, as_of=date)
