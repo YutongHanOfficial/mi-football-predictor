@@ -1,5 +1,6 @@
 date,home,away,home_score,away_score
 2025-08-21,Galloway Westland (OH),Columbus Centennial (OH),49,0
+2025-08-21,Onsted,Addison,,
 2025-08-22,Akron Archbishop Hoban (OH),Columbus Harvest Prep (OH),31,12
 2025-08-22,Antwerp (OH),Montpelier (OH),16,24
 2025-08-22,Auburndale (WI),Spencer (WI),35,27
@@ -19,10 +20,6 @@ date,home,away,home_score,away_score
 2025-08-22,Toledo Whitmer (OH),Dublin Coffman (OH),30,0
 2025-08-23,Cincinnati Moeller (OH),Cincinnati Princeton (OH),41,20
 2025-08-23,Clarkson Football North (CN),Harrisburg Bishop McDevitt (PA),27,7
-2025-08-28,Lake Orion,Northville,13,14
-2025-08-28,Flint Beecher,Petersburg Summerfield,14,55
-2025-08-28,Reese,Millington,12,35
-2025-08-28,Belleville,Clarkston,7,38
 2025-08-28,Addison,Clinton Township Clintondale,18,20
 2025-08-28,Adrian,Dundee,21,0
 2025-08-28,Adrian Madison,Grass Lake,56,0
@@ -37,6 +34,7 @@ date,home,away,home_score,away_score
 2025-08-28,Bay City John Glenn,South Lyon East,24,17
 2025-08-28,Bay City Western,Holly,34,0
 2025-08-28,Belding,Ionia,63,7
+2025-08-28,Belleville,Clarkston,7,38
 2025-08-28,Benton Harbor,Battle Creek Central,0,52
 2025-08-28,Benzie Central,Frankfort,13,20
 2025-08-28,Berkley,Livonia Franklin,7,34
@@ -50,6 +48,7 @@ date,home,away,home_score,away_score
 2025-08-28,Burton Bentley,Auburn Hills Oakland Christian,14,26
 2025-08-28,Cadillac,Midland,21,35
 2025-08-28,Caledonia,Windsor Holy Names (CN),36,0
+2025-08-28,Canton,Livonia Churchill,6,26
 2025-08-28,Carrollton,Birch Run,8,49
 2025-08-28,Cassopolis,Galesburg-Augusta,20,62
 2025-08-28,Cedar Springs,Auburn Hills Avondale,57,7
@@ -59,8 +58,11 @@ date,home,away,home_score,away_score
 2025-08-28,Coldwater,Sturgis,44,6
 2025-08-28,Coopersville,Ludington,13,40
 2025-08-28,Croswell-Lexington,Saginaw Swan Valley,35,55
+2025-08-28,DeWitt,Haslett,21,3
 2025-08-28,Dearborn Divine Child,Detroit Mumford,56,0
 2025-08-28,Dearborn Edsel Ford,Garden City,14,21
+2025-08-28,Dearborn Heights Crestwood,Dearborn,7,18
+2025-08-28,Decatur,Lawton,6,24
 2025-08-28,Delton Kellogg,Constantine,6,40
 2025-08-28,Detroit Central,Pontiac Notre Dame Prep,0,55
 2025-08-28,Detroit Denby,Chelsea,26,41
@@ -68,7 +70,6 @@ date,home,away,home_score,away_score
 2025-08-28,Detroit Southeastern,Detroit Edison,0,20
 2025-08-28,Detroit University Prep Science & Math,Romulus Summit Academy North,6,42
 2025-08-28,Detroit Western,Detroit Communication Media Arts,14,46
-2025-08-28,DeWitt,Haslett,21,3
 2025-08-28,East Grand Rapids,Lowell,7,40
 2025-08-28,Eaton Rapids,Lansing Eastern,13,22
 2025-08-28,Ecorse,Whitmore Lake,16,8
@@ -76,6 +77,7 @@ date,home,away,home_score,away_score
 2025-08-28,Escanaba,Kingsford,21,18
 2025-08-28,Essexville Garber,Hemlock,20,18
 2025-08-28,Farwell,Hesperia,42,21
+2025-08-28,Flint Beecher,Petersburg Summerfield,14,55
 2025-08-28,Flint Carman-Ainsworth,Bay City Central,16,41
 2025-08-28,Flint Hamady,Ogemaw Heights,8,56
 2025-08-28,Fowlerville,Corunna,40,14
@@ -93,7 +95,9 @@ date,home,away,home_score,away_score
 2025-08-28,Grayling,Clare,21,39
 2025-08-28,Grosse Ile,Ida,7,48
 2025-08-28,Grosse Pointe South,Detroit Renaissance,49,0
+2025-08-28,Grosse Pointe Woods University Liggett,Detroit Lincoln-King,6,14
 2025-08-28,Hamtramck,Warren De La Salle Collegiate,8,64
+2025-08-28,Hancock,L'Anse,6,26
 2025-08-28,Hanover-Horton,Monroe Jefferson,28,42
 2025-08-28,Harbor Springs,Morley Stanwood,18,16
 2025-08-28,Hazel Park,Detroit Loyola,28,22
@@ -117,6 +121,7 @@ date,home,away,home_score,away_score
 2025-08-28,Lake City,Hart,6,38
 2025-08-28,Lake Fenton,New Boston Huron,50,36
 2025-08-28,Lake Odessa Lakewood,Wyoming Godwin Heights,8,38
+2025-08-28,Lake Orion,Northville,13,14
 2025-08-28,Lakeview,Mason County Central,0,35
 2025-08-28,Lansing Sexton,Lansing Everett,14,24
 2025-08-28,Lansing Waverly,Wayland,28,50
@@ -129,6 +134,7 @@ date,home,away,home_score,away_score
 2025-08-28,Madison Heights Lamphere,Ferndale,17,14
 2025-08-28,Madison Heights Madison,Madison Heights Bishop Foley,64,16
 2025-08-28,Mancelona,Tawas,30,8
+2025-08-28,Manistique,East Jordan,6,20
 2025-08-28,Marlette,Manchester,16,6
 2025-08-28,Mason,Holt,19,0
 2025-08-28,Melvindale Academy for Business & Tech,Genesee,26,14
@@ -143,6 +149,7 @@ date,home,away,home_score,away_score
 2025-08-28,Muskegon Catholic Central,New Lothrop,7,35
 2025-08-28,Muskegon Mona Shores,Grand Blanc,20,35
 2025-08-28,Muskegon Oakridge,Muskegon Orchard View,29,14
+2025-08-28,Muskegon Reeths-Puffer,Grand Rapids Forest Hills Central,12,18
 2025-08-28,Negaunee,Marquette,30,22
 2025-08-28,Niles Brandywine,Hartford,8,52
 2025-08-28,North Farmington,Livonia Stevenson,20,7
@@ -155,6 +162,8 @@ date,home,away,home_score,away_score
 2025-08-28,Owosso,Pinckney,21,12
 2025-08-28,Parchment,Union City,14,16
 2025-08-28,Parma Western,Jackson,27,20
+2025-08-28,Paw Paw,Big Rapids,7,19
+2025-08-28,Perry,Clawson,7,17
 2025-08-28,Pinconning,Detroit Voyageur College Prep,27,42
 2025-08-28,Pontiac,Arts & Technology Academy of Pontiac,20,6
 2025-08-28,Port Huron,New Baltimore Anchor Bay,0,32
@@ -162,7 +171,11 @@ date,home,away,home_score,away_score
 2025-08-28,Portage Northern,Orchard Lake St Mary's,0,41
 2025-08-28,Portland,Detroit Country Day,30,6
 2025-08-28,Quincy,East Jackson,64,6
+2025-08-28,Ravenna,Beal City,2,15
 2025-08-28,Reading,White Pigeon,0,38
+2025-08-28,Redford Thurston,Port Huron Northern,6,13
+2025-08-28,Reed City,Kingsley,6,24
+2025-08-28,Reese,Millington,12,35
 2025-08-28,Remus Chippewa Hills,Manistee,15,42
 2025-08-28,Richland Gull Lake,Marshall,14,42
 2025-08-28,River Rouge,Westland John Glenn,13,7
@@ -190,13 +203,16 @@ date,home,away,home_score,away_score
 2025-08-28,St Clair,Richmond,19,49
 2025-08-28,St Clair Shores Lakeview,Lapeer,21,7
 2025-08-28,St Johns,Hamilton,22,14
+2025-08-28,Standish-Sterling,Chesaning,12,13
 2025-08-28,Sterling Heights,Ypsilanti Community,6,54
 2025-08-28,Sterling Heights Stevenson,Temperance Bedford,41,0
+2025-08-28,Swartz Creek,Yale,6,21
 2025-08-28,Taylor,Lincoln Park,22,32
 2025-08-28,Tecumseh,Carleton Airport,42,16
 2025-08-28,Traverse City West,Howell,13,23
 2025-08-28,Troy,Bloomfield Hills,17,13
 2025-08-28,Troy Athens,Birmingham Seaholm,28,31
+2025-08-28,Unionville-Sebewaing,Charlevoix,12,21
 2025-08-28,Utica,Grosse Pointe North,47,14
 2025-08-28,Vandercook Lake,Sand Creek,21,14
 2025-08-28,Vassar,Burton Atherton,52,19
@@ -219,22 +235,23 @@ date,home,away,home_score,away_score
 2025-08-28,Wyoming Lee,Comstock Park,0,1
 2025-08-28,Zeeland East,Grand Rapids Union,34,8
 2025-08-29,Allen Park,Trenton,47,27
-2025-08-29,Detroit Cass Tech,Toledo Central Catholic (OH),28,27
-2025-08-29,Flint New Standard Academy,Erie Mason,46,20
 2025-08-29,Alpena,Boyne City,13,18
 2025-08-29,Ann Arbor Skyline,Dearborn Heights Annapolis,64,0
 2025-08-29,Armada,Marine City,21,14
 2025-08-29,Auburndale (WI),Marathon (WI),14,12
 2025-08-29,Beaverton,Evart,38,36
 2025-08-29,Bronson,LaGrange Prairie Heights (IN),31,16
+2025-08-29,Brownsburg (IN),Indianapolis Cathedral (IN),29,0
 2025-08-29,Center Line,Detroit Henry Ford,34,26
 2025-08-29,Cheboygan,Sault Ste Marie,19,7
 2025-08-29,Cincinnati Elder (OH),Park Hills Covington Catholic (KY),28,20
 2025-08-29,Clarkston Everest Collegiate,Warren Michigan Collegiate,6,32
+2025-08-29,Detroit Cass Tech,Toledo Central Catholic (OH),28,27
 2025-08-29,Detroit Catholic Central,Clinton Township Chippewa Valley,41,7
 2025-08-29,Detroit Douglass,Detroit Community,0,24
 2025-08-29,Detroit East English,Detroit Cody,19,20
 2025-08-29,Detroit Leadership Academy,Detroit Pershing,0,38
+2025-08-29,Flint New Standard Academy,Erie Mason,46,20
 2025-08-29,Galloway Westland (OH),Grove City HS (OH),41,45
 2025-08-29,Gladstone,Durand,22,28
 2025-08-29,Grand Rapids Christian,Grand Rapids South Christian,13,27
@@ -253,12 +270,15 @@ date,home,away,home_score,away_score
 2025-08-29,Morris (IL),Wilmington (IL),27,20
 2025-08-29,New Lenox Lincoln Way West (IL),Blue Island Eisenhower (IL),47,7
 2025-08-29,Niles,St Joseph,28,18
+2025-08-29,Oak Park,Farmington,12,17
 2025-08-29,Oxford,Hartland,23,7
 2025-08-29,Pioneer North Central (OH),Paulding (OH),0,61
 2025-08-29,Plainwell,Allegan,21,7
 2025-08-29,Redford Union,Harper Woods,0,40
 2025-08-29,Redford Westfield Prep,Milan,0,43
 2025-08-29,Southfield Arts & Technology,East Kentwood,8,43
+2025-08-29,St John Lake Central (IN),Grand Rapids Catholic Central,7,30
+2025-08-29,Sterling Heights Parkway Christian,Mount Clemens,12,8
 2025-08-29,Toledo St Francis De Sales (OH),Fort Wayne Bishop Dwenger (IN),15,31
 2025-08-29,Toledo St John's Jesuit (OH),Whitehouse Anthony Wayne (OH),24,28
 2025-08-29,Toledo Whitmer (OH),Detroit Martin Luther King,7,32
@@ -269,6 +289,7 @@ date,home,away,home_score,away_score
 2025-08-30,Akron Archbishop Hoban (OH),Archbishop Spalding (MD),28,58
 2025-08-30,Cincinnati Moeller (OH),Chicago Mt Carmel (IL),42,43
 2025-08-30,Edon (OH),Antwerp (OH),31,19
+2025-08-30,Eureka St. Bernard (CA),Lakeport Clear Lake (CA),30,6
 2025-08-30,Garfield Heights (OH),Erie (PA),14,12
 2025-08-30,West Unity Hilltop (OH),Edgerton (OH),0,42
 2025-09-04,Detroit Central,Detroit East English,14,6
@@ -284,6 +305,7 @@ date,home,away,home_score,away_score
 2025-09-05,Allen Park,Taylor,41,12
 2025-09-05,Allen Park Cabrini,Sterling Heights Parkway Christian,42,6
 2025-09-05,Almont,Imlay City,31,14
+2025-09-05,Archbishop Spalding (MD),Princeton Hun (NJ),28,35
 2025-09-05,Armada,Croswell-Lexington,34,12
 2025-09-05,Auburn Hills Oakland Christian,Marine City Cardinal Mooney,38,2
 2025-09-05,Auburndale (WI),Edgar (WI),0,27
@@ -300,11 +322,13 @@ date,home,away,home_score,away_score
 2025-09-05,Bloomfield Hills,Royal Oak,42,7
 2025-09-05,Bloomfield Hills Cranbrook Kingswood,Owosso,19,47
 2025-09-05,Boyne City,Elk Rapids,36,0
+2025-09-05,Brownsburg (IN),Indianapolis Franklin Central (IN),35,7
 2025-09-05,Brownstown Woodhaven,Ann Arbor Huron,38,14
 2025-09-05,Burton Bendle,Burton Atherton,28,15
 2025-09-05,Caledonia,Muskegon Reeths-Puffer,56,21
 2025-09-05,Calumet,Ishpeming Westwood,55,6
 2025-09-05,Canton,Brighton,0,48
+2025-09-05,Caro,Unionville-Sebewaing,6,20
 2025-09-05,Cass City,Hemlock,54,0
 2025-09-05,Cassopolis,Comstock,41,12
 2025-09-05,Cedar Springs,Battle Creek Harper Creek,30,20
@@ -314,6 +338,7 @@ date,home,away,home_score,away_score
 2025-09-05,Cincinnati Elder (OH),Springboro (OH),21,7
 2025-09-05,Cincinnati Moeller (OH),Louisville Trinity (KY),24,21
 2025-09-05,Clare,Ortonville Brandon,43,20
+2025-09-05,Clarkson Football North (CN),Cuyahoga Falls Walsh Jesuit (OH),6,30
 2025-09-05,Clarkston,Harper Woods,21,27
 2025-09-05,Clawson,Center Line,14,24
 2025-09-05,Clinton Township Clintondale,Eastpointe,50,8
@@ -321,6 +346,7 @@ date,home,away,home_score,away_score
 2025-09-05,Corunna,Linden,13,39
 2025-09-05,Dansville,Bath,0,42
 2025-09-05,Davison,Warren De La Salle Collegiate,23,21
+2025-09-05,DeWitt,Mason,44,37
 2025-09-05,Dearborn,Livonia Churchill,26,20
 2025-09-05,Dearborn Divine Child,Lake Fenton,35,0
 2025-09-05,Dearborn Edsel Ford,Gibraltar Carlson,0,68
@@ -335,7 +361,6 @@ date,home,away,home_score,away_score
 2025-09-05,Detroit U of D Jesuit,Bloomfield Hills Brother Rice,7,35
 2025-09-05,Detroit University Prep,Detroit Cody,0,16
 2025-09-05,Detroit Voyageur College Prep,Detroit Lincoln-King,18,6
-2025-09-05,DeWitt,Mason,44,37
 2025-09-05,Durand,New Lothrop,40,33
 2025-09-05,East Kentwood,Byron Center,43,14
 2025-09-05,East Lansing,Hudsonville,6,37
@@ -344,8 +369,11 @@ date,home,away,home_score,away_score
 2025-09-05,Escanaba,Cadillac,36,7
 2025-09-05,Farwell,Detroit Osborn,58,0
 2025-09-05,Fenton,Haslett,14,15
+2025-09-05,Ferndale,Troy,12,24
 2025-09-05,Flat Rock,Monroe St Mary Catholic Central,20,36
+2025-09-05,Flint Beecher,Burton Bentley,6,20
 2025-09-05,Flint Carman-Ainsworth,Grand Blanc,6,56
+2025-09-05,Flint Kearsley,Bay City Central,8,7
 2025-09-05,Flint Powers Catholic,Essexville Garber,23,24
 2025-09-05,Flint Southwestern,Pinconning,6,45
 2025-09-05,Flushing,Zeeland East,13,14
@@ -355,9 +383,11 @@ date,home,away,home_score,away_score
 2025-09-05,Galesburg-Augusta,Plainwell,20,34
 2025-09-05,Galloway Westland (OH),Grove City Central Crossing (OH),33,0
 2025-09-05,Genesee,Flint New Standard Academy,20,16
+2025-09-05,Gladstone,Negaunee,2,25
 2025-09-05,Grand Ledge,Battle Creek Lakeview,35,6
 2025-09-05,Grand Rapids Catholic Central,Hamilton St Thomas More (CN),35,10
 2025-09-05,Grand Rapids Forest Hills Central,Portage Central,0,41
+2025-09-05,Grand Rapids Forest Hills Northern,Jenison,7,23
 2025-09-05,Grand Rapids Kenowa Hills,Paw Paw,48,27
 2025-09-05,Grand Rapids Northview,Vicksburg,23,21
 2025-09-05,Grand Rapids Ottawa Hills,Kalamazoo Loy Norrix,8,37
@@ -365,6 +395,7 @@ date,home,away,home_score,away_score
 2025-09-05,Grand Rapids West Catholic,Coopersville,34,0
 2025-09-05,Grass Lake,Jonesville,34,38
 2025-09-05,Grayling,Benzie Central,35,6
+2025-09-05,Grosse Ile,New Boston Huron,7,18
 2025-09-05,Gwinn,Manistique,0,1
 2025-09-05,Hamilton,Middleville Thornapple Kellogg,27,28
 2025-09-05,Hammond Morton (IN),Alan b. Shepard HS (IL),42,20
@@ -376,16 +407,19 @@ date,home,away,home_score,away_score
 2025-09-05,Hartland,Novi,30,0
 2025-09-05,Hastings,Williamston,29,36
 2025-09-05,Hesperia,Grant,0,35
+2025-09-05,Hicksville (OH),Edon (OH),6,21
 2025-09-05,Holland,South Haven,26,23
 2025-09-05,Holland Christian,Comstock Park,35,19
 2025-09-05,Holly,Farmington,20,18
 2025-09-05,Holt,Swartz Creek,41,0
 2025-09-05,Homer,Wyoming,14,16
 2025-09-05,Hopkins,Parchment,42,8
+2025-09-05,Houghton,Kingsford,6,29
 2025-09-05,Houghton Lake,Evart,14,8
 2025-09-05,Howard City Tri County,Sanford Meridian,34,20
 2025-09-05,Howards Grove (WI),Manitowoc Roncalli HS (WI),16,50
 2025-09-05,Howell,Salem,35,20
+2025-09-05,Ida,Hudson,3,8
 2025-09-05,Ionia,St Johns,16,49
 2025-09-05,Iron Mountain,Bark River-Harris,22,30
 2025-09-05,Jackson,Chelsea,12,35
@@ -411,6 +445,7 @@ date,home,away,home_score,away_score
 2025-09-05,Livonia Franklin,Westland John Glenn,19,14
 2025-09-05,Lombard Montini (IL),Country Club Hills Hillcrest (IL),35,12
 2025-09-05,Macomb L'Anse Creuse North,Macomb Dakota,0,30
+2025-09-05,Madison Heights Lamphere,Port Huron Northern,3,2
 2025-09-05,Mancelona,Harbor Springs,42,6
 2025-09-05,Manchester,Vandercook Lake,54,3
 2025-09-05,Manistee,Fremont,36,24
@@ -424,8 +459,10 @@ date,home,away,home_score,away_score
 2025-09-05,Mason County Central,Ludington,13,54
 2025-09-05,Mattawan,Lowell,20,49
 2025-09-05,McBain,LeRoy Pine River,50,16
+2025-09-05,McKinleyville (CA),Eureka St. Bernard (CA),0,37
 2025-09-05,Melvindale,Dearborn Heights Robichaud,0,1
 2025-09-05,Michigan Center,Brooklyn Columbia Central,49,14
+2025-09-05,Midland,Portage Northern,10,24
 2025-09-05,Midland Bullock Creek,Carrollton,50,8
 2025-09-05,Millington,Standish-Sterling,53,14
 2025-09-05,Monroe,Dexter,7,48
@@ -437,6 +474,7 @@ date,home,away,home_score,away_score
 2025-09-05,Muskegon,Rockford,26,30
 2025-09-05,Muskegon Mona Shores,River Rouge,16,6
 2025-09-05,Muskegon Oakridge,Montague,15,7
+2025-09-05,Napoleon,Hanover-Horton,8,28
 2025-09-05,New Lenox Lincoln Way West (IL),Lockport Township (IL),21,17
 2025-09-05,New Market Huron Heights (CN),Chatham Ursuline College (CN),37,0
 2025-09-05,Newaygo,Central Montcalm,24,28
@@ -444,6 +482,7 @@ date,home,away,home_score,away_score
 2025-09-05,North Muskegon,Shelby,33,30
 2025-09-05,Northville,Plymouth,35,15
 2025-09-05,Ogemaw Heights,Traverse City St Francis,32,42
+2025-09-05,Okemos,Grand Rapids Union,7,6
 2025-09-05,Onsted,Dundee,21,0
 2025-09-05,Oscoda,Kalkaska,14,20
 2025-09-05,Otisville LakeVille Memorial,Chesaning,28,0
@@ -452,6 +491,7 @@ date,home,away,home_score,away_score
 2025-09-05,Perry,Wyoming Kelloggsville,28,48
 2025-09-05,Petersburg Summerfield,Detroit Northwestern,40,6
 2025-09-05,Pewamo-Westphalia,Saranac,52,0
+2025-09-05,Pioneer North Central (OH),Lima Perry (OH),12,6
 2025-09-05,Pontiac,Troy Athens,16,44
 2025-09-05,Port Huron,Warren Fitzgerald,38,36
 2025-09-05,Reese,Waterford Our Lady of the Lakes,22,12
@@ -462,6 +502,7 @@ date,home,away,home_score,away_score
 2025-09-05,Rochester Adams,Rochester,31,3
 2025-09-05,Rochester Hills Lutheran Northwest,Center Line Prep Academy,35,12
 2025-09-05,Romeo,Grosse Pointe South,18,21
+2025-09-05,Romulus,Redford Union,6,14
 2025-09-05,Romulus Summit Academy North,Harper Woods Chandler Park,26,6
 2025-09-05,Roscommon,Lake City,28,34
 2025-09-05,Roseville,New Baltimore Anchor Bay,30,7
@@ -498,6 +539,7 @@ date,home,away,home_score,away_score
 2025-09-05,Toledo Whitmer (OH),Sylvania Southview (OH),48,0
 2025-09-05,Traverse City West,Grand Haven,32,14
 2025-09-05,Ubly,Clarkston Everest Collegiate,22,14
+2025-09-05,Utica,Sterling Heights Stevenson,7,21
 2025-09-05,Utica Ford,Warren Woods Tower,41,0
 2025-09-05,Vermontville Maple Valley,Union City,7,36
 2025-09-05,Walled Lake Northern,White Lake Lakeland,20,48
@@ -514,6 +556,7 @@ date,home,away,home_score,away_score
 2025-09-05,Whitehall,Muskegon Orchard View,48,22
 2025-09-05,Whitmore Lake,Ann Arbor Father Gabriel Richard,20,42
 2025-09-05,Wyandotte Roosevelt,Trenton,13,48
+2025-09-05,Wyoming Godwin Heights,Kent City,6,16
 2025-09-05,Ypsilanti Community,Ypsilanti Lincoln,26,27
 2025-09-05,Zeeland West,Holland West Ottawa,28,24
 2025-09-06,Detroit Denby,Garfield Heights (OH),8,32
@@ -531,15 +574,19 @@ date,home,away,home_score,away_score
 2025-09-11,Detroit Southeastern,Detroit Martin Luther King,0,48
 2025-09-11,Muskegon Catholic Central,Wyoming Lee,1,0
 2025-09-12,Ada Forest Hills Eastern,Hudsonville Unity Christian,7,35
+2025-09-12,Addison,Manchester,6,12
 2025-09-12,Akron Archbishop Hoban (OH),Akron East (OH),52,0
+2025-09-12,Allendale,Grand Rapids Kenowa Hills,10,28
 2025-09-12,Alma,Frankenmuth,21,70
 2025-09-12,Ann Arbor Father Gabriel Richard,Detroit University Prep Science & Math,59,24
 2025-09-12,Ann Arbor Pioneer,Saline,0,51
 2025-09-12,Ann Arbor Skyline,Monroe,13,20
 2025-09-12,Armada,Algonac,49,0
+2025-09-12,Arts & Technology Academy of Pontiac,Hamtramck,8,12
 2025-09-12,Auburn Hills Avondale,Macomb Lutheran North,7,50
 2025-09-12,Auburn Hills Oakland Christian,Whitmore Lake,32,49
 2025-09-12,Auburndale (WI),Pittsville (WI),41,0
+2025-09-12,Avon (IN),Brownsburg (IN),47,55
 2025-09-12,Bath,Pewamo-Westphalia,0,55
 2025-09-12,Battle Creek Central,Battle Creek Lakeview,39,13
 2025-09-12,Bay City Central,Traverse City West,13,40
@@ -548,10 +595,12 @@ date,home,away,home_score,away_score
 2025-09-12,Belleville,Livonia Stevenson,39,7
 2025-09-12,Benzie Central,Traverse City St Francis,20,56
 2025-09-12,Big Rapids,Newaygo,56,0
+2025-09-12,Bloomfield Hills,Birmingham Seaholm,7,28
 2025-09-12,Bloomfield Hills Brother Rice,Toledo Central Catholic (OH),14,28
 2025-09-12,Bloomfield Hills Cranbrook Kingswood,Waterford Our Lady of the Lakes,15,25
 2025-09-12,Bronson,Hartford,46,19
 2025-09-12,Brooklyn Columbia Central,Grass Lake,48,0
+2025-09-12,Brussels Southern Door (WI),Marinette (WI),8,27
 2025-09-12,Buchanan,Battle Creek Pennfield,20,23
 2025-09-12,Burton Atherton,Flint Beecher,20,0
 2025-09-12,Burton Bentley,Burton Bendle,17,22
@@ -575,6 +624,7 @@ date,home,away,home_score,away_score
 2025-09-12,Coopersville,Lowell,20,33
 2025-09-12,Corunna,Clio,22,48
 2025-09-12,Dansville,Flint New Standard Academy,8,56
+2025-09-12,DeWitt,Lansing Waverly,55,0
 2025-09-12,Dearborn Advanced Tech Academy,Royal Oak Shrine Catholic,0,1
 2025-09-12,Dearborn Divine Child,Ypsilanti Community,43,0
 2025-09-12,Dearborn Fordson,Livonia Franklin,33,21
@@ -591,10 +641,10 @@ date,home,away,home_score,away_score
 2025-09-12,Detroit Leadership Academy,Melvindale Academy for Business & Tech,6,53
 2025-09-12,Detroit Lincoln-King,Warren Michigan Collegiate,0,1
 2025-09-12,Detroit Loyola,Detroit Country Day,8,55
+2025-09-12,Detroit Old Redford,Harper Woods Chandler Park,7,22
 2025-09-12,Detroit Osborn,Detroit Douglass,20,6
 2025-09-12,Detroit U of D Jesuit,Windsor Holy Names (CN),28,29
 2025-09-12,Detroit University Prep,Bridgeport,20,18
-2025-09-12,DeWitt,Lansing Waverly,55,0
 2025-09-12,Dexter,Ann Arbor Huron,48,16
 2025-09-12,Dowagiac,Benton Harbor,69,12
 2025-09-12,Dundee,Adrian Madison,3,40
@@ -612,6 +662,7 @@ date,home,away,home_score,away_score
 2025-09-12,Fowler,Saranac,34,6
 2025-09-12,Fowlerville,St Johns,26,27
 2025-09-12,Frankfort,Johannesburg-Lewiston,41,30
+2025-09-12,Fraser,Warren Cousino,6,28
 2025-09-12,Galesburg-Augusta,Allegan,37,7
 2025-09-12,Galloway Westland (OH),Worthington Kilbourne (OH),38,48
 2025-09-12,Garden City,Redford Union,6,56
@@ -631,6 +682,7 @@ date,home,away,home_score,away_score
 2025-09-12,Hanover-Horton,Michigan Center,14,53
 2025-09-12,Harbor Springs,Maple City Glen Lake,6,44
 2025-09-12,Harper Woods,Birmingham Groves,35,8
+2025-09-12,Harrison,Sanford Meridian,6,20
 2025-09-12,Harrison Township L'Anse Creuse,Macomb L'Anse Creuse North,27,25
 2025-09-12,Haslett,Lansing Eastern,49,8
 2025-09-12,Hastings,Jackson Northwest,58,34
@@ -641,14 +693,17 @@ date,home,away,home_score,away_score
 2025-09-12,Holland,Holland Christian,21,40
 2025-09-12,Holland West Ottawa,Grandville,14,27
 2025-09-12,Homer,Leslie,0,42
+2025-09-12,Hopkins,Belding,7,8
 2025-09-12,Houghton,Hancock,42,0
 2025-09-12,Howard City Tri County,Grant,55,9
 2025-09-12,Howards Grove (WI),Hilbert (WI),22,44
+2025-09-12,Howell,Northville,7,17
 2025-09-12,Hudson,Onsted,52,21
 2025-09-12,Hudsonville,Caledonia,38,6
 2025-09-12,Ionia,Eaton Rapids,30,33
 2025-09-12,Jackson Lumen Christi,Grand Rapids Catholic Central,14,28
 2025-09-12,Jenison,East Kentwood,7,54
+2025-09-12,Jonesville,Napoleon,6,22
 2025-09-12,Kalamazoo Central,Richland Gull Lake,47,19
 2025-09-12,Kalamazoo Loy Norrix,St Joseph,25,51
 2025-09-12,Kent City,Morley Stanwood,40,0
@@ -662,9 +717,11 @@ date,home,away,home_score,away_score
 2025-09-12,Lawton,Kalamazoo Hackett Catholic Prep,22,19
 2025-09-12,LeRoy Pine River,Houghton Lake,24,0
 2025-09-12,Lincoln Park,Brownstown Woodhaven,0,49
+2025-09-12,Livonia Churchill,Wayne Memorial,7,6
 2025-09-12,Lombard Montini (IL),Chicago Marist (IL),28,21
 2025-09-12,Ludington,Fremont,49,0
 2025-09-12,Madison Heights Madison,Clawson,48,14
+2025-09-12,Mancelona,Ravenna,8,14
 2025-09-12,Manistique,Iron Mountain,8,35
 2025-09-12,Manton,McBain,38,56
 2025-09-12,Marlette,Unionville-Sebewaing,6,44
@@ -684,6 +741,8 @@ date,home,away,home_score,away_score
 2025-09-12,Muskegon Oakridge,Manistee,27,8
 2025-09-12,Muskegon Orchard View,Montague,20,54
 2025-09-12,Negaunee,Calumet,18,33
+2025-09-12,New Baltimore Anchor Bay,Macomb Dakota,7,17
+2025-09-12,New Boston Huron,Monroe St Mary Catholic Central,3,28
 2025-09-12,New Lenox Lincoln Way West (IL),Tinley Park Andrew (IL),17,7
 2025-09-12,New Lothrop,Chesaning,35,7
 2025-09-12,New Market Huron Heights (CN),Toronto Michael Powers St Joseph (CN),42,7
@@ -693,15 +752,19 @@ date,home,away,home_score,away_score
 2025-09-12,Oak Park,Troy Athens,44,17
 2025-09-12,Okemos,Lansing Everett,13,20
 2025-09-12,Olivet,Portland,0,35
+2025-09-12,Oscoda,Elk Rapids,6,8
 2025-09-12,Otsego,Three Rivers,6,31
 2025-09-12,Ottawa Lake Whiteford,West Unity Hilltop (OH),63,6
 2025-09-12,Ovid-Elsie,Otisville LakeVille Memorial,38,12
+2025-09-12,Owings Mills McDonogh (MD),Archbishop Spalding (MD),13,35
 2025-09-12,Owosso,Lake Fenton,38,35
 2025-09-12,Oxford,Clarkston,17,38
 2025-09-12,Parchment,Berrien Springs,14,31
 2025-09-12,Paw Paw,Niles,14,30
 2025-09-12,Perry,Laingsburg,15,27
+2025-09-12,Petoskey,Escanaba,10,27
 2025-09-12,Pinckney,Jackson,34,37
+2025-09-12,Pinconning,St Louis,7,16
 2025-09-12,Plainwell,Vicksburg,6,49
 2025-09-12,Plymouth,Hartland,7,42
 2025-09-12,Pontiac,Berkley,0,43
@@ -715,8 +778,10 @@ date,home,away,home_score,away_score
 2025-09-12,Rochester,Lake Orion,23,21
 2025-09-12,Rochester Hills Lutheran Northwest,Allen Park Cabrini,7,41
 2025-09-12,Rochester Hills Stoney Creek,Southfield Arts & Technology,40,18
+2025-09-12,Romulus,Dearborn Heights Robichaud,12,20
 2025-09-12,Saginaw Michigan Lutheran Seminary,Ithaca,40,42
 2025-09-12,Saginaw Swan Valley,Freeland,31,7
+2025-09-12,Saginaw United,Lapeer,6,21
 2025-09-12,Saginaw Valley Lutheran,Saginaw Nouvel Catholic Central,27,20
 2025-09-12,Salem,Canton,61,6
 2025-09-12,Shelby,Hart,28,18
@@ -748,6 +813,7 @@ date,home,away,home_score,away_score
 2025-09-12,Utica Eisenhower,Romeo,28,34
 2025-09-12,Vandercook Lake,East Jackson,42,0
 2025-09-12,Vassar,Reese,20,42
+2025-09-12,Vermontville Maple Valley,Reading,7,28
 2025-09-12,Walled Lake Central,Livonia Clarenceville,45,15
 2025-09-12,Walled Lake Western,Waterford Mott,34,42
 2025-09-12,Warren De La Salle Collegiate,Orchard Lake St Mary's,10,49
@@ -755,6 +821,7 @@ date,home,away,home_score,away_score
 2025-09-12,Warren Mott,Port Huron,21,28
 2025-09-12,Waterford Kettering,Milford,6,45
 2025-09-12,Wayland,Middleville Thornapple Kellogg,14,41
+2025-09-12,West Bloomfield,Rochester Adams,12,6
 2025-09-12,West Chicago Wheaton Academy (IL),Palos Heights Chicago Christian (IL),49,14
 2025-09-12,West Iron County,Bark River-Harris,14,42
 2025-09-12,Westland John Glenn,Dearborn,41,43
@@ -766,17 +833,22 @@ date,home,away,home_score,away_score
 2025-09-12,Ypsilanti Lincoln,Tecumseh,21,17
 2025-09-12,Zeeland West,Whitehall,28,35
 2025-09-13,Erie Mason,Montpelier (OH),6,48
+2025-09-13,Eureka St. Bernard (CA),Hoopa Valley (CA),44,0
+2025-09-13,Garfield Heights (OH),Muskegon,8,15
 2025-09-13,Gaylord,Marquette,28,27
 2025-09-13,Grosse Pointe Woods University Liggett,Madison Heights Bishop Foley,14,6
 2025-09-13,Marine City Cardinal Mooney,Caro,7,46
 2025-09-13,Morris (IL),Peoria (IL),35,28
 2025-09-13,Mount Clemens,Southfield Bradford Academy,0,28
+2025-09-13,Sterling Heights Parkway Christian,Lutheran Westland,8,15
 2025-09-13,Vestaburg,Mount Pleasant Sacred Heart,7,49
 2025-09-13,Zeeland East,Alpena,35,0
 2025-09-15,New Market Huron Heights (CN),Barrie Maple Ridge (CN),47,0
 2025-09-18,Detroit Communication Media Arts,Detroit Cody,20,26
 2025-09-18,Detroit Northwestern,Detroit Denby,0,48
+2025-09-18,Detroit Osborn,Detroit Pershing,6,12
 2025-09-18,Detroit Southeastern,Detroit Renaissance,32,8
+2025-09-18,Redford Westfield Prep,Southfield Bradford Academy,6,2
 2025-09-18,Windsor Holy Names (CN),Tecumseh St Annes (CN),45,0
 2025-09-19,Ada Forest Hills Eastern,Wayland,27,16
 2025-09-19,Addison,Vandercook Lake,16,17
@@ -788,11 +860,14 @@ date,home,away,home_score,away_score
 2025-09-19,Allen Park Cabrini,Clarkston Everest Collegiate,19,9
 2025-09-19,Alpena,Cadillac,39,48
 2025-09-19,Ann Arbor Huron,Ann Arbor Skyline,28,0
+2025-09-19,Archbishop Spalding (MD),Baltimore Calvert Hall (MD),56,14
 2025-09-19,Armada,Richmond,17,24
+2025-09-19,Auburndale (WI),Bark River-Harris,,
 2025-09-19,Battle Creek Central,Portage Central,0,55
 2025-09-19,Battle Creek Harper Creek,Battle Creek Pennfield,44,0
 2025-09-19,Battle Creek Lakeview,Portage Northern,28,50
 2025-09-19,Bay City Central,Midland,16,35
+2025-09-19,Bay City John Glenn,Saginaw Swan Valley,7,28
 2025-09-19,Belding,Wyoming Kelloggsville,44,14
 2025-09-19,Benton Harbor,Muskegon Catholic Central,26,27
 2025-09-19,Benzie Central,Tawas,56,0
@@ -807,7 +882,9 @@ date,home,away,home_score,away_score
 2025-09-19,Bridgeport,Alma,0,51
 2025-09-19,Brighton,Hartland,17,7
 2025-09-19,Brooklyn Columbia Central,Hanover-Horton,14,30
+2025-09-19,Brownsburg (IN),Fishers (IN),42,14
 2025-09-19,Buchanan,Niles Brandywine,64,6
+2025-09-19,Caledonia,Grandville,7,28
 2025-09-19,Calumet,Menominee,15,25
 2025-09-19,Canton,Novi,0,41
 2025-09-19,Caro,Elkton-Pigeon-Bay Port Laker,14,26
@@ -816,6 +893,7 @@ date,home,away,home_score,away_score
 2025-09-19,Center Line Prep Academy,Detroit University Prep,0,1
 2025-09-19,Charlevoix,Oscoda,49,0
 2025-09-19,Charlotte,Lansing Catholic,35,17
+2025-09-19,Chesaning,Mt Morris,6,14
 2025-09-19,Cincinnati Elder (OH),Louisville St Xavier (KY),26,24
 2025-09-19,Cincinnati Moeller (OH),Cincinnati St Xavier (OH),30,13
 2025-09-19,Clare,Gladwin,26,28
@@ -845,6 +923,7 @@ date,home,away,home_score,away_score
 2025-09-19,East Lansing,Okemos,22,13
 2025-09-19,Eaton Rapids,Lake Odessa Lakewood,13,35
 2025-09-19,Edwardsburg,Paw Paw,7,35
+2025-09-19,Elk Rapids,Cheboygan,12,13
 2025-09-19,Erie Mason,Edon (OH),6,54
 2025-09-19,Fenton,Swartz Creek,49,0
 2025-09-19,Flat Rock,Carleton Airport,36,0
@@ -864,6 +943,8 @@ date,home,away,home_score,away_score
 2025-09-19,Genesee,Burton Bentley,20,3
 2025-09-19,Gladstone,Hancock,57,8
 2025-09-19,Grand Blanc,Traverse City West,49,6
+2025-09-19,Grand Haven,Jenison,10,23
+2025-09-19,Grand Rapids Catholic Central,East Grand Rapids,10,7
 2025-09-19,Grand Rapids Christian,Spring Lake,24,21
 2025-09-19,Grand Rapids Forest Hills Central,Wyoming,42,6
 2025-09-19,Grand Rapids Forest Hills Northern,Grand Rapids Union,49,19
@@ -877,6 +958,7 @@ date,home,away,home_score,away_score
 2025-09-19,Hamilton St Thomas More (CN),Hamilton St. Mary Catholic (CN),38,0
 2025-09-19,Harper Woods Chandler Park,Detroit Voyageur College Prep,36,14
 2025-09-19,Harrison,Beaverton,36,20
+2025-09-19,Hart,Kent City,6,15
 2025-09-19,Hartford,Decatur,0,48
 2025-09-19,Hemlock,Saginaw Valley Lutheran,8,35
 2025-09-19,Hillsdale,Adrian Madison,0,47
@@ -887,6 +969,7 @@ date,home,away,home_score,away_score
 2025-09-19,Howards Grove (WI),Oostburg (WI),50,6
 2025-09-19,Hudsonville,Holland West Ottawa,42,21
 2025-09-19,Hudsonville Unity Christian,Zeeland East,50,12
+2025-09-19,Iron Mountain,West Iron County,,
 2025-09-19,Ishpeming Westwood,Houghton,44,46
 2025-09-19,Ithaca,Carrollton,68,6
 2025-09-19,Jackson,Ypsilanti Community,28,50
@@ -911,6 +994,7 @@ date,home,away,home_score,away_score
 2025-09-19,Macomb Lutheran North,Detroit Loyola,35,6
 2025-09-19,Manchester,Michigan Center,8,43
 2025-09-19,Manistique,L'Anse,16,46
+2025-09-19,Mansfield (MA),Springfield Central (MA),3,28
 2025-09-19,Maple City Glen Lake,East Jordan,24,22
 2025-09-19,Marinette (WI),Bonduel (WI),6,35
 2025-09-19,Marlette,Ubly,22,42
@@ -922,8 +1006,10 @@ date,home,away,home_score,away_score
 2025-09-19,Milan,New Boston Huron,24,48
 2025-09-19,Milford,South Lyon,20,43
 2025-09-19,Millington,Cass City,14,17
+2025-09-19,Monroe,Temperance Bedford,7,24
 2025-09-19,Monroe Jefferson,Riverview,39,8
 2025-09-19,Monroe St Mary Catholic Central,Grosse Ile,48,6
+2025-09-19,Montague,Whitehall,6,13
 2025-09-19,Morley Stanwood,Lakeview,28,7
 2025-09-19,Morris (IL),LaSalle-Peru (IL),48,0
 2025-09-19,Mount Clemens,Melvindale Academy for Business & Tech,12,48
@@ -968,13 +1054,16 @@ date,home,away,home_score,away_score
 2025-09-19,Royal Oak,Livonia Clarenceville,38,6
 2025-09-19,Saginaw Heritage,Davison,42,63
 2025-09-19,Saginaw Nouvel Catholic Central,Saginaw Michigan Lutheran Seminary,27,14
+2025-09-19,Saginaw United,Marquette,12,20
 2025-09-19,Saline,Dexter,61,34
 2025-09-19,Sandusky,Burton Bendle,28,20
 2025-09-19,Sanford Meridian,Pinconning,37,6
+2025-09-19,Santa Rosa Montgomery (CA),Eureka St. Bernard (CA),14,50
 2025-09-19,Saranac,Dansville,47,0
 2025-09-19,Saugatuck,Coloma,42,60
 2025-09-19,Sault Ste Marie,Escanaba,7,53
 2025-09-19,Schoolcraft,Galesburg-Augusta,53,28
+2025-09-19,Shelby,Ravenna,8,30
 2025-09-19,South Haven,Constantine,25,39
 2025-09-19,Southfield Arts & Technology,Lowell,8,40
 2025-09-19,Southgate Anderson,Wyandotte Roosevelt,20,21
@@ -1022,6 +1111,7 @@ date,home,away,home_score,away_score
 2025-09-19,Wyoming Godwin Heights,Hopkins,26,16
 2025-09-19,Yale,Imlay City,14,12
 2025-09-19,Ypsilanti Lincoln,Ann Arbor Pioneer,28,27
+2025-09-19,Zeeland West,Grand Rapids South Christian,12,6
 2025-09-20,Auburn Hills Avondale,Pontiac,34,14
 2025-09-20,Detroit Martin Luther King,Detroit Cass Tech,22,27
 2025-09-20,Hammond Morton (IN),Phalen Leadership Academy (IN),62,0
@@ -1034,16 +1124,19 @@ date,home,away,home_score,away_score
 2025-09-25,Detroit Mumford,Detroit Cass Tech,0,48
 2025-09-25,Howards Grove (WI),Reedsville (WI),14,23
 2025-09-25,Windsor Holy Names (CN),La Salle St Thomas Of Villanova (CN),45,0
-2025-09-26,Dundee,Hillsdale,29,18
 2025-09-26,Addison,Brooklyn Columbia Central,26,56
 2025-09-26,Adrian Madison,Hudson,7,56
 2025-09-26,Akron Archbishop Hoban (OH),Cuyahoga Falls Walsh Jesuit (OH),19,14
+2025-09-26,Allegan,Constantine,7,25
 2025-09-26,Alma,Freeland,13,42
 2025-09-26,Almont,Croswell-Lexington,38,13
 2025-09-26,Ann Arbor Father Gabriel Richard,Bloomfield Hills Cranbrook Kingswood,66,22
 2025-09-26,Ann Arbor Pioneer,Ann Arbor Huron,14,21
+2025-09-26,Ann Arbor Skyline,Temperance Bedford,10,28
+2025-09-26,Arts & Technology Academy of Pontiac,Southfield Bradford Academy,8,14
 2025-09-26,Auburn Hills Avondale,Ferndale,0,33
 2025-09-26,Auburn Hills Oakland Christian,Benton Harbor,27,20
+2025-09-26,Baltimore Gilman (MD),Archbishop Spalding (MD),0,42
 2025-09-26,Battle Creek Harper Creek,Grand Rapids Kenowa Hills,37,15
 2025-09-26,Battle Creek Pennfield,Hastings,24,55
 2025-09-26,Bay City John Glenn,Bridgeport,62,0
@@ -1074,8 +1167,10 @@ date,home,away,home_score,away_score
 2025-09-26,Clarkson Football North (CN),Massillon Washington (OH),34,2
 2025-09-26,Clarkston,Rochester Adams,21,7
 2025-09-26,Clinton Township Chippewa Valley,Macomb Dakota,0,20
+2025-09-26,Coloma,Schoolcraft,6,26
 2025-09-26,Comstock,White Pigeon,0,58
 2025-09-26,Davison,Saginaw United,49,8
+2025-09-26,DeWitt,East Lansing,58,7
 2025-09-26,Dearborn Edsel Ford,Southgate Anderson,0,44
 2025-09-26,Dearborn Heights Annapolis,Dearborn Heights Robichaud,0,51
 2025-09-26,Dearborn Heights Crestwood,Romulus,26,35
@@ -1090,8 +1185,9 @@ date,home,away,home_score,away_score
 2025-09-26,Detroit Southeastern,Detroit East English,40,0
 2025-09-26,Detroit U of D Jesuit,Toledo St Francis De Sales (OH),0,34
 2025-09-26,Detroit University Prep Science & Math,Center Line Prep Academy,13,20
-2025-09-26,DeWitt,East Lansing,58,7
+2025-09-26,Detroit Voyageur College Prep,Detroit Edison,12,28
 2025-09-26,Dexter,Chelsea,42,28
+2025-09-26,Dundee,Hillsdale,29,18
 2025-09-26,East Jackson,Grass Lake,0,1
 2025-09-26,East Jordan,Mount Pleasant Sacred Heart,34,12
 2025-09-26,East Kentwood,Caledonia,42,6
@@ -1104,6 +1200,7 @@ date,home,away,home_score,away_score
 2025-09-26,Flint Powers Catholic,Frankenmuth,7,48
 2025-09-26,Flint Southwestern,Flint Beecher,20,14
 2025-09-26,Fowler,Bath,61,7
+2025-09-26,Fowlerville,Haslett,12,20
 2025-09-26,Frankfort,Harbor Springs,21,2
 2025-09-26,Fremont,Muskegon Oakridge,16,41
 2025-09-26,Fruitport,Comstock Park,35,14
@@ -1115,6 +1212,7 @@ date,home,away,home_score,away_score
 2025-09-26,Grand Rapids Christian,Ada Forest Hills Eastern,44,24
 2025-09-26,Grand Rapids Forest Hills Central,Hudsonville Unity Christian,16,52
 2025-09-26,Grand Rapids Forest Hills Northern,Muskegon,21,40
+2025-09-26,Grand Rapids Northview,East Grand Rapids,3,10
 2025-09-26,Grand Rapids Union,Muskegon Reeths-Puffer,9,37
 2025-09-26,Grandville,Rockford,0,28
 2025-09-26,Greenville,Coopersville,7,42
@@ -1122,12 +1220,14 @@ date,home,away,home_score,away_score
 2025-09-26,Grosse Pointe North,Warren Woods Tower,52,0
 2025-09-26,Grosse Pointe Woods University Liggett,Macomb Lutheran North,0,62
 2025-09-26,Gwinn,West Iron County,0,1
+2025-09-26,Hamilton St Thomas More (CN),Ancaster Bishop Tonnos (CN),4,8
 2025-09-26,Hamtramck,Romulus Summit Academy North,0,36
 2025-09-26,Hancock,Negaunee,0,44
 2025-09-26,Hanover-Horton,Jonesville,28,14
 2025-09-26,Harbor Beach,Unionville-Sebewaing,52,6
 2025-09-26,Harrison Township L'Anse Creuse,Utica,7,37
 2025-09-26,Hart,North Muskegon,18,29
+2025-09-26,Hartford,Vermontville Maple Valley,6,13
 2025-09-26,Hartland,Salem,28,21
 2025-09-26,Hazel Park,Clinton Township Clintondale,20,14
 2025-09-26,Holland,Belding,20,60
@@ -1157,6 +1257,7 @@ date,home,away,home_score,away_score
 2025-09-26,LaGrange Prairie Heights (IN),Butler Eastside (IN),0,42
 2025-09-26,Lake Fenton,Ortonville Brandon,28,29
 2025-09-26,Lake Orion,Oxford,34,41
+2025-09-26,Lansing Catholic,Eaton Rapids,7,6
 2025-09-26,Lansing Eastern,Mason,6,42
 2025-09-26,Lansing Everett,Grand Blanc,6,41
 2025-09-26,Lansing Sexton,Charlotte,34,18
@@ -1171,6 +1272,7 @@ date,home,away,home_score,away_score
 2025-09-26,Livonia Stevenson,Livonia Churchill,27,21
 2025-09-26,Lombard Montini (IL),Aurora Marmion Academy (IL),47,0
 2025-09-26,Lowell,Cedar Springs,28,35
+2025-09-26,Lyndhurst Brush (OH),Garfield Heights (OH),8,28
 2025-09-26,Madison Heights Bishop Foley,Clarkston Everest Collegiate,0,33
 2025-09-26,Madison Heights Lamphere,Warren Fitzgerald,0,21
 2025-09-26,Madison Heights Madison,New Haven,44,8
@@ -1208,6 +1310,7 @@ date,home,away,home_score,away_score
 2025-09-26,Okemos,Holt,14,42
 2025-09-26,Onsted,Clinton,0,49
 2025-09-26,Otisville LakeVille Memorial,Durand,13,56
+2025-09-26,Ovid-Elsie,Montrose,10,14
 2025-09-26,Owosso,Corunna,34,14
 2025-09-26,Parma Western,Coldwater,21,28
 2025-09-26,Petoskey,Alpena,24,0
@@ -1221,6 +1324,7 @@ date,home,away,home_score,away_score
 2025-09-26,Portland,Lake Odessa Lakewood,35,0
 2025-09-26,Quincy,Union City,14,38
 2025-09-26,Ravenna,Mason County Central,15,18
+2025-09-26,Redford Thurston,Redford Union,12,6
 2025-09-26,Reese,Marlette,28,14
 2025-09-26,Remus Chippewa Hills,Grant,34,13
 2025-09-26,Richland Gull Lake,Portage Northern,0,48
@@ -1261,6 +1365,7 @@ date,home,away,home_score,away_score
 2025-09-26,Ubly,Vassar,36,22
 2025-09-26,Utica Eisenhower,Sterling Heights Stevenson,15,3
 2025-09-26,Utica Ford,Warren Cousino,0,35
+2025-09-26,Vandercook Lake,Homer,12,14
 2025-09-26,Vestaburg,Laingsburg,3,35
 2025-09-26,Walled Lake Central,Waterford Mott,0,44
 2025-09-26,Walled Lake Western,South Lyon,21,24
@@ -1272,6 +1377,7 @@ date,home,away,home_score,away_score
 2025-09-26,Wayne Memorial,Westland John Glenn,13,44
 2025-09-26,West Bloomfield,Birmingham Groves,20,7
 2025-09-26,West Chicago Wheaton Academy (IL),Elgin St Edward (IL),48,0
+2025-09-26,Westfield (IN),Brownsburg (IN),10,14
 2025-09-26,White Lake Lakeland,Waterford Kettering,63,0
 2025-09-26,Whitmore Lake,Lutheran Westland,63,7
 2025-09-26,Wyandotte Roosevelt,Brownstown Woodhaven,7,49
@@ -1297,6 +1403,7 @@ date,home,away,home_score,away_score
 2025-10-03,Ann Arbor Father Gabriel Richard,Detroit Loyola,52,0
 2025-10-03,Ann Arbor Huron,Saline,14,42
 2025-10-03,Ann Arbor Skyline,Ann Arbor Pioneer,13,24
+2025-10-03,Archbishop Spalding (MD),Annapolis St. Mary's (MD),51,7
 2025-10-03,Arts & Technology Academy of Pontiac,Detroit Leadership Academy,30,14
 2025-10-03,Auburndale (WI),Abbotsford (WI),42,0
 2025-10-03,Bath,Perry,26,21
@@ -1311,12 +1418,14 @@ date,home,away,home_score,away_score
 2025-10-03,Bridgeport,Saginaw Swan Valley,0,62
 2025-10-03,Bronson,Comstock,52,0
 2025-10-03,Brooklyn Columbia Central,Vandercook Lake,60,13
+2025-10-03,Brownsburg (IN),Zionsville (IN),38,6
 2025-10-03,Brownstown Woodhaven,Dearborn Edsel Ford,63,7
 2025-10-03,Buchanan,Millington,8,35
 2025-10-03,Burton Bendle,Genesee,14,6
 2025-10-03,Burton Bentley,Flint Southwestern,50,18
 2025-10-03,Caledonia,Grand Haven,28,6
 2025-10-03,Calumet,Houghton,46,0
+2025-10-03,Carleton Airport,Grosse Ile,10,14
 2025-10-03,Cass City,Caro,33,6
 2025-10-03,Cedar Springs,Sault Ste Marie,63,7
 2025-10-03,Central Montcalm,Morley Stanwood,22,8
@@ -1328,6 +1437,7 @@ date,home,away,home_score,away_score
 2025-10-03,Clarkston,Lake Orion,42,21
 2025-10-03,Clarkston Everest Collegiate,Marine City Cardinal Mooney,42,0
 2025-10-03,Clinton,Hillsdale,69,14
+2025-10-03,Clinton Township Clintondale,Clawson,6,30
 2025-10-03,Clio,Ortonville Brandon,56,57
 2025-10-03,Coloma,Delton Kellogg,28,7
 2025-10-03,Constantine,Kalamazoo Hackett Catholic Prep,7,34
@@ -1366,6 +1476,7 @@ date,home,away,home_score,away_score
 2025-10-03,Flint Beecher,Flint New Standard Academy,0,65
 2025-10-03,Flint Hamady,Burton Atherton,48,0
 2025-10-03,Flint Kearsley,Fenton,7,55
+2025-10-03,Flushing,Holly,12,20
 2025-10-03,Frankenmuth,Bay City John Glenn,51,12
 2025-10-03,Fraser,Port Huron Northern,0,35
 2025-10-03,Fremont,Muskegon Orchard View,28,55
@@ -1386,6 +1497,7 @@ date,home,away,home_score,away_score
 2025-10-03,Grand Rapids West Catholic,Grand Rapids Christian,51,14
 2025-10-03,Grandville,Jenison,31,26
 2025-10-03,Grant,Newaygo,34,28
+2025-10-03,Grass Lake,Napoleon,6,30
 2025-10-03,Grayling,Cheboygan,27,41
 2025-10-03,Grosse Pointe North,St Clair Shores Lake Shore,14,13
 2025-10-03,Gwinn,Iron Mountain,0,1
@@ -1412,12 +1524,15 @@ date,home,away,home_score,away_score
 2025-10-03,Jackson Northwest,Berkley,30,37
 2025-10-03,Jonesville,Addison,20,0
 2025-10-03,Kalamazoo Central,Portage Central,7,42
+2025-10-03,Kalkaska,Maple City Glen Lake,12,16
 2025-10-03,Kingsford,Hancock,41,0
 2025-10-03,Kingsley,Benzie Central,52,12
 2025-10-03,L'Anse,Bark River-Harris,16,44
+2025-10-03,LaGrange Prairie Heights (IN),Woodburn Woodlan (IN),6,30
 2025-10-03,Laingsburg,Saranac,20,36
 2025-10-03,Lake Fenton,Corunna,48,20
 2025-10-03,Lake Odessa Lakewood,Lansing Sexton,34,41
+2025-10-03,Lansing Eastern,Fowlerville,8,22
 2025-10-03,Lansing Waverly,Okemos,23,33
 2025-10-03,Lawton,Schoolcraft,14,18
 2025-10-03,LeRoy Pine River,Roscommon,48,30
@@ -1425,6 +1540,7 @@ date,home,away,home_score,away_score
 2025-10-03,Linden,Swartz Creek,45,12
 2025-10-03,Livonia Franklin,Wayne Memorial,42,13
 2025-10-03,Lombard Montini (IL),Mundelein Carmel (IL),55,54
+2025-10-03,Lutheran Westland,Rochester Hills Lutheran Northwest,7,20
 2025-10-03,Macomb L'Anse Creuse North,Grosse Pointe South,6,42
 2025-10-03,Macomb Lutheran North,Bloomfield Hills Cranbrook Kingswood,48,9
 2025-10-03,Madison Heights Bishop Foley,Allen Park Cabrini,13,40
@@ -1450,6 +1566,7 @@ date,home,away,home_score,away_score
 2025-10-03,Mount Clemens,Redford Westfield Prep,14,16
 2025-10-03,Mount Pleasant Sacred Heart,Vestaburg,52,0
 2025-10-03,Muskegon Catholic Central,Shelby,8,44
+2025-10-03,Muskegon Mona Shores,Muskegon,12,28
 2025-10-03,Muskegon Reeths-Puffer,Grand Rapids Forest Hills Northern,27,40
 2025-10-03,Negaunee,Ishpeming Westwood,1,0
 2025-10-03,New Haven,Warren Lincoln,19,24
@@ -1488,6 +1605,7 @@ date,home,away,home_score,away_score
 2025-10-03,Rochester Hills Stoney Creek,Rochester Adams,20,26
 2025-10-03,Rockford,Hudsonville,28,35
 2025-10-03,Romeo,Macomb Dakota,39,20
+2025-10-03,Roseville,Utica,7,14
 2025-10-03,Royal Oak,Auburn Hills Avondale,35,6
 2025-10-03,Royal Oak Shrine Catholic,Waterford Our Lady of the Lakes,28,14
 2025-10-03,Saginaw Heritage,Flint Carman-Ainsworth,49,14
@@ -1504,13 +1622,16 @@ date,home,away,home_score,away_score
 2025-10-03,Springport,Stockbridge,53,0
 2025-10-03,St Clair,St Clair Shores South Lake,42,14
 2025-10-03,St Clair Shores Lakeview,Harrison Township L'Anse Creuse,42,14
+2025-10-03,St John Lake Central (IN),Chesterton (IN),6,27
 2025-10-03,St Louis,Beaverton,22,26
 2025-10-03,Sterling Heights,Marine City,7,61
 2025-10-03,Sterling Heights Parkway Christian,Auburn Hills Oakland Christian,13,22
 2025-10-03,Sterling Heights Stevenson,New Baltimore Anchor Bay,45,6
+2025-10-03,Tawas,Frankfort,7,29
 2025-10-03,Taylor,Trenton,20,48
 2025-10-03,Temperance Bedford,Dexter,13,38
 2025-10-03,Toledo Central Catholic (OH),Toledo St John's Jesuit (OH),42,7
+2025-10-03,Toledo St Francis De Sales (OH),Jackson Lumen Christi,7,14
 2025-10-03,Toledo Whitmer (OH),Sylvania Northview (OH),51,10
 2025-10-03,Traverse City St Francis,Boyne City,20,13
 2025-10-03,Traverse City West,Midland Dow,13,31
@@ -1535,9 +1656,12 @@ date,home,away,home_score,away_score
 2025-10-03,Wyoming Lee,Wyoming Kelloggsville,0,1
 2025-10-03,Yale,North Branch,24,21
 2025-10-03,Ypsilanti Community,Chelsea,6,35
+2025-10-03,Zeeland West,Hudsonville Unity Christian,6,14
 2025-10-04,Erie Mason,Pioneer North Central (OH),30,33
+2025-10-04,Eureka St. Bernard (CA),Eureka (CA),43,6
 2025-10-04,Harbor Springs,Lakeview,43,7
 2025-10-04,New Market Huron Heights (CN),Columbus Harvest Prep (OH),47,34
+2025-10-04,Warren Michigan Collegiate,Detroit Voyageur College Prep,12,22
 2025-10-04,Warren Woods Tower,Warren Fitzgerald,0,61
 2025-10-04,West Iron County,Manistique,27,22
 2025-10-05,Detroit Catholic Central,Bloomfield Hills Brother Rice,41,8
@@ -1551,6 +1675,8 @@ date,home,away,home_score,away_score
 2025-10-10,Ada Forest Hills Eastern,Spring Lake,43,57
 2025-10-10,Addison,Homer,22,7
 2025-10-10,Adrian Madison,Blissfield,51,14
+2025-10-10,Akron Archbishop Hoban (OH),Cleveland Glenville (OH),12,9
+2025-10-10,Algonac,Yale,6,28
 2025-10-10,Allegan,Watervliet,50,33
 2025-10-10,Allen Park,Wyandotte Roosevelt,31,7
 2025-10-10,Alma,Essexville Garber,14,7
@@ -1560,11 +1686,13 @@ date,home,away,home_score,away_score
 2025-10-10,Auburndale (WI),Wisconsin Rapids Assumption (WI),41,6
 2025-10-10,Bark River-Harris,Iron Mountain,38,14
 2025-10-10,Bath,Laingsburg,34,14
+2025-10-10,Battle Creek Central,Kalamazoo Central,12,31
 2025-10-10,Bay City Central,Midland Dow,0,48
 2025-10-10,Beal City,Evart,64,0
 2025-10-10,Belleville,Westland John Glenn,28,23
 2025-10-10,Benzie Central,Oscoda,54,12
 2025-10-10,Berkley,Auburn Hills Avondale,27,8
+2025-10-10,Berrien Springs,Benton Harbor,,
 2025-10-10,Birmingham Groves,Rochester Hills Stoney Creek,29,12
 2025-10-10,Boyne City,Morley Stanwood,28,0
 2025-10-10,Bridgeport,Frankenmuth,6,77
@@ -1580,9 +1708,11 @@ date,home,away,home_score,away_score
 2025-10-10,Carrollton,Saginaw Valley Lutheran,6,49
 2025-10-10,Cassopolis,Sand Creek,1,0
 2025-10-10,Cedar Springs,Sparta,51,13
+2025-10-10,Center Line Prep Academy,Mount Pleasant Sacred Heart,12,20
 2025-10-10,Central Montcalm,Kent City,14,46
 2025-10-10,Centreville,Hartford,20,14
 2025-10-10,Charlevoix,Mancelona,15,12
+2025-10-10,Charlotte,Olivet,7,14
 2025-10-10,Cheboygan,Kingsley,22,57
 2025-10-10,Chelsea,Pinckney,44,6
 2025-10-10,Chesaning,Ovid-Elsie,16,58
@@ -1601,6 +1731,7 @@ date,home,away,home_score,away_score
 2025-10-10,Corunna,Goodrich,7,55
 2025-10-10,Dansville,Perry,14,35
 2025-10-10,Davison,Flint Carman-Ainsworth,58,0
+2025-10-10,DeWitt,Grand Ledge,59,7
 2025-10-10,Dearborn,Wayne Memorial,29,21
 2025-10-10,Dearborn Edsel Ford,Lincoln Park,0,42
 2025-10-10,Dearborn Fordson,Livonia Churchill,41,14
@@ -1608,11 +1739,11 @@ date,home,away,home_score,away_score
 2025-10-10,Detroit Cass Tech,Detroit East English,67,0
 2025-10-10,Detroit Catholic Central,Toledo St John's Jesuit (OH),48,7
 2025-10-10,Detroit Henry Ford,Detroit Martin Luther King,0,51
+2025-10-10,Detroit Lincoln-King,Ecorse,6,8
 2025-10-10,Detroit Pershing,Detroit Central,6,0
 2025-10-10,Detroit Renaissance,Detroit Western,58,16
 2025-10-10,Detroit U of D Jesuit,Detroit Country Day,0,35
 2025-10-10,Detroit University Prep,Cass City,14,69
-2025-10-10,DeWitt,Grand Ledge,59,7
 2025-10-10,Dexter,Ann Arbor Skyline,48,7
 2025-10-10,Dundee,Ida,28,63
 2025-10-10,Durand,Birch Run,30,28
@@ -1620,6 +1751,7 @@ date,home,away,home_score,away_score
 2025-10-10,Eaton Rapids,Portland,6,54
 2025-10-10,Edwardsburg,Three Rivers,27,0
 2025-10-10,Elk Rapids,Tawas,46,6
+2025-10-10,Elkton-Pigeon-Bay Port Laker,Millington,3,14
 2025-10-10,Escanaba,Gaylord,30,34
 2025-10-10,Farmington,Bloomfield Hills,49,21
 2025-10-10,Fenton,Linden,46,41
@@ -1629,6 +1761,7 @@ date,home,away,home_score,away_score
 2025-10-10,Flushing,Swartz Creek,40,28
 2025-10-10,Fowlerville,Mason,13,58
 2025-10-10,Frankfort,Muskegon Catholic Central,22,8
+2025-10-10,Fraser,Utica Ford,7,14
 2025-10-10,Freeland,Bay City John Glenn,35,14
 2025-10-10,Fremont,Montague,0,35
 2025-10-10,Fruitport,Wyoming Godwin Heights,30,31
@@ -1657,6 +1790,7 @@ date,home,away,home_score,away_score
 2025-10-10,Hastings,Battle Creek Harper Creek,15,29
 2025-10-10,Hazel Park,Warren Lincoln,42,6
 2025-10-10,Hesperia,Mason County Central,20,49
+2025-10-10,Hillsdale,Onsted,12,26
 2025-10-10,Holland,Hopkins,0,45
 2025-10-10,Holland Christian,Grand Rapids Catholic Central,7,35
 2025-10-10,Holland West Ottawa,Caledonia,33,30
@@ -1709,12 +1843,14 @@ date,home,away,home_score,away_score
 2025-10-10,Mount Pleasant,Traverse City West,29,8
 2025-10-10,Mt Morris,Otisville LakeVille Memorial,26,19
 2025-10-10,Muskegon,Grand Rapids Union,67,0
+2025-10-10,Muskegon Oakridge,Belding,7,28
 2025-10-10,Muskegon Orchard View,Hart,35,30
 2025-10-10,Napoleon,Leslie,30,26
 2025-10-10,New Baltimore Anchor Bay,Clinton Township Chippewa Valley,26,8
 2025-10-10,New Boston Huron,Carleton Airport,56,14
 2025-10-10,New Lothrop,Montrose,14,28
 2025-10-10,Newaygo,Reed City,6,55
+2025-10-10,Noblesville (IN),Brownsburg (IN),7,42
 2025-10-10,North Branch,Armada,14,31
 2025-10-10,North Farmington,Oak Park,21,6
 2025-10-10,Northville,Hartland,55,9
@@ -1793,32 +1929,22 @@ date,home,away,home_score,away_score
 2025-10-10,Zeeland East,Grand Rapids South Christian,12,41
 2025-10-11,Bloomfield Hills Brother Rice,Warren De La Salle Collegiate,22,17
 2025-10-11,Bloomfield Hills Cranbrook Kingswood,Detroit Loyola,39,20
+2025-10-11,Detroit Leadership Academy,Mount Clemens,,
 2025-10-11,Detroit University Prep Science & Math,Vestaburg,30,12
+2025-10-11,Eureka St. Bernard (CA),Fortuna (CA),26,22
 2025-10-11,Flint New Standard Academy,Flint Southwestern,35,8
 2025-10-11,Hammond Morton (IN),Hobart (IN),18,29
 2025-10-11,Lapeer,New Lenox Lincoln Way West (IL),7,49
 2025-10-11,Marine City Cardinal Mooney,Allen Park Cabrini,7,42
 2025-10-11,Ottawa Lake Whiteford,Erie Mason,84,0
+2025-10-11,Towson Concordia Prep (MD),Archbishop Spalding (MD),10,49
 2025-10-16,Detroit East English,Detroit Communication Media Arts,40,8
 2025-10-16,Detroit Henry Ford,Detroit Northwestern,18,0
 2025-10-16,Detroit Mumford,Detroit Central,22,16
+2025-10-16,Detroit Renaissance,Dearborn Divine Child,8,42
 2025-10-16,Detroit Southeastern,Detroit Osborn,50,0
 2025-10-16,Detroit Western,Detroit Cody,0,20
-2025-10-16,Detroit Renaissance,Dearborn Divine Child,8,42
 2025-10-16,Windsor Holy Names (CN),Essex (CN),35,13
-2025-10-17,Detroit Cass Tech,Detroit Martin Luther King,35,19
-2025-10-17,Detroit Denby,Detroit Pershing,20,6
-2025-10-17,Clare,Beaverton,54,0
-2025-10-17,Gladwin,Harrison,63,30
-2025-10-17,Midland Bullock Creek,Farwell,39,24
-2025-10-17,Ogemaw Heights,Sanford Meridian,34,0
-2025-10-17,Shepherd,St Louis,23,8
-2025-10-17,Standish-Sterling,Pinconning,21,8
-2025-10-17,Clio,Swartz Creek,20,21
-2025-10-17,Corunna,Flint Kearsley,38,20
-2025-10-17,Lake Fenton,Linden,34,60
-2025-10-17,Ortonville Brandon,Flushing,0,38
-2025-10-17,Owosso,Holly,14,41
 2025-10-17,Adrian,Jackson,48,7
 2025-10-17,Akron Archbishop Hoban (OH),Central York (PA),46,21
 2025-10-17,Allen Park Cabrini,Waterford Our Lady of the Lakes,21,6
@@ -1841,27 +1967,37 @@ date,home,away,home_score,away_score
 2025-10-17,Birmingham Seaholm,Rochester Adams,7,45
 2025-10-17,Bloomfield Hills,West Bloomfield,0,37
 2025-10-17,Brighton,Howell,28,37
+2025-10-17,Brownsburg (IN),Fishers Hamilton Southeastern (IN),35,7
 2025-10-17,Brownstown Woodhaven,Trenton,24,14
 2025-10-17,Byron Center,Grand Rapids Forest Hills Northern,41,13
 2025-10-17,Calumet,Gladstone,46,3
 2025-10-17,Carleton Airport,Milan,33,28
+2025-10-17,Cassopolis,Centreville,6,24
 2025-10-17,Central Montcalm,Remus Chippewa Hills,46,14
 2025-10-17,Charlevoix,Boyne City,13,12
 2025-10-17,Chelsea,Ypsilanti Lincoln,35,7
 2025-10-17,Chesaning,Durand,22,51
+2025-10-17,Clare,Beaverton,54,0
+2025-10-17,Clarkson Football North (CN),Baltimore St. Francis Academy (MD),7,29
 2025-10-17,Clarkston,Farmington,49,7
 2025-10-17,Clarkston Everest Collegiate,Royal Oak Shrine Catholic,28,7
 2025-10-17,Clinton Township Chippewa Valley,Harrison Township L'Anse Creuse,42,14
+2025-10-17,Clio,Swartz Creek,20,21
 2025-10-17,Coldwater,Hastings,37,40
+2025-10-17,Comstock,Hartford,6,30
 2025-10-17,Constantine,Watervliet,56,26
 2025-10-17,Coopersville,Big Rapids,38,28
+2025-10-17,Corunna,Flint Kearsley,38,20
+2025-10-17,Crescent City Del Norte (CA),Eureka St. Bernard (CA),0,16
 2025-10-17,Croswell-Lexington,Yale,38,17
 2025-10-17,Dearborn Edsel Ford,Allen Park,0,57
 2025-10-17,Dearborn Heights Annapolis,Romulus,0,53
 2025-10-17,Dearborn Heights Robichaud,Dearborn Heights Crestwood,14,15
 2025-10-17,Decatur,White Pigeon,22,14
+2025-10-17,Detroit Cass Tech,Detroit Martin Luther King,35,19
 2025-10-17,Detroit Catholic Central,Grand Ledge,36,14
 2025-10-17,Detroit Community,Detroit Leadership Academy,46,0
+2025-10-17,Detroit Denby,Detroit Pershing,20,6
 2025-10-17,Detroit Loyola,Grosse Pointe Woods University Liggett,14,7
 2025-10-17,Detroit Old Redford,Detroit Lincoln-King,0,1
 2025-10-17,Detroit U of D Jesuit,Saginaw Heritage,14,42
@@ -1871,10 +2007,12 @@ date,home,away,home_score,away_score
 2025-10-17,East Grand Rapids,Grand Rapids Ottawa Hills,61,14
 2025-10-17,East Jordan,Frankfort,25,14
 2025-10-17,Eaton Rapids,Lansing Sexton,13,48
+2025-10-17,Ecorse,Detroit Edison,8,27
 2025-10-17,Elk Rapids,Benzie Central,42,14
 2025-10-17,Essexville Garber,Bridgeport,42,0
 2025-10-17,Evart,McBain,28,71
 2025-10-17,Flat Rock,New Boston Huron,37,13
+2025-10-17,Flint Carman-Ainsworth,Saginaw United,8,14
 2025-10-17,Flint Hamady,Rochester Hills Lutheran Northwest,28,14
 2025-10-17,Flint Southwestern,Burton Atherton,0,41
 2025-10-17,Fowler,Ithaca,48,28
@@ -1883,6 +2021,7 @@ date,home,away,home_score,away_score
 2025-10-17,Galloway Westland (OH),Delaware Hayes (OH),24,17
 2025-10-17,Gaylord,St Johns,32,28
 2025-10-17,Genesee,Flint Beecher,1,0
+2025-10-17,Gladwin,Harrison,63,30
 2025-10-17,Grand Blanc,Davison,57,29
 2025-10-17,Grand Haven,Hudsonville,14,63
 2025-10-17,Grand Rapids Kenowa Hills,Greenville,42,0
@@ -1892,6 +2031,7 @@ date,home,away,home_score,away_score
 2025-10-17,Grand Rapids West Catholic,Ada Forest Hills Eastern,31,21
 2025-10-17,Grandville,East Kentwood,20,35
 2025-10-17,Gwinn,L'Anse,0,1
+2025-10-17,Hamilton St Thomas More (CN),Hamilton Bishop Ryan (CN),3,19
 2025-10-17,Hammond Morton (IN),East Chicago Central (IN),58,6
 2025-10-17,Hancock,Ishpeming Westwood,52,20
 2025-10-17,Hanover-Horton,Addison,46,0
@@ -1910,6 +2050,7 @@ date,home,away,home_score,away_score
 2025-10-17,Imlay City,Armada,0,42
 2025-10-17,Ionia,Lansing Catholic,0,28
 2025-10-17,Iron Mountain,Manistique,43,14
+2025-10-17,Jenison,Holland West Ottawa,9,7
 2025-10-17,Jonesville,Vandercook Lake,46,7
 2025-10-17,Kalamazoo Central,Mattawan,45,28
 2025-10-17,Kalamazoo Hackett Catholic Prep,Parchment,42,0
@@ -1919,6 +2060,7 @@ date,home,away,home_score,away_score
 2025-10-17,LaGrange Prairie Heights (IN),Ligonier West Noble (IN),6,42
 2025-10-17,Laingsburg,Dansville,43,11
 2025-10-17,Lake City,Houghton Lake,8,34
+2025-10-17,Lake Fenton,Linden,34,60
 2025-10-17,Lake Orion,Oak Park,14,13
 2025-10-17,Lakeview,Hemlock,13,12
 2025-10-17,Lansing Eastern,Detroit University Prep Science & Math,50,44
@@ -1929,6 +2071,7 @@ date,home,away,home_score,away_score
 2025-10-17,Lincoln Park,Gibraltar Carlson,36,59
 2025-10-17,Livonia Churchill,Livonia Franklin,26,34
 2025-10-17,Livonia Clarenceville,Whitmore Lake,15,56
+2025-10-17,Livonia Stevenson,Dearborn,7,6
 2025-10-17,Lombard Montini (IL),Chicago Saint Ignatius College Prep (IL),49,7
 2025-10-17,Lowell,Sparta,35,14
 2025-10-17,Macomb Dakota,Utica,17,26
@@ -1944,6 +2087,7 @@ date,home,away,home_score,away_score
 2025-10-17,Melvindale Academy for Business & Tech,Redford Westfield Prep,34,18
 2025-10-17,Michigan Center,Napoleon,46,14
 2025-10-17,Middleville Thornapple Kellogg,Holland Christian,22,21
+2025-10-17,Midland Bullock Creek,Farwell,39,24
 2025-10-17,Midland Dow,Lapeer,50,0
 2025-10-17,Milford,Walled Lake Central,41,19
 2025-10-17,Monroe Jefferson,Monroe St Mary Catholic Central,15,20
@@ -1952,6 +2096,7 @@ date,home,away,home_score,away_score
 2025-10-17,Montrose,Mt Morris,44,0
 2025-10-17,Morley Stanwood,Grant,42,20
 2025-10-17,Morris (IL),Sycamore (IL),50,10
+2025-10-17,Mount Clemens,Arts & Technology Academy of Pontiac,7,14
 2025-10-17,Mount Pleasant,Midland,10,0
 2025-10-17,Muskegon Orchard View,Ludington,15,55
 2025-10-17,Muskegon Reeths-Puffer,Muskegon,7,61
@@ -1963,12 +2108,15 @@ date,home,away,home_score,away_score
 2025-10-17,North Branch,Almont,14,43
 2025-10-17,North Muskegon,Newaygo,56,34
 2025-10-17,Novi,Northville,19,16
+2025-10-17,Ogemaw Heights,Sanford Meridian,34,0
 2025-10-17,Okemos,DeWitt,0,51
 2025-10-17,Olivet,Lake Odessa Lakewood,42,14
 2025-10-17,Onsted,Adrian Madison,35,53
 2025-10-17,Orchard Lake St Mary's,Bloomfield Hills Brother Rice,31,43
+2025-10-17,Ortonville Brandon,Flushing,0,38
 2025-10-17,Otsego,Sturgis,49,0
 2025-10-17,Ovid-Elsie,New Lothrop,56,25
+2025-10-17,Owosso,Holly,14,41
 2025-10-17,Oxford,North Farmington,27,14
 2025-10-17,Perry,Pewamo-Westphalia,0,55
 2025-10-17,Petersburg Summerfield,Ottawa Lake Whiteford,6,58
@@ -1987,6 +2135,7 @@ date,home,away,home_score,away_score
 2025-10-17,Reese,Saginaw Michigan Lutheran Seminary,18,26
 2025-10-17,Richland Gull Lake,Stevensville Lakeshore,41,56
 2025-10-17,Richmond,Algonac,47,6
+2025-10-17,River Rouge,New Market Huron Heights (CN),7,14
 2025-10-17,Riverview,Grosse Ile,68,24
 2025-10-17,Rochester Hills Stoney Creek,Berkley,37,0
 2025-10-17,Rockford,Caledonia,34,14
@@ -2002,6 +2151,7 @@ date,home,away,home_score,away_score
 2025-10-17,Saugatuck,Lawton,17,56
 2025-10-17,Sault Ste Marie,Petoskey,0,42
 2025-10-17,Schoolcraft,Delton Kellogg,60,0
+2025-10-17,Shepherd,St Louis,23,8
 2025-10-17,South Haven,Allegan,31,0
 2025-10-17,South Lyon,Wyandotte Roosevelt,56,7
 2025-10-17,South Lyon East,Walled Lake Western,21,41
@@ -2012,6 +2162,7 @@ date,home,away,home_score,away_score
 2025-10-17,St Clair,Hazel Park,38,26
 2025-10-17,St Clair Shores Lake Shore,Warren Cousino,12,56
 2025-10-17,St John Lake Central (IN),Valparaiso (IN),21,14
+2025-10-17,Standish-Sterling,Pinconning,21,8
 2025-10-17,Stockbridge,Sand Creek,64,32
 2025-10-17,Tecumseh,Ypsilanti Community,35,6
 2025-10-17,Three Rivers,Paw Paw,0,43
@@ -2031,7 +2182,9 @@ date,home,away,home_score,away_score
 2025-10-17,Vicksburg,Edwardsburg,38,35
 2025-10-17,Warren De La Salle Collegiate,Toledo St John's Jesuit (OH),48,22
 2025-10-17,Warren Fitzgerald,Port Huron Northern,36,23
+2025-10-17,Warren Michigan Collegiate,Harper Woods Chandler Park,8,28
 2025-10-17,Warren Mott,Grosse Pointe North,35,34
+2025-10-17,Warren Woods Tower,Fraser,6,13
 2025-10-17,Waterford Kettering,Walled Lake Northern,0,46
 2025-10-17,Wayland,Grand Rapids Christian,21,31
 2025-10-17,Wayne Memorial,Belleville,19,57
@@ -2044,6 +2197,7 @@ date,home,away,home_score,away_score
 2025-10-17,Wyoming Godwin Heights,Wyoming Kelloggsville,41,22
 2025-10-17,Zeeland East,Grand Rapids Forest Hills Central,28,14
 2025-10-18,Bloomfield Hills Cranbrook Kingswood,Riverview Gabriel Richard,37,20
+2025-10-18,Cadillac,Marquette,12,21
 2025-10-18,Center Line,Warren Lincoln,28,20
 2025-10-18,Detroit Country Day,Mason,14,19
 2025-10-18,Detroit University Prep,Lutheran Westland,16,0
@@ -2054,23 +2208,11 @@ date,home,away,home_score,away_score
 2025-10-18,Garfield Heights (OH),Maple Heights (OH),20,18
 2025-10-18,Marine City Cardinal Mooney,Madison Heights Bishop Foley,0,22
 2025-10-18,Muskegon Catholic Central,Auburn Hills Oakland Christian,55,18
+2025-10-18,Traverse City St Francis,Jackson Lumen Christi,12,27
 2025-10-19,Goodrich,Fenton,21,20
 2025-10-23,Burton Bentley,Imlay City,0,55
 2025-10-23,Lansing Eastern,Lansing Sexton,0,45
 2025-10-23,Negaunee,Iron Mountain,44,7
-2025-10-24,Reading,Centreville,14,40
-2025-10-24,Sand Creek,Comstock,56,34
-2025-10-24,Springport,Bronson,7,0
-2025-10-24,Stockbridge,White Pigeon,20,46
-2025-10-24,Vermontville Maple Valley,Cassopolis,21,28
-2025-10-24,East Jackson,Homer,8,56
-2025-10-24,Grass Lake,Addison,22,6
-2025-10-24,Leslie,Vandercook Lake,56,2
-2025-10-24,Manchester,Jonesville,0,22
-2025-10-24,Napoleon,Brooklyn Columbia Central,40,36
-2025-10-24,Dearborn Fordson,Brighton,39,35
-2025-10-24,Carleton Airport,Auburn Hills Avondale,24,15
-2025-10-24,South Haven,Galesburg-Augusta,21,6
 2025-10-24,Akron Archbishop Hoban (OH),Lakewood St Edward (OH),24,20
 2025-10-24,Algonac,Madison Heights Madison,34,38
 2025-10-24,Allegan,Coloma,44,37
@@ -2078,6 +2220,7 @@ date,home,away,home_score,away_score
 2025-10-24,Almont,Detroit Edison,53,46
 2025-10-24,Ann Arbor Huron,Rochester Hills Stoney Creek,14,35
 2025-10-24,Ann Arbor Pioneer,Pinckney,35,20
+2025-10-24,Ann Arbor Skyline,Romulus Summit Academy North,,
 2025-10-24,Armada,Frankenmuth,14,42
 2025-10-24,Bark River-Harris,Houghton,44,6
 2025-10-24,Bath,Durand,0,50
@@ -2099,25 +2242,30 @@ date,home,away,home_score,away_score
 2025-10-24,Burton Atherton,Grand Rapids Union,0,46
 2025-10-24,Burton Bendle,Flint Southwestern,46,0
 2025-10-24,Caledonia,Jenison,14,7
+2025-10-24,Carleton Airport,Auburn Hills Avondale,24,15
 2025-10-24,Caro,Laingsburg,44,14
 2025-10-24,Carrollton,Pinconning,12,35
 2025-10-24,Cedar Springs,Coopersville,27,21
 2025-10-24,Center Line Prep Academy,Detroit Community,0,1
 2025-10-24,Central Montcalm,Hart,60,24
 2025-10-24,Chelsea,Linden,35,28
+2025-10-24,Chesaning,Corunna,7,28
 2025-10-24,Cincinnati Elder (OH),Warren De La Salle Collegiate,35,7
 2025-10-24,Cincinnati Moeller (OH),Muskegon,56,13
 2025-10-24,Clarkson Football North (CN),Cleveland St Ignatius (OH),28,13
 2025-10-24,Clarkston,Utica Eisenhower,42,0
 2025-10-24,Clarkston Everest Collegiate,Saginaw Nouvel Catholic Central,17,34
+2025-10-24,Clawson,Royal Oak,10,7
 2025-10-24,Clinton,Ubly,48,22
 2025-10-24,Clinton Township Chippewa Valley,Southfield Arts & Technology,35,6
 2025-10-24,Comstock Park,Olivet,14,49
 2025-10-24,Constantine,Lawton,14,23
+2025-10-24,Croswell-Lexington,Ogemaw Heights,7,27
 2025-10-24,Dansville,Vestaburg,34,14
 2025-10-24,Davison,Lapeer,44,0
 2025-10-24,Dearborn,Hartland,18,42
 2025-10-24,Dearborn Divine Child,Detroit Southeastern,56,6
+2025-10-24,Dearborn Fordson,Brighton,39,35
 2025-10-24,Detroit Central,Warren Lincoln,22,6
 2025-10-24,Detroit Country Day,Monroe St Mary Catholic Central,17,3
 2025-10-24,Detroit Denby,Detroit University Prep Science & Math,34,18
@@ -2127,12 +2275,15 @@ date,home,away,home_score,away_score
 2025-10-24,Detroit Old Redford,Redford Westfield Prep,0,1
 2025-10-24,Detroit Osborn,Melvindale Academy for Business & Tech,0,40
 2025-10-24,Dexter,Flushing,42,12
+2025-10-24,Dundee,Grosse Ile,10,27
 2025-10-24,East Grand Rapids,Grand Rapids Forest Hills Central,34,6
+2025-10-24,East Jackson,Homer,8,56
 2025-10-24,East Jordan,Elk Rapids,20,6
 2025-10-24,East Kentwood,Grand Haven,49,29
 2025-10-24,East Lansing,Holt,28,14
 2025-10-24,Eaton Rapids,Milan,14,16
 2025-10-24,Ecorse,Hamtramck,38,11
+2025-10-24,Edwardsburg,Niles,12,21
 2025-10-24,Erie Mason,Petersburg Summerfield,0,29
 2025-10-24,Escanaba,Gladstone,38,12
 2025-10-24,Essexville Garber,Owosso,14,34
@@ -2157,6 +2308,7 @@ date,home,away,home_score,away_score
 2025-10-24,Grand Rapids West Catholic,Zeeland West,28,16
 2025-10-24,Grandville,Hudsonville,25,28
 2025-10-24,Grant,Kent City,8,38
+2025-10-24,Grass Lake,Addison,22,6
 2025-10-24,Grayling,Shepherd,21,20
 2025-10-24,Greenville,Lowell,13,37
 2025-10-24,Grosse Pointe South,Grosse Pointe North,44,7
@@ -2173,6 +2325,7 @@ date,home,away,home_score,away_score
 2025-10-24,Hillsdale,Blissfield,27,20
 2025-10-24,Holland Christian,Grand Rapids Christian,35,22
 2025-10-24,Holly,Walled Lake Northern,21,20
+2025-10-24,Hopkins,Fruitport,12,7
 2025-10-24,Hudsonville Unity Christian,Pontiac Notre Dame Prep,25,34
 2025-10-24,Ithaca,Beal City,8,39
 2025-10-24,Jackson Northwest,Battle Creek Harper Creek,16,48
@@ -2181,19 +2334,24 @@ date,home,away,home_score,away_score
 2025-10-24,L'Anse,Calumet,8,42
 2025-10-24,Lake Odessa Lakewood,Ionia,33,14
 2025-10-24,Lansing Everett,DeWitt,7,63
+2025-10-24,Leslie,Vandercook Lake,56,2
 2025-10-24,Livonia Churchill,Plymouth,20,22
 2025-10-24,Livonia Clarenceville,Bloomfield Hills Cranbrook Kingswood,41,62
 2025-10-24,Livonia Franklin,Northville,14,35
 2025-10-24,Livonia Stevenson,Salem,6,34
 2025-10-24,Lombard Montini (IL),Burbank St. Laurence (IL),23,0
 2025-10-24,Ludington,Howard City Tri County,48,7
+2025-10-24,Lutheran Westland,Dearborn Heights Annapolis,6,21
 2025-10-24,Macomb Dakota,Oxford,20,24
+2025-10-24,Macomb L'Anse Creuse North,Richmond,7,21
 2025-10-24,Madison Heights Bishop Foley,Grosse Pointe Woods University Liggett,17,0
 2025-10-24,Madison Heights Lamphere,Berkley,24,3
 2025-10-24,Mancelona,Maple City Glen Lake,22,23
+2025-10-24,Manchester,Jonesville,0,22
 2025-10-24,Manistee,Mason County Central,24,37
 2025-10-24,Mansfield (MA),North Attleborough (MA),24,14
 2025-10-24,Manton,Johannesburg-Lewiston,50,8
+2025-10-24,Marine City,Marysville,8,19
 2025-10-24,Marlette,Elkton-Pigeon-Bay Port Laker,12,42
 2025-10-24,Marquette,Kingsford,21,13
 2025-10-24,Marshall,Coldwater,28,7
@@ -2209,6 +2367,8 @@ date,home,away,home_score,away_score
 2025-10-24,Muskegon Oakridge,North Muskegon,41,27
 2025-10-24,Muskegon Orchard View,Shelby,35,34
 2025-10-24,Muskegon Reeths-Puffer,Ada Forest Hills Eastern,22,37
+2025-10-24,Napoleon,Brooklyn Columbia Central,40,36
+2025-10-24,New Boston Huron,Adrian,6,27
 2025-10-24,New Haven,Utica Ford,18,21
 2025-10-24,New Lenox Lincoln Way West (IL),Stagg (IL),49,0
 2025-10-24,New Lothrop,Cheboygan,21,16
@@ -2230,6 +2390,7 @@ date,home,away,home_score,away_score
 2025-10-24,Pontiac,Ortonville Brandon,12,55
 2025-10-24,Port Huron Northern,St Clair,35,26
 2025-10-24,Quincy,Hartford,12,35
+2025-10-24,Reading,Centreville,14,40
 2025-10-24,Redford Union,Detroit Voyageur College Prep,6,0
 2025-10-24,Reed City,Standish-Sterling,52,15
 2025-10-24,Remus Chippewa Hills,Lakeview,0,7
@@ -2246,21 +2407,25 @@ date,home,away,home_score,away_score
 2025-10-24,Saginaw Michigan Lutheran Seminary,Cass City,30,14
 2025-10-24,Saginaw Swan Valley,Midland Bullock Creek,49,37
 2025-10-24,Saline,Lake Orion,49,14
+2025-10-24,Sand Creek,Comstock,56,34
 2025-10-24,Sandusky,Reese,21,42
 2025-10-24,Sanford Meridian,Alpena,46,20
 2025-10-24,Saranac,White Cloud,39,0
 2025-10-24,Sault Ste Marie,Gaylord,0,35
 2025-10-24,Schoolcraft,Kalamazoo Hackett Catholic Prep,20,25
+2025-10-24,South Haven,Galesburg-Augusta,21,6
 2025-10-24,South Lyon,South Lyon East,28,6
 2025-10-24,Southfield Bradford Academy,Marine City Cardinal Mooney,20,3
 2025-10-24,Southgate Anderson,Melvindale,59,6
 2025-10-24,Sparta,Grand Rapids Kenowa Hills,35,56
+2025-10-24,Springport,Bronson,7,0
 2025-10-24,St Clair Shores Lake Shore,St Clair Shores Lakeview,7,42
 2025-10-24,St Joseph,Portage Central,8,40
 2025-10-24,St Louis,Hesperia,44,28
 2025-10-24,Sterling Heights,Clinton Township Clintondale,26,70
 2025-10-24,Sterling Heights Parkway Christian,Genesee,31,28
 2025-10-24,Stevensville Lakeshore,Portage Northern,21,46
+2025-10-24,Stockbridge,White Pigeon,20,46
 2025-10-24,Sturgis,Three Rivers,14,42
 2025-10-24,Swartz Creek,Bay City John Glenn,30,13
 2025-10-24,Tawas,Roscommon,20,30
@@ -2269,11 +2434,14 @@ date,home,away,home_score,away_score
 2025-10-24,Temperance Bedford,Detroit Cass Tech,0,61
 2025-10-24,Toledo Central Catholic (OH),Muskegon Mona Shores,35,13
 2025-10-24,Toledo St John's Jesuit (OH),Detroit U of D Jesuit,52,28
+2025-10-24,Towson Loyola Blakefield (MD),Archbishop Spalding (MD),6,56
 2025-10-24,Traverse City West,Traverse City Central,21,20
 2025-10-24,Trenton,Lincoln Park,49,26
 2025-10-24,Troy,North Farmington,7,42
 2025-10-24,Troy Athens,Fraser,40,7
+2025-10-24,Union City,Decatur,8,20
 2025-10-24,Unionville-Sebewaing,Saginaw Valley Lutheran,14,27
+2025-10-24,Vermontville Maple Valley,Cassopolis,21,28
 2025-10-24,Walled Lake Central,Walled Lake Western,21,63
 2025-10-24,Warren Cousino,Utica,34,42
 2025-10-24,Warren Woods Tower,Warren Mott,0,46
@@ -2292,286 +2460,273 @@ date,home,away,home_score,away_score
 2025-10-24,Wyoming Kelloggsville,Holland,40,34
 2025-10-24,Ypsilanti Community,Mount Pleasant,12,34
 2025-10-24,Ypsilanti Lincoln,St Johns,23,28
-2025-10-25,Michigan Center,Hanover-Horton,14,20
 2025-10-25,Ann Arbor Father Gabriel Richard,Allen Park Cabrini,42,7
 2025-10-25,Detroit Catholic Central,Detroit Martin Luther King,26,14
-2025-10-25,Jackson Lumen Christi,Center Line,42,7
 2025-10-25,Eastpointe,Detroit Pershing,0,1
+2025-10-25,Eureka (CA),Eureka St. Bernard (CA),0,28
+2025-10-25,Jackson Lumen Christi,Center Line,42,7
+2025-10-25,Michigan Center,Hanover-Horton,14,20
 2025-10-25,Mount Pleasant Sacred Heart,Lake City,31,28
 2025-10-25,Niles Brandywine,Mount Clemens,50,8
 2025-10-25,Warren Michigan Collegiate,St Clair Shores South Lake,38,6
 2025-10-25,Waterford Kettering,Waterford Mott,8,45
-2025-10-31,Hudsonville,Jenison,47,7
-2025-10-31,Rockford,Grandville,42,7
-2025-10-31,Howell,Kalamazoo Central,45,20
-2025-10-31,East Kentwood,Grand Ledge,49,15
-2025-10-31,Detroit Catholic Central,Hartland,35,7
-2025-10-31,Clarkston,Davison,52,14
-2025-10-31,Grand Blanc,Oxford,49,30
-2025-10-31,Saline,Salem,43,13
-2025-10-31,Detroit Cass Tech,Northville,46,3
-2025-10-31,Farmington,Dearborn Fordson,14,34
-2025-10-31,Rochester Adams,Rochester,34,10
-2025-10-31,Rochester Hills Stoney Creek,Utica Eisenhower,35,31
-2025-10-31,Romeo,Sterling Heights Stevenson,14,13
-2025-10-31,Muskegon,Muskegon Mona Shores,39,34
-2025-10-31,Traverse City West,Traverse City Central,13,15
-2025-10-31,Portage Central,Lansing Everett,67,19
-2025-10-31,Byron Center,Portage Northern,47,6
-2025-10-31,Midland Dow,Waterford Mott,51,15
-2025-10-31,White Lake Lakeland,East Lansing,20,26
-2025-10-31,Walled Lake Western,Bloomfield Hills Brother Rice,24,28
-2025-10-31,North Farmington,Orchard Lake St Mary's,7,35
-2025-10-31,South Lyon,South Lyon East,45,21
-2025-10-31,Dexter,Livonia Franklin,42,7
-2025-10-31,Gibraltar Carlson,Lincoln Park,48,8
-2025-10-31,Allen Park,Temperance Bedford,14,42
-2025-10-31,Birmingham Groves,Warren Mott,49,14
-2025-10-31,Warren Cousino,Birmingham Seaholm,28,7
-2025-10-31,Port Huron Northern,St Clair Shores Lakeview,14,21
-2025-10-31,Mount Pleasant,Bay City Western,35,14
-2025-10-31,Gaylord,Marquette,38,34
-2025-10-31,Grand Rapids Kenowa Hills,Coopersville,7,42
-2025-10-31,East Grand Rapids,Cedar Springs,23,21
-2025-10-31,Niles,Zeeland West,21,30
-2025-10-31,St Joseph,Zeeland East,20,6
-2025-10-31,Lowell,Coldwater,49,14
-2025-10-31,Hastings,Middleville Thornapple Kellogg,20,28
-2025-10-31,DeWitt,Owosso,70,13
-2025-10-31,Mason,Linden,28,35
 2025-10-31,Adrian,Ypsilanti Lincoln,35,14
-2025-10-31,Fenton,Holly,48,6
-2025-10-31,Detroit Martin Luther King,Riverview,36,6
-2025-10-31,Warren Fitzgerald,Warren De La Salle Collegiate,34,56
-2025-10-31,Ludington,Big Rapids,31,32
-2025-10-31,Hudsonville Unity Christian,Holland Christian,53,42
-2025-10-31,Wyoming Godwin Heights,Spring Lake,35,42
+2025-10-31,Allen Park,Temperance Bedford,14,42
+2025-10-31,Allen Park Cabrini,Southfield Bradford Academy,45,8
+2025-10-31,Almont,Clinton Township Clintondale,42,12
+2025-10-31,Ann Arbor Father Gabriel Richard,Detroit Cody,57,6
+2025-10-31,Archbishop Spalding (MD),Baltimore Mount St. Joseph (MD),56,20
+2025-10-31,Bark River-Harris,West Iron County,54,6
 2025-10-31,Battle Creek Harper Creek,Grand Rapids Christian,13,21
-2025-10-31,Portland,Grand Rapids South Christian,42,41
-2025-10-31,Paw Paw,Three Rivers,14,21
-2025-10-31,Edwardsburg,Vicksburg,30,43
-2025-10-31,Williamston,Lansing Sexton,47,6
-2025-10-31,Haslett,St Johns,49,14
-2025-10-31,Goodrich,Lake Fenton,51,6
+2025-10-31,Beal City,Mount Pleasant Sacred Heart,49,7
+2025-10-31,Belding,Ovid-Elsie,28,14
+2025-10-31,Berrien Springs,Dowagiac,34,20
+2025-10-31,Birmingham Groves,Warren Mott,49,14
+2025-10-31,Bronson,Jonesville,52,12
+2025-10-31,Byron Center,Portage Northern,47,6
+2025-10-31,Central Montcalm,Montague,20,40
+2025-10-31,Charlevoix,McBain,27,28
 2025-10-31,Chelsea,Fowlerville,42,14
+2025-10-31,Clarkston,Davison,52,14
+2025-10-31,Clinton,Ottawa Lake Whiteford,36,20
+2025-10-31,DeWitt,Owosso,70,13
 2025-10-31,Dearborn Divine Child,Tecumseh,55,19
+2025-10-31,Decatur,White Pigeon,20,22
+2025-10-31,Detroit Cass Tech,Northville,46,3
+2025-10-31,Detroit Catholic Central,Hartland,35,7
+2025-10-31,Detroit Community,Rochester Hills Lutheran Northwest,14,42
+2025-10-31,Detroit Edison,Detroit Central,42,18
+2025-10-31,Detroit Martin Luther King,Riverview,36,6
+2025-10-31,Detroit Pershing,Warren Michigan Collegiate,14,36
+2025-10-31,Dexter,Livonia Franklin,42,7
+2025-10-31,East Grand Rapids,Cedar Springs,23,21
+2025-10-31,East Jordan,Frankfort,34,6
+2025-10-31,East Kentwood,Grand Ledge,49,15
+2025-10-31,Ecorse,Adrian Madison,40,38
+2025-10-31,Edwardsburg,Vicksburg,30,43
+2025-10-31,Elkton-Pigeon-Bay Port Laker,Cass City,17,0
+2025-10-31,Farmington,Dearborn Fordson,14,34
+2025-10-31,Fenton,Holly,48,6
+2025-10-31,Frankenmuth,Yale,56,0
+2025-10-31,Gaylord,Marquette,38,34
+2025-10-31,Gibraltar Carlson,Lincoln Park,48,8
+2025-10-31,Goodrich,Lake Fenton,51,6
+2025-10-31,Grand Blanc,Oxford,49,30
+2025-10-31,Grand Rapids Catholic Central,Wyoming Kelloggsville,45,16
+2025-10-31,Grand Rapids Kenowa Hills,Coopersville,7,42
+2025-10-31,Grand Rapids West Catholic,Muskegon Oakridge,56,7
+2025-10-31,Hanover-Horton,Union City,44,6
+2025-10-31,Harbor Beach,Reese,49,8
 2025-10-31,Harper Woods,Macomb Lutheran North,45,16
 2025-10-31,Harper Woods Chandler Park,Center Line,33,11
-2025-10-31,Ogemaw Heights,Negaunee,29,28
-2025-10-31,Saginaw Swan Valley,Clare,38,20
-2025-10-31,Whitehall,Howard City Tri County,38,22
-2025-10-31,Grand Rapids Catholic Central,Wyoming Kelloggsville,45,16
-2025-10-31,Grand Rapids West Catholic,Muskegon Oakridge,56,7
-2025-10-31,Kalamazoo Hackett Catholic Prep,Hopkins,41,20
-2025-10-31,Berrien Springs,Dowagiac,34,20
-2025-10-31,Ann Arbor Father Gabriel Richard,Detroit Cody,57,6
-2025-10-31,Michigan Center,Romulus,50,14
-2025-10-31,Romulus Summit Academy North,Detroit Voyageur College Prep,34,7
-2025-10-31,Monroe Jefferson,Flat Rock,36,8
-2025-10-31,Pontiac Notre Dame Prep,Hazel Park,59,0
-2025-10-31,Frankenmuth,Yale,56,0
-2025-10-31,Richmond,Armada,14,10
-2025-10-31,Reed City,Sanford Meridian,63,28
-2025-10-31,Central Montcalm,Montague,20,40
-2025-10-31,Belding,Ovid-Elsie,28,14
-2025-10-31,Olivet,Kent City,22,28
-2025-10-31,Montrose,Flint New Standard Academy,52,8
-2025-10-31,Jackson Lumen Christi,Onsted,56,7
-2025-10-31,Napoleon,Buchanan,26,20
-2025-10-31,Ecorse,Adrian Madison,40,38
-2025-10-31,Ida,Dearborn Heights Robichaud,57,26
-2025-10-31,Detroit Edison,Detroit Central,42,18
-2025-10-31,Detroit Pershing,Warren Michigan Collegiate,14,36
-2025-10-31,Almont,Clinton Township Clintondale,42,12
-2025-10-31,Marine City,Clawson,52,7
-2025-10-31,Menominee,Manton,48,17
-2025-10-31,Charlevoix,McBain,27,28
 2025-10-31,Harrison,Morley Stanwood,36,8
-2025-10-31,Elkton-Pigeon-Bay Port Laker,Cass City,17,0
-2025-10-31,Schoolcraft,Galesburg-Augusta,42,21
-2025-10-31,Lawton,Constantine,49,28
-2025-10-31,Hanover-Horton,Union City,44,6
-2025-10-31,Bronson,Jonesville,52,12
-2025-10-31,Monroe St Mary Catholic Central,Leslie,27,2
-2025-10-31,Clinton,Ottawa Lake Whiteford,36,20
-2025-10-31,Millington,Burton Bendle,49,0
-2025-10-31,Detroit Community,Rochester Hills Lutheran Northwest,14,42
-2025-10-31,Bark River-Harris,West Iron County,54,6
-2025-10-31,Iron Mountain,L'Anse,31,15
-2025-10-31,Maple City Glen Lake,Mancelona,35,0
-2025-10-31,East Jordan,Frankfort,34,6
-2025-10-31,Beal City,Mount Pleasant Sacred Heart,49,7
-2025-10-31,Saginaw Nouvel Catholic Central,Saginaw Michigan Lutheran Seminary,34,28
-2025-10-31,Harbor Beach,Reese,49,8
-2025-10-31,Unionville-Sebewaing,Genesee,64,14
+2025-10-31,Haslett,St Johns,49,14
+2025-10-31,Hastings,Middleville Thornapple Kellogg,20,28
+2025-10-31,Howell,Kalamazoo Central,45,20
 2025-10-31,Hudson,Centreville,52,13
-2025-10-31,Decatur,White Pigeon,20,22
-2025-10-31,Springport,Manchester,47,8
-2025-10-31,New Lothrop,Fowler,19,14
+2025-10-31,Hudsonville,Jenison,47,7
+2025-10-31,Hudsonville Unity Christian,Holland Christian,53,42
+2025-10-31,Ida,Dearborn Heights Robichaud,57,26
+2025-10-31,Indianapolis Pike (IN),Brownsburg (IN),14,43
+2025-10-31,Iron Mountain,L'Anse,31,15
+2025-10-31,Jackson Lumen Christi,Onsted,56,7
+2025-10-31,Kalamazoo Hackett Catholic Prep,Hopkins,41,20
+2025-10-31,Lawton,Constantine,49,28
+2025-10-31,LeRoy Pine River,Shelby,2,20
+2025-10-31,Lowell,Coldwater,49,14
+2025-10-31,Ludington,Big Rapids,31,32
+2025-10-31,Madison Heights Lamphere,Redford Union,7,6
 2025-10-31,Madison Heights Madison,Auburn Hills Oakland Christian,28,7
-2025-10-31,Allen Park Cabrini,Southfield Bradford Academy,45,8
+2025-10-31,Maple City Glen Lake,Mancelona,35,0
+2025-10-31,Marine City,Clawson,52,7
+2025-10-31,Mason,Linden,28,35
+2025-10-31,Menominee,Manton,48,17
+2025-10-31,Michigan Center,Romulus,50,14
+2025-10-31,Midland Dow,Waterford Mott,51,15
+2025-10-31,Millington,Burton Bendle,49,0
+2025-10-31,Monroe Jefferson,Flat Rock,36,8
+2025-10-31,Monroe St Mary Catholic Central,Leslie,27,2
+2025-10-31,Montrose,Flint New Standard Academy,52,8
+2025-10-31,Mount Pleasant,Bay City Western,35,14
+2025-10-31,Muskegon,Muskegon Mona Shores,39,34
+2025-10-31,Napoleon,Buchanan,26,20
+2025-10-31,New Lothrop,Fowler,19,14
+2025-10-31,Niles,Zeeland West,21,30
+2025-10-31,North Farmington,Orchard Lake St Mary's,7,35
+2025-10-31,Ogemaw Heights,Negaunee,29,28
+2025-10-31,Olivet,Kent City,22,28
+2025-10-31,Paw Paw,Three Rivers,14,21
+2025-10-31,Pontiac Notre Dame Prep,Hazel Park,59,0
+2025-10-31,Port Huron Northern,St Clair Shores Lakeview,14,21
+2025-10-31,Portage Central,Lansing Everett,67,19
+2025-10-31,Portland,Grand Rapids South Christian,42,41
+2025-10-31,Reed City,Sanford Meridian,63,28
+2025-10-31,Richmond,Armada,14,10
+2025-10-31,Rochester Adams,Rochester,34,10
+2025-10-31,Rochester Hills Stoney Creek,Utica Eisenhower,35,31
+2025-10-31,Rockford,Grandville,42,7
+2025-10-31,Romeo,Sterling Heights Stevenson,14,13
+2025-10-31,Romulus Summit Academy North,Detroit Voyageur College Prep,34,7
+2025-10-31,Saginaw Nouvel Catholic Central,Saginaw Michigan Lutheran Seminary,34,28
+2025-10-31,Saginaw Swan Valley,Clare,38,20
+2025-10-31,Saginaw Valley Lutheran,Ithaca,12,24
+2025-10-31,Saline,Salem,43,13
+2025-10-31,Schoolcraft,Galesburg-Augusta,42,21
+2025-10-31,South Lyon,South Lyon East,45,21
+2025-10-31,Springport,Manchester,47,8
+2025-10-31,St Joseph,Zeeland East,20,6
+2025-10-31,Traverse City West,Traverse City Central,13,15
+2025-10-31,Unionville-Sebewaing,Genesee,64,14
+2025-10-31,Utica,Macomb Dakota,3,6
+2025-10-31,Walled Lake Western,Bloomfield Hills Brother Rice,24,28
+2025-10-31,Warren Cousino,Birmingham Seaholm,28,7
+2025-10-31,Warren Fitzgerald,Warren De La Salle Collegiate,34,56
+2025-10-31,West Bloomfield,Brighton,7,25
+2025-10-31,White Lake Lakeland,East Lansing,20,26
+2025-10-31,Whitehall,Howard City Tri County,38,22
+2025-10-31,Williamston,Lansing Sexton,47,6
+2025-10-31,Wyoming Godwin Heights,Spring Lake,35,42
 2025-11-01,Belleville,Brownstown Woodhaven,29,30
-2025-11-01,Grosse Pointe South,Roseville,28,27
-2025-11-01,Trenton,Redford Thurston,42,22
-2025-11-01,Port Huron,Marysville,24,14
-2025-11-01,Escanaba,Freeland,17,13
-2025-11-01,Kingsford,Gladwin,26,6
 2025-11-01,Detroit Southeastern,Detroit Denby,16,18
-2025-11-01,Kingsley,Calumet,41,14
-2025-11-01,Traverse City St Francis,Boyne City,55,35
+2025-11-01,Escanaba,Freeland,17,13
 2025-11-01,Flint Hamady,Durand,22,32
-2025-11-01,Pewamo-Westphalia,Ravenna,41,12
-2025-11-01,North Muskegon,Saranac,48,6
-2025-11-01,Waterford Our Lady of the Lakes,Clarkston Everest Collegiate,14,34
+2025-11-01,Fortuna (CA),Eureka St. Bernard (CA),26,18
+2025-11-01,Grosse Pointe South,Roseville,28,27
+2025-11-01,Kingsford,Gladwin,26,6
+2025-11-01,Kingsley,Calumet,41,14
 2025-11-01,Melvindale Academy for Business & Tech,Riverview Gabriel Richard,6,34
-2025-11-07,Hudsonville,Rockford,42,31
-2025-11-07,Detroit Catholic Central,Brighton,45,7
+2025-11-01,North Muskegon,Saranac,48,6
+2025-11-01,Pewamo-Westphalia,Ravenna,41,12
+2025-11-01,Port Huron,Marysville,24,14
+2025-11-01,Traverse City St Francis,Boyne City,55,35
+2025-11-01,Trenton,Redford Thurston,42,22
+2025-11-01,Waterford Our Lady of the Lakes,Clarkston Everest Collegiate,14,34
+2025-11-07,Adrian,Fenton,7,35
+2025-11-07,Allen Park Cabrini,Riverview Gabriel Richard,52,0
+2025-11-07,Almont,Marine City,27,0
+2025-11-07,Ann Arbor Father Gabriel Richard,Michigan Center,18,35
+2025-11-07,Archbishop Spalding (MD),Baltimore Gilman (MD),35,8
+2025-11-07,Bark River-Harris,Iron Mountain,41,20
+2025-11-07,Beal City,Saginaw Nouvel Catholic Central,41,13
+2025-11-07,Belding,Kent City,16,24
+2025-11-07,Birmingham Groves,Warren Cousino,36,22
+2025-11-07,Brownsburg (IN),Avon (IN),53,29
 2025-11-07,Clarkston,Grand Blanc,44,22
-2025-11-07,Saline,Brownstown Woodhaven,57,17
+2025-11-07,DeWitt,Linden,45,0
+2025-11-07,Dearborn Divine Child,Madison Heights Lamphere,41,7
 2025-11-07,Detroit Cass Tech,Dearborn Fordson,48,8
+2025-11-07,Detroit Catholic Central,Brighton,45,7
+2025-11-07,Detroit Edison,Warren Michigan Collegiate,48,14
+2025-11-07,Detroit Martin Luther King,Trenton,38,22
+2025-11-07,East Grand Rapids,Coopersville,17,0
+2025-11-07,Ecorse,Ida,6,28
+2025-11-07,Frankenmuth,Richmond,38,6
+2025-11-07,Gibraltar Carlson,Temperance Bedford,33,14
+2025-11-07,Goodrich,Chelsea,27,7
+2025-11-07,Grand Rapids Catholic Central,Grand Rapids West Catholic,20,21
+2025-11-07,Hanover-Horton,Bronson,20,12
+2025-11-07,Harbor Beach,Unionville-Sebewaing,35,12
+2025-11-07,Harper Woods,Harper Woods Chandler Park,47,6
+2025-11-07,Harrison,Shelby,16,30
+2025-11-07,Hudson,White Pigeon,50,20
+2025-11-07,Hudsonville,Rockford,42,31
+2025-11-07,Hudsonville Unity Christian,Spring Lake,34,19
+2025-11-07,Jackson Lumen Christi,Napoleon,44,0
+2025-11-07,Kalamazoo Hackett Catholic Prep,Berrien Springs,21,6
+2025-11-07,Kingsley,Traverse City St Francis,57,6
+2025-11-07,Lowell,Middleville Thornapple Kellogg,28,21
+2025-11-07,Madison Heights Madison,Clarkston Everest Collegiate,22,17
+2025-11-07,Maple City Glen Lake,East Jordan,28,14
+2025-11-07,Midland Dow,East Lansing,21,12
+2025-11-07,Millington,Rochester Hills Lutheran Northwest,49,0
+2025-11-07,Monroe St Mary Catholic Central,Clinton,14,22
+2025-11-07,Mount Pleasant,Gaylord,42,0
+2025-11-07,Muskegon,Traverse City Central,14,16
+2025-11-07,Orchard Lake St Mary's,Bloomfield Hills Brother Rice,35,14
+2025-11-07,Pontiac Notre Dame Prep,Detroit Denby,49,0
+2025-11-07,Port Huron,Warren De La Salle Collegiate,6,34
+2025-11-07,Portage Central,Byron Center,34,7
+2025-11-07,Portland,Grand Rapids Christian,28,0
+2025-11-07,Reed City,Montague,45,14
 2025-11-07,Rochester Adams,Rochester Hills Stoney Creek,43,18
 2025-11-07,Romeo,Macomb Dakota,56,0
-2025-11-07,Muskegon,Traverse City Central,14,16
-2025-11-07,Portage Central,Byron Center,34,7
-2025-11-07,Midland Dow,East Lansing,21,12
-2025-11-07,Orchard Lake St Mary's,Bloomfield Hills Brother Rice,35,14
+2025-11-07,Romulus Summit Academy North,Monroe Jefferson,21,34
+2025-11-07,Saginaw Swan Valley,Whitehall,36,20
+2025-11-07,Saline,Brownstown Woodhaven,57,17
+2025-11-07,Schoolcraft,Lawton,26,0
 2025-11-07,South Lyon,Dexter,27,41
-2025-11-07,Gibraltar Carlson,Temperance Bedford,33,14
-2025-11-07,Birmingham Groves,Warren Cousino,36,22
-2025-11-07,Mount Pleasant,Gaylord,42,0
-2025-11-07,East Grand Rapids,Coopersville,17,0
+2025-11-07,Springport,New Lothrop,35,13
 2025-11-07,St Joseph,Zeeland West,24,48
-2025-11-07,Lowell,Middleville Thornapple Kellogg,28,21
-2025-11-07,DeWitt,Linden,45,0
-2025-11-07,Adrian,Fenton,7,35
-2025-11-07,Detroit Martin Luther King,Trenton,38,22
-2025-11-07,Port Huron,Warren De La Salle Collegiate,6,34
-2025-11-07,Hudsonville Unity Christian,Spring Lake,34,19
-2025-11-07,Portland,Grand Rapids Christian,28,0
 2025-11-07,Vicksburg,Three Rivers,21,17
 2025-11-07,Williamston,Haslett,42,21
-2025-11-07,Goodrich,Chelsea,27,7
-2025-11-07,Dearborn Divine Child,Madison Heights Lamphere,41,7
-2025-11-07,Harper Woods,Harper Woods Chandler Park,47,6
-2025-11-07,Saginaw Swan Valley,Whitehall,36,20
-2025-11-07,Grand Rapids Catholic Central,Grand Rapids West Catholic,20,21
-2025-11-07,Kalamazoo Hackett Catholic Prep,Berrien Springs,21,6
-2025-11-07,Ann Arbor Father Gabriel Richard,Michigan Center,18,35
-2025-11-07,Romulus Summit Academy North,Monroe Jefferson,21,34
-2025-11-07,Pontiac Notre Dame Prep,Detroit Denby,49,0
-2025-11-07,Frankenmuth,Richmond,38,6
-2025-11-07,Kingsley,Traverse City St Francis,57,6
-2025-11-07,Reed City,Montague,45,14
-2025-11-07,Belding,Kent City,16,24
-2025-11-07,Jackson Lumen Christi,Napoleon,44,0
-2025-11-07,Detroit Edison,Warren Michigan Collegiate,48,14
-2025-11-07,Almont,Marine City,27,0
-2025-11-07,Harrison,Shelby,16,30
-2025-11-07,Schoolcraft,Lawton,26,0
-2025-11-07,Hanover-Horton,Bronson,20,12
-2025-11-07,Monroe St Mary Catholic Central,Clinton,14,22
-2025-11-07,Millington,Rochester Hills Lutheran Northwest,49,0
-2025-11-07,Bark River-Harris,Iron Mountain,41,20
-2025-11-07,Maple City Glen Lake,East Jordan,28,14
-2025-11-07,Beal City,Saginaw Nouvel Catholic Central,41,13
-2025-11-07,Harbor Beach,Unionville-Sebewaing,35,12
-2025-11-07,Hudson,White Pigeon,50,20
-2025-11-07,Springport,New Lothrop,35,13
-2025-11-07,Madison Heights Madison,Clarkston Everest Collegiate,22,17
-2025-11-07,Allen Park Cabrini,Riverview Gabriel Richard,52,0
-2025-11-08,Howell,East Kentwood,41,49
-2025-11-08,Escanaba,Big Rapids,18,48
-2025-11-08,Ogemaw Heights,Kingsford,41,6
-2025-11-08,Montrose,Durand,49,16
-2025-11-08,Menominee,McBain,49,6
-2025-11-08,Pewamo-Westphalia,North Muskegon,56,28
 2025-11-08,Elkton-Pigeon-Bay Port Laker,Ithaca,21,22
+2025-11-08,Escanaba,Big Rapids,18,48
+2025-11-08,Eureka St. Bernard (CA),Crescent City Del Norte (CA),35,21
+2025-11-08,Grosse Pointe South,St Clair Shores Lakeview,7,24
+2025-11-08,Howell,East Kentwood,41,49
+2025-11-08,Menominee,McBain,49,6
+2025-11-08,Montrose,Durand,49,16
+2025-11-08,Ogemaw Heights,Kingsford,41,6
+2025-11-08,Pewamo-Westphalia,North Muskegon,56,28
+2025-11-14,Almont,Detroit Edison,44,8
 2025-11-14,Clarkston,Detroit Catholic Central,13,42
-2025-11-14,Saline,Detroit Cass Tech,28,42
-2025-11-14,Rochester Adams,Romeo,29,13
-2025-11-14,Portage Central,Traverse City Central,24,20
-2025-11-14,Midland Dow,Orchard Lake St Mary's,7,42
-2025-11-14,Gibraltar Carlson,Dexter,42,56
-2025-11-14,St Clair Shores Lakeview,Birmingham Groves,14,37
-2025-11-14,Mount Pleasant,East Grand Rapids,28,14
-2025-11-14,Lowell,Zeeland West,36,34
 2025-11-14,DeWitt,Fenton,70,26
 2025-11-14,Detroit Martin Luther King,Warren De La Salle Collegiate,20,38
-2025-11-14,Hudsonville Unity Christian,Big Rapids,52,14
-2025-11-14,Williamston,Goodrich,33,41
+2025-11-14,Gibraltar Carlson,Dexter,42,56
 2025-11-14,Grand Rapids West Catholic,Kalamazoo Hackett Catholic Prep,27,0
-2025-11-14,Monroe Jefferson,Michigan Center,71,45
-2025-11-14,Pontiac Notre Dame Prep,Frankenmuth,42,28
-2025-11-14,Kingsley,Reed City,18,14
-2025-11-14,Jackson Lumen Christi,Ida,21,7
-2025-11-14,Almont,Detroit Edison,44,8
-2025-11-14,Pewamo-Westphalia,Ithaca,42,21
-2025-11-14,Maple City Glen Lake,Bark River-Harris,21,22
 2025-11-14,Hudson,Springport,68,22
+2025-11-14,Hudsonville Unity Christian,Big Rapids,52,14
+2025-11-14,Indianapolis Decatur Central (IN),Brownsburg (IN),23,47
+2025-11-14,Jackson Lumen Christi,Ida,21,7
+2025-11-14,Kingsley,Reed City,18,14
+2025-11-14,Lowell,Zeeland West,36,34
 2025-11-14,Madison Heights Madison,Allen Park Cabrini,32,34
+2025-11-14,Maple City Glen Lake,Bark River-Harris,21,22
+2025-11-14,Midland Dow,Orchard Lake St Mary's,7,42
+2025-11-14,Monroe Jefferson,Michigan Center,71,45
+2025-11-14,Mount Pleasant,East Grand Rapids,28,14
+2025-11-14,Pewamo-Westphalia,Ithaca,42,21
+2025-11-14,Pontiac Notre Dame Prep,Frankenmuth,42,28
+2025-11-14,Portage Central,Traverse City Central,24,20
+2025-11-14,Rochester Adams,Romeo,29,13
+2025-11-14,Saline,Detroit Cass Tech,28,42
+2025-11-14,St Clair Shores Lakeview,Birmingham Groves,14,37
+2025-11-14,Williamston,Goodrich,33,41
+2025-11-15,Archbishop Spalding (MD),Owings Mills McDonogh (MD),30,22
+2025-11-15,Eureka St. Bernard (CA),San Rafael (CA),42,20
+2025-11-15,Hanover-Horton,Schoolcraft,14,22
+2025-11-15,Harbor Beach,Beal City,26,15
+2025-11-15,Harper Woods,Dearborn Divine Child,6,10
 2025-11-15,Hudsonville,East Kentwood,28,52
-2025-11-15,Portland,Vicksburg,41,42
-2025-11-15,Saginaw Swan Valley,Ogemaw Heights,14,34
 2025-11-15,Kent City,Montrose,50,20
 2025-11-15,Menominee,Shelby,43,0
-2025-11-15,Hanover-Horton,Schoolcraft,14,22
 2025-11-15,Millington,Clinton,18,20
-2025-11-15,Harbor Beach,Beal City,26,15
-2025-11-22,Detroit Catholic Central,East Kentwood,46,6
-2025-11-22,Rochester Adams,Detroit Cass Tech,22,48
-2025-11-22,Portage Central,Orchard Lake St Mary's,7,42
-2025-11-22,Dexter,Birmingham Groves,41,6
-2025-11-22,Mount Pleasant,Lowell,41,21
-2025-11-22,DeWitt,Warren De La Salle Collegiate,41,20
-2025-11-22,Hudsonville Unity Christian,Vicksburg,45,17
-2025-11-22,Grand Rapids West Catholic,Ogemaw Heights,34,24
-2025-11-22,Pontiac Notre Dame Prep,Monroe Jefferson,51,21
-2025-11-22,Kent City,Kingsley,0,14
-2025-11-22,Jackson Lumen Christi,Almont,25,19
-2025-11-22,Menominee,Pewamo-Westphalia,32,28
+2025-11-15,Portland,Vicksburg,41,42
+2025-11-15,Saginaw Swan Valley,Ogemaw Heights,14,34
+2025-11-21,Brownsburg (IN),Indianapolis Warren Central (IN),31,0
 2025-11-22,Clinton,Schoolcraft,14,43
+2025-11-22,DeWitt,Warren De La Salle Collegiate,41,20
+2025-11-22,Detroit Catholic Central,East Kentwood,46,6
+2025-11-22,Dexter,Birmingham Groves,41,6
+2025-11-22,Eureka St. Bernard (CA),Fortuna (CA),15,35
+2025-11-22,Goodrich,Dearborn Divine Child,7,10
+2025-11-22,Grand Rapids West Catholic,Ogemaw Heights,34,24
 2025-11-22,Harbor Beach,Bark River-Harris,40,0
 2025-11-22,Hudson,Allen Park Cabrini,67,14
+2025-11-22,Hudsonville Unity Christian,Vicksburg,45,17
+2025-11-22,Jackson Lumen Christi,Almont,25,19
+2025-11-22,Kent City,Kingsley,0,14
+2025-11-22,Menominee,Pewamo-Westphalia,32,28
+2025-11-22,Mount Pleasant,Lowell,41,21
+2025-11-22,Pontiac Notre Dame Prep,Monroe Jefferson,51,21
+2025-11-22,Portage Central,Orchard Lake St Mary's,7,42
+2025-11-22,Rochester Adams,Detroit Cass Tech,22,48
 2025-11-28,Dexter,Orchard Lake St Mary's,14,51
+2025-11-28,Hudson,Harbor Beach,20,31
 2025-11-28,Hudsonville Unity Christian,Dearborn Divine Child,22,23
 2025-11-28,Jackson Lumen Christi,Kingsley,28,14
-2025-11-28,Hudson,Harbor Beach,20,31
-2025-11-30,Detroit Catholic Central,Detroit Cass Tech,42,19
-2025-11-30,DeWitt,Mount Pleasant,54,20
-2025-11-30,Pontiac Notre Dame Prep,Grand Rapids West Catholic,14,42
-2025-11-30,Menominee,Schoolcraft,34,6
-2025-08-30,Eureka St. Bernard (CA),Lakeport Clear Lake (CA),30,6
-2025-09-05,McKinleyville (CA),Eureka St. Bernard (CA),0,37
-2025-09-13,Eureka St. Bernard (CA),Hoopa Valley (CA),44,0
-2025-09-19,Santa Rosa Montgomery (CA),Eureka St. Bernard (CA),14,50
-2025-10-04,Eureka St. Bernard (CA),Eureka (CA),43,6
-2025-10-11,Eureka St. Bernard (CA),Fortuna (CA),26,22
-2025-10-17,Crescent City Del Norte (CA),Eureka St. Bernard (CA),0,16
-2025-10-25,Eureka (CA),Eureka St. Bernard (CA),0,28
-2025-11-01,Fortuna (CA),Eureka St. Bernard (CA),26,18
-2025-11-08,Eureka St. Bernard (CA),Crescent City Del Norte (CA),35,21
-2025-11-15,Eureka St. Bernard (CA),San Rafael (CA),42,20
-2025-11-22,Eureka St. Bernard (CA),Fortuna (CA),15,35
-2025-09-05,Archbishop Spalding (MD),Princeton Hun (NJ),28,35
-2025-09-12,Owings Mills McDonogh (MD),Archbishop Spalding (MD),13,35
-2025-09-19,Archbishop Spalding (MD),Baltimore Calvert Hall (MD),56,14
-2025-09-26,Baltimore Gilman (MD),Archbishop Spalding (MD),0,42
-2025-10-03,Archbishop Spalding (MD),Annapolis St. Mary's (MD),51,7
-2025-10-11,Towson Concordia Prep (MD),Archbishop Spalding (MD),10,49
-2025-10-24,Towson Loyola Blakefield (MD),Archbishop Spalding (MD),6,56
-2025-10-31,Archbishop Spalding (MD),Baltimore Mount St. Joseph (MD),56,20
-2025-11-07,Archbishop Spalding (MD),Baltimore Gilman (MD),35,8
-2025-11-15,Archbishop Spalding (MD),Owings Mills McDonogh (MD),30,22
-2025-08-29,Brownsburg (IN),Indianapolis Cathedral (IN),29,0
-2025-09-05,Brownsburg (IN),Indianapolis Franklin Central (IN),35,7
-2025-09-12,Avon (IN),Brownsburg (IN),47,55
-2025-09-19,Brownsburg (IN),Fishers (IN),42,14
-2025-09-26,Westfield (IN),Brownsburg (IN),10,14
-2025-10-03,Brownsburg (IN),Zionsville (IN),38,6
-2025-10-10,Noblesville (IN),Brownsburg (IN),7,42
-2025-10-17,Brownsburg (IN),Fishers Hamilton Southeastern (IN),35,7
-2025-10-31,Indianapolis Pike (IN),Brownsburg (IN),14,43
-2025-11-07,Brownsburg (IN),Avon (IN),53,29
-2025-11-14,Indianapolis Decatur Central (IN),Brownsburg (IN),23,47
-2025-11-21,Brownsburg (IN),Indianapolis Warren Central (IN),31,0
 2025-11-29,Brownsburg (IN),Westfield (IN),38,31
+2025-11-30,DeWitt,Mount Pleasant,54,20
+2025-11-30,Detroit Catholic Central,Detroit Cass Tech,42,19
+2025-11-30,Menominee,Schoolcraft,34,6
+2025-11-30,Pontiac Notre Dame Prep,Grand Rapids West Catholic,14,42

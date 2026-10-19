@@ -20,10 +20,6 @@ date,home,away,home_score,away_score
 2026-08-21,Toledo Whitmer (OH),Reynoldsburg (OH),42,23
 2026-08-21,West Unity Hilltop (OH),Hicksville (OH),12,7
 2026-08-21,Woodburn Woodlan (IN),LaGrange Prairie Heights (IN),21,0
-2026-08-27,Clinton Township Chippewa Valley,Detroit Catholic Central,0,55
-2026-08-27,Grand Rapids Kenowa Hills,DeWitt,21,59
-2026-08-27,Lapeer,Holly,12,15
-2026-08-27,New Baltimore Anchor Bay,Port Huron,21,28
 2026-08-27,Ada Forest Hills Eastern,Grand Rapids Forest Hills Northern,28,21
 2026-08-27,Addison,Perry,12,42
 2026-08-27,Algonac,Clinton Township Clintondale,20,12
@@ -49,6 +45,7 @@ date,home,away,home_score,away_score
 2026-08-27,Chesaning,Standish-Sterling,57,20
 2026-08-27,Clarkston Everest Collegiate,Ubly,15,22
 2026-08-27,Clawson,Detroit Pershing,41,0
+2026-08-27,Clinton Township Chippewa Valley,Detroit Catholic Central,0,55
 2026-08-27,Clio,Mt Morris,58,0
 2026-08-27,Comstock,Centreville,8,21
 2026-08-27,Constantine,Kalamazoo Hackett Catholic Prep,27,29
@@ -78,6 +75,7 @@ date,home,away,home_score,away_score
 2026-08-27,Grand Haven,Spring Lake,35,34
 2026-08-27,Grand Ledge,Holland West Ottawa,40,21
 2026-08-27,Grand Rapids Forest Hills Central,Battle Creek Central,49,54
+2026-08-27,Grand Rapids Kenowa Hills,DeWitt,21,59
 2026-08-27,Grand Rapids NorthPointe Christian,Comstock Park,31,47
 2026-08-27,Grand Rapids Northview,Grand Rapids West Catholic,21,48
 2026-08-27,Grand Rapids Union,Grand Rapids Ottawa Hills,37,0
@@ -108,11 +106,12 @@ date,home,away,home_score,away_score
 2026-08-27,Lansing Catholic,Williamston,12,20
 2026-08-27,Lansing Eastern,Eaton Rapids,0,23
 2026-08-27,Lansing Everett,Lansing Sexton,0,33
+2026-08-27,Lapeer,Holly,12,15
 2026-08-27,Lawton,South Haven,58,33
 2026-08-27,Lincoln Park,Taylor,48,30
 2026-08-27,Linden,Haslett,44,23
 2026-08-27,Livonia Churchill,Canton,27,8
-2026-08-27,Livonia Clarenceville,Waterford Kettering,5,20
+2026-08-27,Livonia Clarenceville,Waterford Kettering,6,20
 2026-08-27,Lowell,East Grand Rapids,21,27
 2026-08-27,Ludington,Coopersville,8,39
 2026-08-27,Madison Heights Madison,Macomb Lutheran North,30,32
@@ -126,6 +125,7 @@ date,home,away,home_score,away_score
 2026-08-27,Muskegon Oakridge,Zeeland East,0,30
 2026-08-27,Muskegon Orchard View,Wyoming,49,0
 2026-08-27,Muskegon Reeths-Puffer,Greenville,56,7
+2026-08-27,New Baltimore Anchor Bay,Port Huron,21,28
 2026-08-27,New Boston Huron,Lake Fenton,40,28
 2026-08-27,New Haven,Waterford Our Lady of the Lakes,46,0
 2026-08-27,New Lothrop,Muskegon Catholic Central,54,0
@@ -180,13 +180,6 @@ date,home,away,home_score,away_score
 2026-08-27,Wyandotte Roosevelt,Gibraltar Carlson,14,45
 2026-08-27,Yale,Swartz Creek,45,48
 2026-08-27,Ypsilanti Lincoln,Okemos,7,19
-2026-08-28,Detroit Cass Tech,Michigan City (IN),62,0
-2026-08-28,North Farmington,Birmingham Groves,14,13
-2026-08-28,Clarkston,South Lyon,37,16
-2026-08-28,Frankenmuth,Goodrich,7,10
-2026-08-28,Davison,Roseville,28,8
-2026-08-28,Flint New Standard Academy,Monroe Jefferson,6,44
-2026-08-28,Flint Southwestern,Detroit East English,0,65
 2026-08-28,Antwerp (OH),Edon (OH),12,35
 2026-08-28,Armada,St Clair Shores Lakeview,28,14
 2026-08-28,Auburn Hills Oakland Christian,Madison Heights Bishop Foley,0,35
@@ -203,13 +196,16 @@ date,home,away,home_score,away_score
 2026-08-28,Chicago Kenwood Academy (IL),New Lenox Providence Catholic (IL),24,39
 2026-08-28,Cincinnati Moeller (OH),Grove Port Madison (OH),7,45
 2026-08-28,Clare,Whitehall,48,22
+2026-08-28,Clarkston,South Lyon,37,16
 2026-08-28,Clinton,Olivet,43,21
 2026-08-28,Clyde (OH),Toledo Start (OH),33,6
 2026-08-28,Columbus Harvest Prep (OH),Marion Local (OH),28,54
 2026-08-28,Columbus St Francis de Sales (OH),Columbus Walnut Ridge (OH),41,6
+2026-08-28,Davison,Roseville,28,8
 2026-08-28,Dearborn Divine Child,Hudsonville Unity Christian,56,28
 2026-08-28,Dearborn Fordson,West Bloomfield,14,13
 2026-08-28,Dearborn Heights Annapolis,Ann Arbor Skyline,6,40
+2026-08-28,Detroit Cass Tech,Michigan City (IN),62,0
 2026-08-28,Detroit Douglass,Melvindale,0,48
 2026-08-28,Detroit Edison,Jackson Lumen Christi,21,39
 2026-08-28,Detroit Lincoln-King,Detroit Cody,0,22
@@ -225,6 +221,9 @@ date,home,away,home_score,away_score
 2026-08-28,Erie Mason,Blissfield,6,48
 2026-08-28,Evart,Beaverton,12,20
 2026-08-28,Flat Rock,Gladwin,29,53
+2026-08-28,Flint New Standard Academy,Monroe Jefferson,6,44
+2026-08-28,Flint Southwestern,Detroit East English,0,65
+2026-08-28,Frankenmuth,Goodrich,7,10
 2026-08-28,Grand Rapids South Christian,Grand Rapids Christian,35,14
 2026-08-28,Grass Lake,Adrian Madison,34,43
 2026-08-28,Hammond Morton (IN),Chesterton (IN),14,21
@@ -254,6 +253,7 @@ date,home,away,home_score,away_score
 2026-08-28,Mount Clemens,Sterling Heights Parkway Christian,18,28
 2026-08-28,Muskegon,Grandville,28,29
 2026-08-28,Napoleon,Montague,46,35
+2026-08-28,North Farmington,Birmingham Groves,14,13
 2026-08-28,Ogemaw Heights,Freeland,27,14
 2026-08-28,Ottawa Lake Whiteford,Monroe St Mary Catholic Central,28,37
 2026-08-28,Paulding (OH),Pioneer North Central (OH),46,0
@@ -283,11 +283,11 @@ date,home,away,home_score,away_score
 2026-08-28,Unionville-Sebewaing,Sandusky,30,16
 2026-08-28,Wyoming Kelloggsville,Belding,20,60
 2026-08-28,Ypsilanti Community,Riverview,21,30
+2026-08-29,Eastpointe,Harper Woods Chandler Park,1,0
+2026-08-29,Grand Rapids Catholic Central,Oak Park,24,12
 2026-08-29,Milford,Birmingham Seaholm,30,13
 2026-08-29,Mount Pleasant,Saginaw Heritage,23,13
 2026-08-29,Romeo,Rochester Adams,17,10
-2026-08-29,Eastpointe,Harper Woods Chandler Park,1,0
-2026-08-29,Grand Rapids Catholic Central,Oak Park,24,12
 2026-09-03,Adrian,Jackson Northwest,53,25
 2026-09-03,Adrian Madison,Dundee,41,20
 2026-09-03,Algonac,Hazel Park,38,21
@@ -627,6 +627,7 @@ date,home,away,home_score,away_score
 2026-09-11,Constantine,Parchment,36,7
 2026-09-11,Croswell-Lexington,Imlay City,0,22
 2026-09-11,Davison,Traverse City Central,54,28
+2026-09-11,DeWitt,Lansing Everett,73,25
 2026-09-11,Dearborn Divine Child,Detroit Country Day,14,7
 2026-09-11,Dearborn Edsel Ford,Trenton,0,35
 2026-09-11,Dearborn Heights Robichaud,Redford Union,6,14
@@ -637,7 +638,6 @@ date,home,away,home_score,away_score
 2026-09-11,Detroit Mumford,Detroit Henry Ford,16,8
 2026-09-11,Detroit Renaissance,Detroit Martin Luther King,0,41
 2026-09-11,Detroit Southeastern,Detroit Cass Tech,0,46
-2026-09-11,DeWitt,Lansing Everett,73,25
 2026-09-11,Dundee,Clinton,0,48
 2026-09-11,Durand,Chesaning,49,14
 2026-09-11,Durand-Arkansaw (WI),Neillsville (WI),60,7
@@ -1051,7 +1051,7 @@ date,home,away,home_score,away_score
 2026-09-18,Schoolcraft,Constantine,21,41
 2026-09-18,South Haven,Coloma,27,6
 2026-09-18,South Lyon East,Livonia Churchill,34,0
-2026-09-18,Southfield Bradford Academy,Arts & Technology Academy of Pontiac,1,0
+2026-09-18,Southfield Bradford Academy,Arts & Technology Academy of Pontiac,2,0
 2026-09-18,St Clair Shores Lakeview,Warren Mott,62,14
 2026-09-18,St Joseph,Mattawan,43,0
 2026-09-18,St Louis,Sanford Meridian,0,56
@@ -1355,7 +1355,7 @@ date,home,away,home_score,away_score
 2026-09-25,Whitehall,Montague,12,0
 2026-09-25,Whitehouse Anthony Wayne (OH),Toledo Whitmer (OH),7,10
 2026-09-25,Williamston,Haslett,27,21
-2026-09-25,Windsor Holy Names (CN),Windsor Herman (CN),28,28
+2026-09-25,Windsor Holy Names (CN),Windsor Herman (CN),,
 2026-09-25,Windsor Sandwich (CN),Windsor St Joseph Catholic (CN),36,0
 2026-09-25,Wyoming,Grand Rapids Forest Hills Central,6,42
 2026-09-25,Yale,Richmond,12,7
@@ -1695,6 +1695,7 @@ date,home,away,home_score,away_score
 2026-10-09,Columbus St Francis de Sales (OH),Columbus St Charles Prep (OH),28,20
 2026-10-09,Constantine,Lawton,39,6
 2026-10-09,Coopersville,Greenville,56,14
+2026-10-09,DeWitt,Holt,44,0
 2026-10-09,Dearborn Divine Child,Detroit U of D Jesuit,27,0
 2026-10-09,Dearborn Fordson,Canton,35,13
 2026-10-09,Dearborn Heights Crestwood,Hartland,34,68
@@ -1707,7 +1708,6 @@ date,home,away,home_score,away_score
 2026-10-09,Detroit Martin Luther King,Detroit Southeastern,49,0
 2026-10-09,Detroit Renaissance,Detroit Cass Tech,0,67
 2026-10-09,Detroit University Prep,Hazel Park,12,45
-2026-10-09,DeWitt,Holt,44,0
 2026-10-09,Dowagiac,Buchanan,0,49
 2026-10-09,East Jackson,Vestaburg,8,53
 2026-10-09,East Jordan,Johannesburg-Lewiston,53,16
@@ -1910,51 +1910,24 @@ date,home,away,home_score,away_score
 2026-10-10,Warren Michigan Collegiate,Romulus Summit Academy North,0,27
 2026-10-12,Lutheran Westland,Flint Hamady,26,20
 2026-10-15,Detroit Douglass,Detroit Henry Ford,0,36
-2026-10-15,Detroit Mumford,Detroit Pershing,28,12
-2026-10-15,Detroit Western,Detroit Cody,0,46
 2026-10-15,Detroit East English,Detroit Northwestern,60,0
+2026-10-15,Detroit Mumford,Detroit Pershing,28,12
 2026-10-15,Detroit Osborn,Detroit Southeastern,6,48
 2026-10-15,Detroit Renaissance,Detroit Communication Media Arts,30,34
+2026-10-15,Detroit Western,Detroit Cody,0,46
 2026-10-15,Manton,Roscommon,1,0
 2026-10-15,Mount Pleasant Sacred Heart,Saginaw Nouvel Catholic Central,34,15
 2026-10-15,Regis (WI),Neillsville (WI),44,6
 2026-10-15,Windsor Holy Names (CN),Belle River St. Anne Catholic (CN),54,0
-2026-10-16,Waterford Mott,Waterford Kettering,40,20
-2026-10-16,Grass Lake,Jonesville,24,58
-2026-10-16,Leslie,Napoleon,18,56
-2026-10-16,Michigan Center,Brooklyn Columbia Central,33,14
-2026-10-16,Vandercook Lake,Addison,50,15
-2026-10-16,Holly,Owosso,41,20
-2026-10-16,Beaverton,Midland Bullock Creek,0,39
-2026-10-16,Farwell,Ogemaw Heights,6,61
-2026-10-16,Harrison,Shepherd,22,29
-2026-10-16,Pinconning,Standish-Sterling,0,27
-2026-10-16,Sanford Meridian,Gladwin,28,13
-2026-10-16,St Louis,Clare,6,61
-2026-10-16,Fenton,Goodrich,14,49
-2026-10-16,Flint Kearsley,Clio,12,34
-2026-10-16,Flushing,Corunna,14,28
-2026-10-16,Linden,Ortonville Brandon,49,14
-2026-10-16,Swartz Creek,Lake Fenton,28,29
-2026-10-16,Auburn Hills Avondale,Troy Athens,0,35
-2026-10-16,Berkley,Bloomfield Hills,7,42
-2026-10-16,Ferndale,Rochester Hills Stoney Creek,12,36
-2026-10-16,Pontiac,Troy,6,38
-2026-10-16,Royal Oak,Rochester,0,49
-2026-10-16,Birmingham Groves,Oxford,22,45
-2026-10-16,Birmingham Seaholm,Rochester Adams,21,22
-2026-10-16,Harper Woods,Clarkston,28,13
-2026-10-16,Oak Park,Lake Orion,8,35
-2026-10-16,Southfield Arts & Technology,West Bloomfield,2,28
-2026-10-16,Detroit Cass Tech,Detroit Martin Luther King,21,20
-2026-10-16,Detroit Central,Detroit Denby,8,6
+2026-10-16,Allegan,Schoolcraft,0,1
 2026-10-16,Allen Park,Dearborn Edsel Ford,45,14
-2026-10-16,Allen Park Cabrini,Detroit Loyola,41,0
+2026-10-16,Allen Park Cabrini,Detroit Loyola,41,6
 2026-10-16,Alma,Bay City John Glenn,21,35
 2026-10-16,Ann Arbor Pioneer,Dexter,13,27
 2026-10-16,Ann Arbor Skyline,Flint Powers Catholic,20,45
 2026-10-16,Armada,Yale,42,6
 2026-10-16,Arts & Technology Academy of Pontiac,Redford Westfield Prep,0,42
+2026-10-16,Auburn Hills Avondale,Troy Athens,0,35
 2026-10-16,Auburn Hills Oakland Christian,Muskegon Catholic Central,12,28
 2026-10-16,Bark River-Harris,Manistique,45,16
 2026-10-16,Bath,Grayling,0,42
@@ -1962,9 +1935,13 @@ date,home,away,home_score,away_score
 2026-10-16,Battle Creek Lakeview,Stevensville Lakeshore,0,38
 2026-10-16,Bay City Central,Traverse City Central,18,45
 2026-10-16,Beal City,LeRoy Pine River,43,7
+2026-10-16,Beaverton,Midland Bullock Creek,0,39
 2026-10-16,Belding,Grandville Calvin Christian,56,14
 2026-10-16,Benzie Central,Maple City Glen Lake,0,46
+2026-10-16,Berkley,Bloomfield Hills,7,42
 2026-10-16,Berrien Springs,Niles Brandywine,48,8
+2026-10-16,Birmingham Groves,Oxford,22,45
+2026-10-16,Birmingham Seaholm,Rochester Adams,21,22
 2026-10-16,Bloomfield Hills Brother Rice,Toledo St John's Jesuit (OH),30,25
 2026-10-16,Bremen (IN),Akron Tippecanoe Valley (IN),7,25
 2026-10-16,Bridgeport,Freeland,0,63
@@ -1997,6 +1974,8 @@ date,home,away,home_score,away_score
 2026-10-16,Dearborn Heights Annapolis,Redford Thurston,0,48
 2026-10-16,Dearborn Heights Crestwood,Howell,13,54
 2026-10-16,Decatur,Hartford,40,0
+2026-10-16,Detroit Cass Tech,Detroit Martin Luther King,21,20
+2026-10-16,Detroit Central,Detroit Denby,8,6
 2026-10-16,Detroit Country Day,Jackson Lumen Christi,27,28
 2026-10-16,Detroit Edison,Ecorse,30,20
 2026-10-16,Detroit Leadership Academy,Detroit Community,12,60
@@ -2013,9 +1992,14 @@ date,home,away,home_score,away_score
 2026-10-16,Elkton-Pigeon-Bay Port Laker,Harbor Beach,47,6
 2026-10-16,Erie Mason,Sand Creek,18,54
 2026-10-16,Essexville Garber,Caro,7,17
+2026-10-16,Farwell,Ogemaw Heights,6,61
+2026-10-16,Fenton,Goodrich,14,49
+2026-10-16,Ferndale,Rochester Hills Stoney Creek,12,36
 2026-10-16,Flint Beecher,Genesee,8,27
 2026-10-16,Flint Hamady,Detroit Lincoln-King,36,34
-2026-10-16,Fowlerville,Pinckney,13,21
+2026-10-16,Flint Kearsley,Clio,12,34
+2026-10-16,Flushing,Corunna,14,28
+2026-10-16,Fowlerville,Pinckney,21,13
 2026-10-16,Frankfort,East Jordan,0,13
 2026-10-16,Fraser,Grosse Pointe North,0,31
 2026-10-16,Gibraltar Carlson,Lincoln Park,27,8
@@ -2030,6 +2014,7 @@ date,home,away,home_score,away_score
 2026-10-16,Grand Rapids Union,Muskegon,0,49
 2026-10-16,Grand Rapids West Catholic,Wayland,34,13
 2026-10-16,Grant,Morley Stanwood,35,6
+2026-10-16,Grass Lake,Jonesville,24,58
 2026-10-16,Greenville,Sparta,20,7
 2026-10-16,Grosse Ile,Riverview,26,40
 2026-10-16,Grosse Pointe Woods University Liggett,Riverview Gabriel Richard,1,0
@@ -2038,12 +2023,15 @@ date,home,away,home_score,away_score
 2026-10-16,Hammond Morton (IN),East Chicago Central (IN),33,0
 2026-10-16,Hamtramck,Williamston,6,53
 2026-10-16,Harbor Springs,Johannesburg-Lewiston,41,0
+2026-10-16,Harper Woods,Clarkston,28,13
 2026-10-16,Harper Woods Chandler Park,Warren Michigan Collegiate,0,40
+2026-10-16,Harrison,Shepherd,22,29
 2026-10-16,Hart,Shelby,0,40
 2026-10-16,Hartland,Dearborn,41,14
 2026-10-16,Hemlock,White Cloud,49,0
 2026-10-16,Hillsdale,Blissfield,19,50
 2026-10-16,Holland West Ottawa,East Kentwood,31,63
+2026-10-16,Holly,Owosso,41,20
 2026-10-16,Homer,East Jackson,60,0
 2026-10-16,Hopkins,Wyoming Kelloggsville,48,6
 2026-10-16,Houghton Lake,Lake City,18,6
@@ -2065,7 +2053,9 @@ date,home,away,home_score,away_score
 2026-10-16,Lansing Everett,East Lansing,7,35
 2026-10-16,Lansing Sexton,Eaton Rapids,42,7
 2026-10-16,Lansing Waverly,Holt,35,34
+2026-10-16,Leslie,Napoleon,18,56
 2026-10-16,Ligonier West Noble (IN),LaGrange Prairie Heights (IN),40,19
+2026-10-16,Linden,Ortonville Brandon,49,14
 2026-10-16,Livonia Franklin,Walled Lake Northern,38,6
 2026-10-16,Livonia Stevenson,Livonia Churchill,14,42
 2026-10-16,Lowell,Grand Rapids Kenowa Hills,21,35
@@ -2084,6 +2074,7 @@ date,home,away,home_score,away_score
 2026-10-16,Melvindale,Dearborn Heights Robichaud,12,30
 2026-10-16,Melvindale Academy for Business & Tech,Southfield Bradford Academy,20,44
 2026-10-16,Menominee,Kingsford,14,21
+2026-10-16,Michigan Center,Brooklyn Columbia Central,33,14
 2026-10-16,Michigan City (IN),Crown Point (IN),0,41
 2026-10-16,Midland Dow,Lapeer,44,14
 2026-10-16,Milan,Carleton Airport,6,49
@@ -2107,6 +2098,7 @@ date,home,away,home_score,away_score
 2026-10-16,North Muskegon,Ravenna,21,13
 2026-10-16,Northville,Salem,55,14
 2026-10-16,Novi,Dearborn Fordson,0,55
+2026-10-16,Oak Park,Lake Orion,8,35
 2026-10-16,Okemos,Haslett,11,21
 2026-10-16,Otisville LakeVille Memorial,New Lothrop,0,42
 2026-10-16,Ottawa Lake Whiteford,Petersburg Summerfield,52,0
@@ -2116,8 +2108,10 @@ date,home,away,home_score,away_score
 2026-10-16,Paw Paw,Three Rivers,50,7
 2026-10-16,Perry,International Academy of Flint,38,12
 2026-10-16,Petoskey,Marquette,10,19
+2026-10-16,Pinconning,Standish-Sterling,0,27
 2026-10-16,Plainwell,Niles,0,56
 2026-10-16,Plymouth,Belleville,14,48
+2026-10-16,Pontiac,Troy,6,38
 2026-10-16,Pontiac Notre Dame Prep,Warren Lincoln,42,16
 2026-10-16,Port Huron Northern,Grosse Pointe South,0,50
 2026-10-16,Portage Central,Mattawan,56,14
@@ -2128,24 +2122,29 @@ date,home,away,home_score,away_score
 2026-10-16,Remus Chippewa Hills,Central Montcalm,49,0
 2026-10-16,River Rouge,New Market Huron Heights (CN),17,27
 2026-10-16,Rochester Hills Lutheran Northwest,Livonia Clarenceville,34,6
-2026-10-16,Romeo,Roseville,56,14
+2026-10-16,Romeo,Roseville,52,14
 2026-10-16,Romulus,Whitmore Lake,38,12
+2026-10-16,Royal Oak,Rochester,0,49
 2026-10-16,Saginaw Heritage,Big Rapids,28,21
 2026-10-16,Saginaw Michigan Lutheran Seminary,Laingsburg,35,0
 2026-10-16,Saginaw Swan Valley,Frankenmuth,22,41
 2026-10-16,Saginaw United,Flint Carman-Ainsworth,12,34
 2026-10-16,Sandusky,Vassar,36,50
+2026-10-16,Sanford Meridian,Gladwin,28,13
 2026-10-16,Saugatuck,Cassopolis,14,34
 2026-10-16,Sault Ste Marie,Alpena,0,40
 2026-10-16,South Lyon East,Walled Lake Western,14,42
+2026-10-16,Southfield Arts & Technology,West Bloomfield,2,28
 2026-10-16,Spring Lake,Ada Forest Hills Eastern,14,17
 2026-10-16,Springport,Quincy,27,22
 2026-10-16,St Clair Shores South Lake,Madison Heights Madison,0,34
 2026-10-16,St Johns,Gaylord,55,7
+2026-10-16,St Louis,Clare,6,61
 2026-10-16,Sterling Heights,Macomb L'Anse Creuse North,0,34
 2026-10-16,Stockbridge,Vermontville Maple Valley,6,42
 2026-10-16,Sturgeon Bay (WI),Marinette (WI),0,49
 2026-10-16,Sturgis,Otsego,36,16
+2026-10-16,Swartz Creek,Lake Fenton,28,29
 2026-10-16,Tawas,Saginaw Valley Lutheran,0,42
 2026-10-16,Taylor,Southgate Anderson,49,48
 2026-10-16,Temperance Bedford,Saline,21,35
@@ -2158,9 +2157,11 @@ date,home,away,home_score,away_score
 2026-10-16,Union City,Centreville,20,0
 2026-10-16,Utica Eisenhower,St Clair Shores Lakeview,13,28
 2026-10-16,Utica Ford,St Clair Shores Lake Shore,22,0
+2026-10-16,Vandercook Lake,Addison,50,15
 2026-10-16,Vestaburg,Lakeview,26,8
 2026-10-16,Walled Lake Central,South Lyon,6,63
 2026-10-16,Warren Cousino,Warren Fitzgerald,0,28
+2026-10-16,Waterford Mott,Waterford Kettering,40,20
 2026-10-16,Waterford Our Lady of the Lakes,Royal Oak Shrine Catholic,13,56
 2026-10-16,White Pigeon,Comstock,0,1
 2026-10-16,Whitehall,Ludington,26,27
@@ -2170,21 +2171,17 @@ date,home,away,home_score,away_score
 2026-10-16,Ypsilanti Community,Tecumseh,14,22
 2026-10-16,Ypsilanti Lincoln,Chelsea,7,52
 2026-10-16,Zeeland West,Grand Rapids Forest Hills Central,56,20
-2026-10-17,Manchester,Hanover-Horton,30,36
 2026-10-17,Chicago Kenwood Academy (IL),Chicago Morgan Park (IL),14,24
 2026-10-17,Eureka St. Bernard (CA),McKinleyville (CA),45,20
+2026-10-17,Manchester,Hanover-Horton,30,36
+2026-10-17,Pioneer North Central (OH),Montpelier (OH),0,20
 2026-10-17,Traverse City St Francis,Manistee,34,27
 2026-10-17,Warren De La Salle Collegiate,Dearborn Divine Child,38,24
 2026-10-17,West Iron County,Iron Mountain,0,1
 2026-10-17,West Unity Hilltop (OH),Edon (OH),14,47
+2026-10-20,Dearborn Heights Annapolis,Romulus,,
 2026-10-22,Clawson,Royal Oak,,
 2026-10-22,Iron Mountain,Negaunee,,
-2026-10-23,Hancock,Houghton,,
-2026-10-23,KLAA crossover,Salem,,
-2026-10-23,KLAA crossover,Dearborn Fordson,,
-2026-10-23,KLAA crossover,Belleville,,
-2026-10-23,KLAA crossover,Novi,,
-2026-10-23,Bloomfield Hills Brother Rice,Detroit Catholic Central,,
 2026-10-23,Ada Forest Hills Eastern,Ypsilanti Community,,
 2026-10-23,Adrian,New Boston Huron,,
 2026-10-23,Adrian Madison,Tecumseh,,
@@ -2205,11 +2202,13 @@ date,home,away,home_score,away_score
 2026-10-23,Bay City Western,Bay City Central,,
 2026-10-23,Beal City,Ithaca,,
 2026-10-23,Belding,Dowagiac,,
+2026-10-23,Belleville,Brighton,,
 2026-10-23,Big Rapids,Freeland,,
 2026-10-23,Birch Run,Sanford Meridian,,
 2026-10-23,Birmingham Groves,Ferndale,,
 2026-10-23,Blissfield,Addison,,
 2026-10-23,Bloomfield Hills,Ann Arbor Pioneer,,
+2026-10-23,Bloomfield Hills Cranbrook Kingswood,Allen Park Cabrini,,
 2026-10-23,Boyne City,Sault Ste Marie,,
 2026-10-23,Bridgeport,Vassar,,
 2026-10-23,Brownstown Woodhaven,Taylor,,
@@ -2220,6 +2219,7 @@ date,home,away,home_score,away_score
 2026-10-23,Caro,Detroit Edison,,
 2026-10-23,Cass City,Ubly,,
 2026-10-23,Charlotte,Fowlerville,,
+2026-10-23,Cheboygan,New Lothrop,,
 2026-10-23,Cincinnati Moeller (OH),Detroit Martin Luther King,,
 2026-10-23,Clare,Petoskey,,
 2026-10-23,Clarkston,Muskegon,,
@@ -2229,8 +2229,10 @@ date,home,away,home_score,away_score
 2026-10-23,Comstock,Gobles,,
 2026-10-23,Comstock Park,Grandville Calvin Christian,,
 2026-10-23,Corunna,Chesaning,,
-2026-10-23,Dearborn Divine Child,Jackson Lumen Christi,,
+2026-10-23,DeWitt,Okemos,,
+2026-10-23,Dearborn,Plymouth,,
 2026-10-23,Dearborn Edsel Ford,Wyandotte Roosevelt,,
+2026-10-23,Dearborn Heights Crestwood,Canton,,
 2026-10-23,Delton Kellogg,South Haven,,
 2026-10-23,Detroit Cass Tech,New Market Huron Heights (CN),,
 2026-10-23,Detroit Central,Detroit Henry Ford,,
@@ -2240,7 +2242,6 @@ date,home,away,home_score,away_score
 2026-10-23,Detroit Northwestern,Detroit Western,,
 2026-10-23,Detroit Renaissance,Hamtramck,,
 2026-10-23,Detroit University Prep Science & Math,Detroit Denby,,
-2026-10-23,DeWitt,Okemos,,
 2026-10-23,Durand,Bath,,
 2026-10-23,East Jackson,Bronson,,
 2026-10-23,East Jordan,Harbor Springs,,
@@ -2278,11 +2279,13 @@ date,home,away,home_score,away_score
 2026-10-23,Greenville,Cadillac,,
 2026-10-23,Grosse Ile,Dundee,,
 2026-10-23,Grosse Pointe North,Grosse Pointe South,,
+2026-10-23,Hancock,Houghton,,
 2026-10-23,Hanover-Horton,Monroe St Mary Catholic Central,,
 2026-10-23,Harbor Beach,Millington,,
 2026-10-23,Harper Woods Chandler Park,Flint Hamady,,
 2026-10-23,Harrison,Evart,,
 2026-10-23,Hartford,Centreville,,
+2026-10-23,Hartland,Dearborn Fordson,,
 2026-10-23,Haslett,Kingsley,,
 2026-10-23,Hazel Park,Clinton Township Clintondale,,
 2026-10-23,Hillsdale,Manchester,,
@@ -2290,6 +2293,7 @@ date,home,away,home_score,away_score
 2026-10-23,Hopkins,Holland,,
 2026-10-23,Houghton Lake,Beaverton,,
 2026-10-23,Howard City Tri County,Central Montcalm,,
+2026-10-23,Howell,Northville,,
 2026-10-23,Hudson,Berrien Springs,,
 2026-10-23,Imlay City,Ovid-Elsie,,
 2026-10-23,Ionia,Lake Odessa Lakewood,,
@@ -2318,9 +2322,11 @@ date,home,away,home_score,away_score
 2026-10-23,Macomb Dakota,Grand Blanc,,
 2026-10-23,Macomb L'Anse Creuse North,New Baltimore Anchor Bay,,
 2026-10-23,Macomb Lutheran North,Flat Rock,,
+2026-10-23,Madison Heights Bishop Foley,Grosse Pointe Woods University Liggett,,
 2026-10-23,Madison Heights Lamphere,Riverview,,
 2026-10-23,Mancelona,Benzie Central,,
 2026-10-23,Manistee,Ludington,,
+2026-10-23,Marine City Cardinal Mooney,Detroit Loyola,,
 2026-10-23,Marysville,Marine City,,
 2026-10-23,Mason,Harper Woods,,
 2026-10-23,McBain,Fowler,,
@@ -2344,7 +2350,7 @@ date,home,away,home_score,away_score
 2026-10-23,Otsego,Plainwell,,
 2026-10-23,Owosso,Essexville Garber,,
 2026-10-23,Oxford,Romeo,,
-2026-10-23,Parchment,Allegan,,
+2026-10-23,Parchment,Decatur,,
 2026-10-23,Petersburg Summerfield,Erie Mason,,
 2026-10-23,Pinckney,Ida,,
 2026-10-23,Pinconning,Carrollton,,
@@ -2400,22 +2406,29 @@ date,home,away,home_score,away_score
 2026-10-23,Warren Mott,Utica Ford,,
 2026-10-23,Warren Woods Tower,St Clair Shores South Lake,,
 2026-10-23,Waterford Kettering,Harrison Township L'Anse Creuse,,
+2026-10-23,Waterford Our Lady of the Lakes,Farwell,,
 2026-10-23,Watervliet,Kalamazoo Hackett Catholic Prep,,
 2026-10-23,Wayland,Grand Rapids Ottawa Hills,,
+2026-10-23,Wayne Memorial,Novi,,
 2026-10-23,West Bloomfield,Utica Eisenhower,,
 2026-10-23,West Iron County,Gwinn,,
+2026-10-23,Westland John Glenn,Salem,,
 2026-10-23,White Cloud,Saranac,,
 2026-10-23,White Lake Lakeland,South Lyon East,,
-2026-10-23,White Pigeon,Decatur,,
 2026-10-23,Whitehall,Muskegon Reeths-Puffer,,
 2026-10-23,Whitmore Lake,Melvindale,,
+2026-10-23,Windsor Holy Names (CN),Essex (CN),,
 2026-10-23,Windsor Holy Names (CN),Windsor St Joseph Catholic (CN),,
+2026-10-23,Windsor Sandwich (CN),La Salle St Thomas Of Villanova (CN),,
 2026-10-23,Wyoming,Hart,,
 2026-10-23,Wyoming Kelloggsville,Wyoming Godwin Heights,,
 2026-10-23,Yale,Holly,,
 2026-10-23,Zeeland East,Hamilton,,
+2026-10-24,Bloomfield Hills Brother Rice,Detroit Catholic Central,,
+2026-10-24,Dearborn Divine Child,Jackson Lumen Christi,,
 2026-10-24,Detroit Leadership Academy,Detroit Pershing,,
 2026-10-24,Detroit University Prep,Sandusky,,
 2026-10-24,Eureka St. Bernard (CA),Crescent City Del Notre (CA),,
 2026-10-24,Mount Clemens,Niles Brandywine,,
+2026-10-24,Royal Oak Shrine Catholic,Clarkston Everest Collegiate,,
 2026-10-24,Warren Michigan Collegiate,Eaton Rapids,,

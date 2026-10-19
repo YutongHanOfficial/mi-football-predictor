@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from collections import deque
 import streamlit as st
 
-from engine import Engine, EngineConfig, is_oos
+from engine import Engine, EngineConfig, discover_seasons, is_oos
 from playoffs import PlayoffSimulator, load_divisions, load_locations, FIELD_PER_DIVISION
 
 # ==========================================
@@ -16,9 +16,14 @@ from playoffs import PlayoffSimulator, load_divisions, load_locations, FIELD_PER
 # walk-forward backtesting (see backtest.py). Override any of them here.
 ENGINE_CONFIG = EngineConfig()
 
-SEASON_FILES = [("2025", "games_2025.csv"), ("2026", "games_2026.csv")]
-# Official MHSAA divisions, enrollments and playoff points (from mhsaa.com Playoff Point Summary)
-DIVISIONS_FILE = "mhsaa_2026.csv"
+# Most recent games_<season>.csv files (see fetch_games.py); the oldest only seeds the ratings
+SEASON_FILES = discover_seasons()
+CURRENT_SEASON = SEASON_FILES[-1][0] if SEASON_FILES else ""
+# Official MHSAA divisions, enrollments and playoff points (refresh_mhsaa.py)
+DIVISIONS_FILE = f"mhsaa_{CURRENT_SEASON}.csv"
+# Last day of regular-season games that count for playoff points (MHSAA bulletin).
+# Add next season's date here when its bulletin comes out.
+LAST_REGULAR_DAY = {"2026": "2026-10-24"}
 # Town coordinates for each school (US Census gazetteer), used to draw Regions
 LOCATIONS_FILE = "school_locations.csv"
 PLAYOFF_SIMS = 2000
@@ -349,9 +354,10 @@ def get_cached_history(_predictor, team_name, version=None):
 
 @st.cache_resource(max_entries=1)
 def load_playoff_sim(_predictor, version):
-    if not os.path.exists(DIVISIONS_FILE):
+    if not os.path.exists(DIVISIONS_FILE) or CURRENT_SEASON not in LAST_REGULAR_DAY:
         return None
-    sim = PlayoffSimulator(_predictor.engine, load_divisions(DIVISIONS_FILE), load_locations(LOCATIONS_FILE))
+    sim = PlayoffSimulator(_predictor.engine, load_divisions(DIVISIONS_FILE), load_locations(LOCATIONS_FILE),
+                           season=CURRENT_SEASON, last_regular_date=LAST_REGULAR_DAY[CURRENT_SEASON])
     sim.run(PLAYOFF_SIMS)
     return sim
 
@@ -497,7 +503,7 @@ st.caption("Bayesian Power Ratings, Calibrated Matchup Projections & Walk-Forwar
 st.write("")
 
 if predictor is None:
-    st.error("⚠️ No game data found! Please upload `games_2025.csv` or `games_2026.csv` to your repository.")
+    st.error("⚠️ No game data found! Run `python fetch_games.py` to download `games_<season>.csv` files from MHSAA.")
 else:
     tab1, tab2, tab3, tab4, tab_playoffs, tab5, tab6 = st.tabs([
         "🎮 Matchup Simulator", 
@@ -612,7 +618,8 @@ else:
         with col_hub_team: selected_team = st.selectbox("Select Team Hub:", all_teams, index=gb_idx, key="hub_team_select")
         with col_hub_season:
             st.write("") 
-            is_archive = (st.radio("Season View", ["2026 Current", "2025 Archive"], horizontal=True, label_visibility="collapsed") == "2025 Archive")
+            season_labels = [f"{predictor.current_season} Current"] + ([f"{predictor.past_season} Archive"] if predictor.past_season else [])
+            is_archive = (st.radio("Season View", season_labels, horizontal=True, label_visibility="collapsed") != season_labels[0])
             
         if selected_team:
             if is_archive:
@@ -630,7 +637,7 @@ else:
                 t_basic = predictor.hist_basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 
                 r_win_pct, r_ppg, r_papg, r_pf, r_diff = predictor.hist_ranks_win_pct, predictor.hist_ranks_ppg, predictor.hist_ranks_papg, predictor.hist_ranks_pf, predictor.hist_ranks_diff
-                target_games, display_year = predictor.historical_games, "2025"
+                target_games, display_year = predictor.historical_games, predictor.past_season
             else:
                 team_rank = get_rank_display(selected_team)
                 t_stats = predictor.teams[selected_team]
@@ -638,7 +645,7 @@ else:
                 t_basic = predictor.basic_stats.get(selected_team, {"W":0, "L":0, "PF":0, "PA":0, "GP":0, "GP_stats":0})
                 
                 r_win_pct, r_ppg, r_papg, r_pf, r_diff = predictor.ranks_win_pct, predictor.ranks_ppg, predictor.ranks_papg, predictor.ranks_pf, predictor.ranks_diff
-                target_games, display_year = predictor.current_games, "2026"
+                target_games, display_year = predictor.current_games, predictor.current_season
 
             gp, gp_stats = max(1, t_basic["GP"]), max(1, t_basic.get("GP_stats", 0))
             pf, pa = t_basic["PF"], t_basic["PA"]
@@ -1020,7 +1027,7 @@ else:
 
         sim = load_playoff_sim(predictor, VERSION)
         if sim is None:
-            st.warning(f"Playoff data not found. Add `{DIVISIONS_FILE}` to the repository.")
+            st.warning(f"Playoff data for {CURRENT_SEASON} isn't set up yet: run `python refresh_mhsaa.py` and add the season's last regular-season day to `LAST_REGULAR_DAY` in predictor.py.")
         else:
             summary = sim.summary()
             official = sim.official
