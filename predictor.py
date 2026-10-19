@@ -1,10 +1,19 @@
+import importlib
 import os
 import re
+import sys
 import pandas as pd
 import altair as alt
 from datetime import datetime, timedelta
 from collections import deque
 import streamlit as st
+
+# Streamlit Cloud re-runs this script after a deploy without restarting Python, so
+# a stale copy of our own modules can linger in memory. Reload them on every run
+# (they only define functions and classes, so this is cheap).
+for _module in ("engine", "playoffs"):
+    if _module in sys.modules:
+        importlib.reload(sys.modules[_module])
 
 from engine import Engine, EngineConfig, discover_seasons, is_oos
 from playoffs import PlayoffSimulator, load_divisions, load_locations, FIELD_PER_DIVISION
