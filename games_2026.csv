@@ -2128,7 +2128,7 @@ date,home,away,home_score,away_score
 2026-10-16,Saginaw Heritage,Big Rapids,28,21
 2026-10-16,Saginaw Michigan Lutheran Seminary,Laingsburg,35,0
 2026-10-16,Saginaw Swan Valley,Frankenmuth,22,41
-2026-10-16,Saginaw United,Flint Carman-Ainsworth,12,34
+2026-10-16,Saginaw United,Flint Carman-Ainsworth,0,0
 2026-10-16,Sandusky,Vassar,36,50
 2026-10-16,Sanford Meridian,Gladwin,28,13
 2026-10-16,Saugatuck,Cassopolis,14,34
@@ -2202,7 +2202,6 @@ date,home,away,home_score,away_score
 2026-10-23,Bay City Western,Bay City Central,,
 2026-10-23,Beal City,Ithaca,,
 2026-10-23,Belding,Dowagiac,,
-2026-10-23,Belleville,Brighton,,
 2026-10-23,Big Rapids,Freeland,,
 2026-10-23,Birch Run,Sanford Meridian,,
 2026-10-23,Birmingham Groves,Ferndale,,
@@ -2211,6 +2210,7 @@ date,home,away,home_score,away_score
 2026-10-23,Bloomfield Hills Cranbrook Kingswood,Allen Park Cabrini,,
 2026-10-23,Boyne City,Sault Ste Marie,,
 2026-10-23,Bridgeport,Vassar,,
+2026-10-23,Brighton,Belleville,,
 2026-10-23,Brownstown Woodhaven,Taylor,,
 2026-10-23,Burton Atherton,Rochester Hills Lutheran Northwest,,
 2026-10-23,Byron Center,Middleville Thornapple Kellogg,,
