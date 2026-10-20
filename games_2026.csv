@@ -2096,7 +2096,7 @@ date,home,away,home_score,away_score
 2026-10-16,North Branch,Richmond,31,6
 2026-10-16,North Farmington,Farmington,6,29
 2026-10-16,North Muskegon,Ravenna,21,13
-2026-10-16,Northville,Salem,55,14
+2026-10-16,Northville,Salem,55,21
 2026-10-16,Novi,Dearborn Fordson,0,55
 2026-10-16,Oak Park,Lake Orion,8,35
 2026-10-16,Okemos,Haslett,11,21
@@ -2219,7 +2219,7 @@ date,home,away,home_score,away_score
 2026-10-23,Caro,Detroit Edison,,
 2026-10-23,Cass City,Ubly,,
 2026-10-23,Charlotte,Fowlerville,,
-2026-10-23,Cheboygan,New Lothrop,,
+2026-10-23,Cheboygan,New Lothrop,0,1
 2026-10-23,Cincinnati Moeller (OH),Detroit Martin Luther King,,
 2026-10-23,Clare,Petoskey,,
 2026-10-23,Clarkston,Muskegon,,
@@ -2411,7 +2411,7 @@ date,home,away,home_score,away_score
 2026-10-23,Wayland,Grand Rapids Ottawa Hills,,
 2026-10-23,Wayne Memorial,Novi,,
 2026-10-23,West Bloomfield,Utica Eisenhower,,
-2026-10-23,West Iron County,Gwinn,,
+2026-10-23,West Iron County,Gwinn,0,1
 2026-10-23,Westland John Glenn,Salem,,
 2026-10-23,White Cloud,Saranac,,
 2026-10-23,White Lake Lakeland,South Lyon East,,
