@@ -539,8 +539,17 @@ else:
 
     get_rank_display = view.rank_display
     all_teams = view.team_list
-    gb_idx = all_teams.index("Grand Blanc") if "Grand Blanc" in all_teams else 0
-    dav_idx = all_teams.index("Davison") if "Davison" in all_teams else (1 if len(all_teams) > 1 else 0)
+
+    def remembered_index(state_key, default):
+        """Keep a team picked on one season selected when switching to another season."""
+        team = st.session_state.get(state_key, default)
+        if team in all_teams:
+            return all_teams.index(team)
+        return all_teams.index(default) if default in all_teams else 0
+
+    def remember(state_key, team):
+        if team:
+            st.session_state[state_key] = team
 
     # ----------------------------------------------------
     # TAB 1: MATCHUP SIMULATOR
@@ -550,7 +559,8 @@ else:
             col_a, col_b = st.columns(2)
             with col_a:
                 st.markdown("### ✈️ Away Team")
-                away = st.selectbox("Away Team Select", all_teams, index=gb_idx, label_visibility="collapsed")
+                away = st.selectbox("Away Team Select", all_teams, index=remembered_index("pick_away", "Grand Blanc"), label_visibility="collapsed")
+                remember("pick_away", away)
                 if away:
                     a_stats = view.stats(away)
                     a_pwr = round(view.power(away), 2)
@@ -560,7 +570,8 @@ else:
 
             with col_b:
                 st.markdown("### 🏠 Home Team")
-                home = st.selectbox("Home Team Select", all_teams, index=dav_idx, label_visibility="collapsed")
+                home = st.selectbox("Home Team Select", all_teams, index=remembered_index("pick_home", "Davison"), label_visibility="collapsed")
+                remember("pick_home", home)
                 if home:
                     h_stats = view.stats(home)
                     h_pwr = round(view.power(home), 2)
@@ -605,10 +616,16 @@ else:
                 view_filter = st.radio("Region Filter", ["Michigan (In-State)", "Out of State (OOS)"], horizontal=True, label_visibility="collapsed")
             
             show_oos = (view_filter == "Out of State (OOS)")
-        
+            min_games = 0
+            if show_oos:
+                if st.checkbox("Only teams with 3+ games in the data", value=True,
+                               help="Most out-of-state teams appear only in their game against a Michigan school, so one result can't say much about them."):
+                    min_games = 3
+
             rankings = []
             for t_name, t_data in view.teams.items():
                 if show_oos != is_oos(t_name): continue
+                if view.stats(t_name)["GP"] < min_games: continue
 
                 o_rating, d_rating = t_data["OSRS"], t_data["DSRS"]
                 s_rec = view.stats(t_name)
@@ -633,7 +650,8 @@ else:
         if tab3.open:
             st.subheader("Team Schedule", anchor=False)
         
-            selected_team = st.selectbox("Select Team Hub:", all_teams, index=gb_idx, key=f"hub_team_select_{season}")
+            selected_team = st.selectbox("Select Team Hub:", all_teams, index=remembered_index("pick_hub", "Grand Blanc"))
+            remember("pick_hub", selected_team)
 
             if selected_team:
                 team_rank = get_rank_display(selected_team)
