@@ -26,7 +26,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install dependencies
-        run: pip install pandas numpy scipy
+        run: pip install pandas numpy
 
       - name: Fetch games from the MHSAA Score Center
         run: python fetch_games.py
@@ -34,15 +34,12 @@ jobs:
       - name: Refresh official playoff points
         run: python refresh_mhsaa.py
 
-      - name: Update season-by-season accuracy
-        run: python backtest.py --save
-
       - name: Commit changes
         run: |
-          if git status --porcelain -- 'games_*.csv' 'mhsaa_*.csv' backtest_summary.csv | grep -q .; then
+          if git status --porcelain -- 'games_*.csv' 'mhsaa_*.csv' | grep -q .; then
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add games_*.csv mhsaa_*.csv backtest_summary.csv
+            git add games_*.csv mhsaa_*.csv
             git commit -m "Update game data from MHSAA ($(date -u +%Y-%m-%d))"
             git push
           else
