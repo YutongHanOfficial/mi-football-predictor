@@ -15,7 +15,7 @@ for _module in ("engine", "playoffs"):
     if _module in sys.modules:
         importlib.reload(sys.modules[_module])
 
-from engine import Engine, EngineConfig, config_hash, discover_seasons, is_oos
+from engine import Engine, EngineConfig, discover_seasons, is_oos
 from playoffs import PlayoffSimulator, load_divisions, load_locations, FIELD_PER_DIVISION
 
 # ==========================================
@@ -28,8 +28,6 @@ ENGINE_CONFIG = EngineConfig()
 # Every games_<season>.csv on disk (see fetch_games.py). The newest is the current
 # season; the oldest only seeds the ratings, every other one is browsable as an archive.
 SEASON_FILES = discover_seasons()
-# Season-by-season accuracy, written by `python backtest.py --save`
-BACKTEST_SUMMARY_FILE = "backtest_summary.csv"
 CURRENT_SEASON = SEASON_FILES[-1][0] if SEASON_FILES else ""
 # Official MHSAA divisions, enrollments and playoff points (refresh_mhsaa.py)
 DIVISIONS_FILE = f"mhsaa_{CURRENT_SEASON}.csv"
@@ -344,17 +342,6 @@ def get_cached_history(_predictor, season, team_name, version=None):
 def get_cached_backtest(_predictor, season, version=None):
     return _predictor.backtest(season)
 
-@st.cache_data(max_entries=4)
-def load_backtest_summary(version=None):
-    """Season-by-season accuracy written by `python backtest.py --save` (refreshed by the
-    GitHub Action). Ignored if it was made with different model settings."""
-    if not os.path.exists(BACKTEST_SUMMARY_FILE):
-        return None
-    df = pd.read_csv(BACKTEST_SUMMARY_FILE, dtype={"season": str})
-    if df.empty or df["config_hash"].iloc[0] != config_hash(ENGINE_CONFIG):
-        return None
-    return df
-
 @st.cache_resource(max_entries=1)
 def load_playoff_sim(_predictor, version):
     if not os.path.exists(DIVISIONS_FILE) or CURRENT_SEASON not in LAST_REGULAR_DAY:
@@ -365,7 +352,7 @@ def load_playoff_sim(_predictor, version):
     return sim
 
 
-def compute_filtered_accuracy_metrics(full_df, scope_selection, skip_early_weeks=False):
+def compute_filtered_accuracy_metrics(full_df, scope_selection, skip_early_weeks=False, by_season=False):
     if full_df is None or full_df.empty:
         return None
         
@@ -391,7 +378,12 @@ def compute_filtered_accuracy_metrics(full_df, scope_selection, skip_early_weeks
     calib_table['Calib_Error'] = calib_table['Pred_Prob'] - calib_table['Act_Win_Pct']
 
     df = df.sort_values(["season", "week_num"])
-    df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
+    if by_season:
+        # One point per season for the all-seasons view
+        df["rel_week"] = 0
+        df["week_label"] = df["season"]
+    else:
+        df["week_label"] = df["season"] + " Wk " + df["rel_week"].astype(str)
 
     weekly = df.groupby(["season", "rel_week", "week_label"]).agg(
         games=("correct", "count"),
@@ -616,16 +608,10 @@ else:
                 view_filter = st.radio("Region Filter", ["Michigan (In-State)", "Out of State (OOS)"], horizontal=True, label_visibility="collapsed")
             
             show_oos = (view_filter == "Out of State (OOS)")
-            min_games = 0
-            if show_oos:
-                if st.checkbox("Only teams with 3+ games in the data", value=True,
-                               help="Most out-of-state teams appear only in their game against a Michigan school, so one result can't say much about them."):
-                    min_games = 3
 
             rankings = []
             for t_name, t_data in view.teams.items():
                 if show_oos != is_oos(t_name): continue
-                if view.stats(t_name)["GP"] < min_games: continue
 
                 o_rating, d_rating = t_data["OSRS"], t_data["DSRS"]
                 s_rec = view.stats(t_name)
@@ -882,10 +868,16 @@ else:
     # ----------------------------------------------------
     with tab6:
         if tab6.open:
-            st.subheader(f"{season} Model Accuracy", anchor=False)
+            st.subheader("Model Accuracy", anchor=False)
             st.caption("Tests the model's accuracy by predicting past games using only the information that was available right before kickoff. This proves how well the model works in real-world scenarios.")
-        
-            col_scope_title, col_scope_toggle = st.columns([1, 2])
+
+            scored_seasons = [s_ for s_ in reversed(predictor.seasons) if s_ != predictor.warmup_season]
+            col_period, col_scope_toggle = st.columns([1, 2])
+            with col_period:
+                acc_period = st.selectbox(
+                    "Seasons", ["All seasons"] + scored_seasons, key="acc_period",
+                    help=f"{predictor.warmup_season} only seeds the ratings (there's no earlier season to predict it from), so accuracy starts in {scored_seasons[-1]}." if predictor.warmup_season else None,
+                )
             with col_scope_toggle:
                 scope_selection = st.radio(
                     "Filter Matchup Scope:",
@@ -899,42 +891,27 @@ else:
                     help="Most public models (e.g. goosepoop.io) report accuracy from week 4 on, once teams have played a few games."
                 )
 
-            summary = load_backtest_summary(version=VERSION)
-            if summary is not None:
-                with st.expander("📚 Accuracy by season", expanded=False):
-                    s_scope = summary[summary["scope"] == scope_selection].sort_values("season", ascending=False)
-                    acc_col = "acc_wk4" if skip_early else "acc"
-                    hist = pd.DataFrame({
-                        "Season": s_scope["season"],
-                        "Games": s_scope["games_wk4" if skip_early else "games"],
-                        "Accuracy": s_scope[acc_col],
-                        "Spread Error": s_scope["spread_wk4" if skip_early else "spread"],
-                        "Total Error": s_scope["total_wk4" if skip_early else "total"],
-                        "Brier": s_scope["brier"],
-                    })
-                    st.dataframe(hist, column_config={
-                        "Accuracy": st.column_config.ProgressColumn("Accuracy", format="%.1f%%", min_value=50, max_value=100),
-                        "Spread Error": st.column_config.NumberColumn(format="%.1f pts"),
-                        "Total Error": st.column_config.NumberColumn(format="%.1f pts"),
-                        "Brier": st.column_config.NumberColumn(format="%.3f"),
-                    }, hide_index=True, width="stretch")
-
-            if season == predictor.warmup_season:
-                bd = None
-                st.info(f"{season} is the first season in the data, so there's no earlier season to predict it from. Pick a later season to see its accuracy.")
+            all_time = acc_period == "All seasons"
+            if all_time:
+                with st.spinner(f"Replaying every season since {scored_seasons[-1]} game by game (only the first time)..."):
+                    frames = [get_cached_backtest(predictor, s_, version=VERSION) for s_ in reversed(scored_seasons)]
+                    frames = [f for f in frames if f is not None]
+                    full_bt = pd.concat(frames, ignore_index=True) if frames else None
+                period_note = f"{scored_seasons[-1]}–{scored_seasons[0]}"
             else:
-                with st.spinner(f"Replaying the {season} season game by game..."):
-                    bd = compute_filtered_accuracy_metrics(get_cached_backtest(predictor, season, version=VERSION), scope_selection, skip_early)
+                with st.spinner(f"Replaying the {acc_period} season game by game..."):
+                    full_bt = get_cached_backtest(predictor, acc_period, version=VERSION)
+                period_note = acc_period
+            bd = compute_filtered_accuracy_metrics(full_bt, scope_selection, skip_early, by_season=all_time)
             weeks_note = ", Weeks 4+" if skip_early else ""
+            period_word = "Season" if all_time else "Week"
 
-            if season == predictor.warmup_season:
-                pass
-            elif bd is None or bd["total_games"] == 0:
+            if bd is None or bd["total_games"] == 0:
                 st.warning(f"No historical prediction data available for the selected scope: **{scope_selection}**.")
             else:
                 win_acc = bd["win_acc"] * 100
             
-                st.markdown(f"### 🎯 Accuracy · {bd['total_games']} Games ({scope_selection}{weeks_note})")
+                st.markdown(f"### 🎯 Accuracy · {bd['total_games']:,} Games ({period_note}, {scope_selection}{weeks_note})")
             
                 c1, c2, c3, c4, c5 = st.columns(5)
                 c1.metric("Accuracy", f"{win_acc:.1f}%")
@@ -982,7 +959,7 @@ else:
                 )
 
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.markdown(f"### 📅 Weekly Win Accuracy ({scope_selection})")
+                st.markdown(f"### 📅 {'Season-by-Season' if all_time else 'Weekly'} Win Accuracy ({scope_selection})")
             
                 weekly_df = bd["weekly_df"]
             
@@ -1009,8 +986,8 @@ else:
 
                 selectors_acc = base_chart.mark_rule(opacity=0, size=30).encode(
                     tooltip=[
-                        alt.Tooltip('week_label:N', title='Week'),
-                        alt.Tooltip('accuracy:Q', title='Weekly Accuracy', format='.1%'),
+                        alt.Tooltip('week_label:N', title=period_word),
+                        alt.Tooltip('accuracy:Q', title=f'{period_word} Accuracy', format='.1%'),
                         alt.Tooltip('cum_accuracy:Q', title='Cumulative Acc', format='.1%')
                     ]
                 ).add_params(hover_acc)
@@ -1022,18 +999,19 @@ else:
                 chart = alt.layer(line_weekly, points_weekly, line_cum, points_cum, rules_acc, selectors_acc).properties(height=350)
                 st.altair_chart(chart, width="stretch")
             
+                legend_label = "Season" if all_time else "Weekly"
                 st.markdown(
-                    """<div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; font-weight: bold; color: var(--text-color); margin-top: -15px;">
-                        <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #38bdf8; border-radius: 3px;"></div> Weekly Accuracy</div>
+                    f"""<div style="display: flex; justify-content: center; gap: 20px; font-size: 14px; font-weight: bold; color: var(--text-color); margin-top: -15px;">
+                        <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #38bdf8; border-radius: 3px;"></div> {legend_label} Accuracy</div>
                         <div style="display: flex; align-items: center; gap: 5px;"><div style="width: 14px; height: 14px; background-color: #f59e0b; border-radius: 3px;"></div> Cumulative</div>
                     </div><br>""", unsafe_allow_html=True
                 )
 
                 st.markdown("<br>", unsafe_allow_html=True)
-                st.markdown(f"### 📋 Weekly Breakdown Log ({scope_selection})")
+                st.markdown(f"### 📋 {'Season' if all_time else 'Weekly'} Breakdown Log ({scope_selection})")
             
                 display_df = weekly_df[["week_label", "games", "correct", "accuracy", "spread_err", "total_err", "cum_accuracy"]].copy()
-                display_df.columns = ["Week", "Games", "Correct", "Accuracy", "Spread Error", "Total Error", "Cumul. Acc"]
+                display_df.columns = [period_word, "Games", "Correct", "Accuracy", "Spread Error", "Total Error", "Cumul. Acc"]
             
                 # Formatting correction: Convert to literal percentages before rendering
                 display_df["Accuracy"] = display_df["Accuracy"] * 100
@@ -1042,7 +1020,7 @@ else:
                 st.dataframe(
                     display_df,
                     column_config={
-                        "Week": st.column_config.TextColumn(width="medium"),
+                        period_word: st.column_config.TextColumn(width="medium"),
                         "Games": st.column_config.NumberColumn(width="small"),
                         "Correct": st.column_config.NumberColumn(width="small"),
                         "Accuracy": st.column_config.NumberColumn(format="%.1f%%", width="small"),
@@ -1055,7 +1033,10 @@ else:
                 )
 
                 with st.expander("🔍 View Raw Out-Of-Sample Predictions Log"):
-                    st.dataframe(bd["df"])
+                    if all_time:
+                        st.caption("Pick a single season above to see its game-by-game predictions.")
+                    else:
+                        st.dataframe(bd["df"])
 
     # ----------------------------------------------------
     # TAB: PLAYOFF PREDICTOR
