@@ -47,10 +47,13 @@ class EngineConfig:
     # Weekly time decay applied to games within a season
     decay_per_week: float = 1.0
     # Prior strength in pseudo-games, for teams with/without last-season data.
-    # 1.25 is close to the empirical-Bayes value (game noise^2 / true year-to-year
-    # change^2 ~ 1.1 games): stronger priors calm the ratings but cost accuracy.
-    prior_games_known: float = 1.25
+    # The empirical-Bayes value is ~1.1-1.25 games (game noise^2 / true year-to-year
+    # change^2); 1.75 trades ~0.3 pts of accuracy for steadier early-season ratings.
+    prior_games_known: float = 1.75
     prior_games_new: float = 0.1
+    # Minimum prior strength for out-of-state teams. Most appear in only one or two
+    # games against Michigan schools, so one blowout shouldn't define them.
+    prior_games_oos: float = 1.0
     # Fraction of last season's rating carried into the new preseason prior
     # (measured year-to-year slope is ~0.85)
     carryover: float = 0.85
@@ -238,10 +241,12 @@ def _solve_points(nT, hi, ai, ph, pa, w, prior_o, prior_d, lam):
 
 
 def fit_ratings(teams, index, games, as_of, prior_power, prior_off, prior_def,
-                has_history, cfg: EngineConfig):
+                has_history, cfg: EngineConfig, oos_mask=None):
     """Fit ratings using completed games strictly before `as_of`."""
     nT = len(teams)
     lam_m = np.where(has_history, cfg.prior_games_known, cfg.prior_games_new)
+    if oos_mask is not None:
+        lam_m = np.where(oos_mask, np.maximum(lam_m, cfg.prior_games_oos), lam_m)
     lam_p = np.where(has_history, cfg.pts_prior_games_known, cfg.pts_prior_games_new)
     g = games
     power, off, deff = prior_power.copy(), prior_off.copy(), prior_def.copy()
@@ -348,7 +353,7 @@ class Engine:
             as_of = g["date_obj"].max() + timedelta(days=1) if len(g) else pd.Timestamp.now()
         g = g[g["date_obj"] < as_of]
         pp, po, pd_, hist = self._priors[season]
-        return fit_ratings(self.teams, self.index, g, as_of, pp, po, pd_, hist, self.cfg)
+        return fit_ratings(self.teams, self.index, g, as_of, pp, po, pd_, hist, self.cfg, self.oos_mask)
 
     def preseason(self, season):
         pp, po, pd_, hist = self._priors[str(season)]
