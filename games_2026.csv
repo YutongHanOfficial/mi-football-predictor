@@ -30,7 +30,7 @@ date,home,away,home_score,away_score
 2026-08-27,Battle Creek Lakeview,Battle Creek Harper Creek,0,38
 2026-08-27,Bay City Central,Flint Carman-Ainsworth,26,44
 2026-08-27,Bloomfield Hills,Harrison Township L'Anse Creuse,42,0
-2026-08-27,Bloomfield Hills Cranbrook Kingswood,Detroit Mumford,25,22
+2026-08-27,Bloomfield Hills Cranbrook Kingswood,Detroit Mumford,0,1
 2026-08-27,Brooklyn Columbia Central,Melvindale Academy for Business & Tech,67,0
 2026-08-27,Burton Atherton,Carson City-Crystal,51,19
 2026-08-27,Byron Center,Hudsonville,41,20
@@ -310,7 +310,7 @@ date,home,away,home_score,away_score
 2026-09-03,Berkley,Birmingham Groves,6,49
 2026-09-03,Birch Run,Ovid-Elsie,31,21
 2026-09-03,Blissfield,Clinton,6,44
-2026-09-03,Bloomfield Hills Cranbrook Kingswood,Detroit Loyola,39,0
+2026-09-03,Bloomfield Hills Cranbrook Kingswood,Detroit Loyola,0,1
 2026-09-03,Brighton,Wayne Memorial,59,0
 2026-09-03,Bronson,Stockbridge,59,6
 2026-09-03,Burton Atherton,Burton Bendle,7,30
@@ -572,7 +572,7 @@ date,home,away,home_score,away_score
 2026-09-10,South Lyon,Walled Lake Western,35,14
 2026-09-10,Southfield Bradford Academy,Marine City Cardinal Mooney,26,34
 2026-09-10,Walled Lake Northern,Milford,14,53
-2026-09-10,Waterford Our Lady of the Lakes,Bloomfield Hills Cranbrook Kingswood,0,64
+2026-09-10,Waterford Our Lady of the Lakes,Bloomfield Hills Cranbrook Kingswood,1,0
 2026-09-11,Ada Forest Hills Eastern,Flint New Standard Academy,52,0
 2026-09-11,Adrian,Chelsea,21,49
 2026-09-11,Adrian Madison,Hillsdale,55,7
@@ -2180,7 +2180,7 @@ date,home,away,home_score,away_score
 2026-10-17,West Iron County,Iron Mountain,0,1
 2026-10-17,West Unity Hilltop (OH),Edon (OH),14,47
 2026-10-20,Dearborn Heights Annapolis,Romulus,0,57
-2026-10-22,Clawson,Royal Oak,,
+2026-10-22,Detroit Central,Detroit Henry Ford,41,0
 2026-10-22,Iron Mountain,Negaunee,21,20
 2026-10-23,Ada Forest Hills Eastern,Ypsilanti Community,,
 2026-10-23,Adrian,New Boston Huron,,
@@ -2222,6 +2222,7 @@ date,home,away,home_score,away_score
 2026-10-23,Cincinnati Moeller (OH),Detroit Martin Luther King,,
 2026-10-23,Clare,Petoskey,,
 2026-10-23,Clarkston,Muskegon,,
+2026-10-23,Clawson,Royal Oak,,
 2026-10-23,Clio,Otisville LakeVille Memorial,,
 2026-10-23,Coldwater,Parma Western,,
 2026-10-23,Coloma,Constantine,,
@@ -2234,7 +2235,6 @@ date,home,away,home_score,away_score
 2026-10-23,Dearborn Heights Crestwood,Canton,,
 2026-10-23,Delton Kellogg,South Haven,,
 2026-10-23,Detroit Cass Tech,New Market Huron Heights (CN),,
-2026-10-23,Detroit Central,Detroit Henry Ford,,
 2026-10-23,Detroit Douglass,Dearborn Heights Robichaud,,
 2026-10-23,Detroit Lincoln-King,Detroit Osborn,,
 2026-10-23,Detroit Mumford,Detroit Cody,,
