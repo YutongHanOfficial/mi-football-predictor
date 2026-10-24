@@ -2189,7 +2189,7 @@ date,home,away,home_score,away_score
 2026-10-23,Allendale,Lowell,,
 2026-10-23,Alma,Remus Chippewa Hills,,
 2026-10-23,Alpena,Ogemaw Heights,,
-2026-10-23,Ann Arbor Father Gabriel Richard,Detroit Country Day,,
+2026-10-23,Ann Arbor Father Gabriel Richard,Detroit Country Day,0,33
 2026-10-23,Ann Arbor Huron,Rochester Hills Stoney Creek,,
 2026-10-23,Ann Arbor Skyline,Brooklyn Columbia Central,,
 2026-10-23,Athol Springs St Francis (NY),Aurora St Andrews (CN),,
@@ -2235,12 +2235,12 @@ date,home,away,home_score,away_score
 2026-10-23,Dearborn Heights Crestwood,Canton,,
 2026-10-23,Delton Kellogg,South Haven,,
 2026-10-23,Detroit Cass Tech,New Market Huron Heights (CN),,
-2026-10-23,Detroit Douglass,Dearborn Heights Robichaud,,
+2026-10-23,Detroit Douglass,Dearborn Heights Robichaud,0,52
 2026-10-23,Detroit Lincoln-King,Detroit Osborn,,
 2026-10-23,Detroit Mumford,Detroit Cody,,
 2026-10-23,Detroit Northwestern,Detroit Western,,
 2026-10-23,Detroit Renaissance,Hamtramck,,
-2026-10-23,Detroit University Prep Science & Math,Detroit Denby,,
+2026-10-23,Detroit University Prep Science & Math,Detroit Denby,6,60
 2026-10-23,Durand,Bath,,
 2026-10-23,East Jackson,Bronson,,
 2026-10-23,East Jordan,Harbor Springs,,
@@ -2259,18 +2259,18 @@ date,home,away,home_score,away_score
 2026-10-23,Fremont,Newaygo,,
 2026-10-23,Fruitport,Grand Rapids NorthPointe Christian,,
 2026-10-23,Galesburg-Augusta,Cassopolis,,
-2026-10-23,Garden City,Almont,,
+2026-10-23,Garden City,Almont,3,47
 2026-10-23,Gaylord,Croswell-Lexington,,
 2026-10-23,Genesee,Auburn Hills Oakland Christian,,
 2026-10-23,Gladstone,Escanaba,,
 2026-10-23,Gladwin,Goodrich,,
-2026-10-23,Grand Ledge,Temperance Bedford,,
+2026-10-23,Grand Ledge,Temperance Bedford,35,7
 2026-10-23,Grand Rapids Christian,Holland Christian,,
 2026-10-23,Grand Rapids Forest Hills Central,East Grand Rapids,,
 2026-10-23,Grand Rapids Forest Hills Northern,Grand Rapids Northview,,
 2026-10-23,Grand Rapids Kenowa Hills,Coopersville,,
 2026-10-23,Grand Rapids South Christian,Grand Rapids Catholic Central,,
-2026-10-23,Grand Rapids Union,Detroit East English,,
+2026-10-23,Grand Rapids Union,Detroit East English,6,27
 2026-10-23,Grand Rapids West Catholic,Traverse City St Francis,,
 2026-10-23,Grandville,Grand Haven,,
 2026-10-23,Grant,Hesperia,,
@@ -2320,7 +2320,7 @@ date,home,away,home_score,away_score
 2026-10-23,Macomb Dakota,Grand Blanc,,
 2026-10-23,Macomb L'Anse Creuse North,New Baltimore Anchor Bay,,
 2026-10-23,Macomb Lutheran North,Flat Rock,,
-2026-10-23,Madison Heights Bishop Foley,Grosse Pointe Woods University Liggett,,
+2026-10-23,Madison Heights Bishop Foley,Grosse Pointe Woods University Liggett,14,6
 2026-10-23,Madison Heights Lamphere,Riverview,,
 2026-10-23,Mancelona,Benzie Central,,
 2026-10-23,Manistee,Ludington,,
@@ -2328,20 +2328,20 @@ date,home,away,home_score,away_score
 2026-10-23,Marysville,Marine City,,
 2026-10-23,Mason,Harper Woods,,
 2026-10-23,McBain,Fowler,,
-2026-10-23,Melvindale Academy for Business & Tech,Saginaw Nouvel Catholic Central,,
+2026-10-23,Melvindale Academy for Business & Tech,Saginaw Nouvel Catholic Central,0,56
 2026-10-23,Michigan Center,Mattawan,,
 2026-10-23,Midland,Midland Dow,,
-2026-10-23,Midland Bullock Creek,Saginaw Swan Valley,,
+2026-10-23,Midland Bullock Creek,Saginaw Swan Valley,6,35
 2026-10-23,Milan,Grass Lake,,
 2026-10-23,Milford,Walled Lake Western,,
-2026-10-23,Monroe,Rochester,,
+2026-10-23,Monroe,Rochester,14,35
 2026-10-23,Monroe Jefferson,Clinton,,
 2026-10-23,Mount Pleasant Sacred Heart,Flint Beecher,,
-2026-10-23,Mt Morris,Hemlock,,
-2026-10-23,Napoleon,Onsted,,
+2026-10-23,Mt Morris,Hemlock,6,49
+2026-10-23,Napoleon,Onsted,43,3
 2026-10-23,New Haven,Sterling Heights,,
 2026-10-23,New Lothrop,Flint Kearsley,,
-2026-10-23,Niles,Edwardsburg,,
+2026-10-23,Niles,Edwardsburg,18,48
 2026-10-23,North Muskegon,Muskegon Oakridge,,
 2026-10-23,Olivet,Homer,,
 2026-10-23,Orchard Lake St Mary's,Detroit U of D Jesuit,,
@@ -2353,13 +2353,13 @@ date,home,away,home_score,away_score
 2026-10-23,Petersburg Summerfield,Erie Mason,,
 2026-10-23,Pinckney,Ida,,
 2026-10-23,Pinconning,Carrollton,,
-2026-10-23,Pontiac Notre Dame Prep,Flint New Standard Academy,,
+2026-10-23,Pontiac Notre Dame Prep,Flint New Standard Academy,34,0
 2026-10-23,Port Huron,Port Huron Northern,,
 2026-10-23,Portland,Hudsonville Unity Christian,,
 2026-10-23,Quincy,Reading,,
-2026-10-23,Ravenna,Montague,,
-2026-10-23,Redford Thurston,Williamston,,
-2026-10-23,Redford Union,Detroit Voyageur College Prep,,
+2026-10-23,Ravenna,Montague,42,14
+2026-10-23,Redford Thurston,Williamston,28,6
+2026-10-23,Redford Union,Detroit Voyageur College Prep,19,20
 2026-10-23,River Rouge,Muskegon Mona Shores,,
 2026-10-23,Rochester Adams,Oak Park,,
 2026-10-23,Rockford,Jenison,,
@@ -2368,7 +2368,7 @@ date,home,away,home_score,away_score
 2026-10-23,Roseville,Warren Fitzgerald,,
 2026-10-23,Saginaw Michigan Lutheran Seminary,Reese,,
 2026-10-23,Saginaw United,Saginaw Heritage,0,1
-2026-10-23,Saginaw Valley Lutheran,Unionville-Sebewaing,,
+2026-10-23,Saginaw Valley Lutheran,Unionville-Sebewaing,0,32
 2026-10-23,Sand Creek,Ottawa Lake Whiteford,,
 2026-10-23,Saugatuck,Benton Harbor,,
 2026-10-23,Schoolcraft,Lawton,,
@@ -2388,16 +2388,16 @@ date,home,away,home_score,away_score
 2026-10-23,Stevensville Lakeshore,Portage Northern,,
 2026-10-23,Stockbridge,Springport,,
 2026-10-23,Tawas,Maple City Glen Lake,,
-2026-10-23,Three Rivers,Sturgis,,
+2026-10-23,Three Rivers,Sturgis,37,6
 2026-10-23,Toledo St Francis De Sales (OH),Toledo St John's Jesuit (OH),,
 2026-10-23,Traverse City Central,Traverse City West,,
 2026-10-23,Troy,Waterford Mott,,
 2026-10-23,Troy Athens,Berkley,,
 2026-10-23,Utica,Birmingham Seaholm,,
 2026-10-23,Vandercook Lake,Perry,,
-2026-10-23,Vermontville Maple Valley,Union City,,
+2026-10-23,Vermontville Maple Valley,Union City,29,22
 2026-10-23,Vestaburg,International Academy of Flint,,
-2026-10-23,Vicksburg,Paw Paw,,
+2026-10-23,Vicksburg,Paw Paw,7,14
 2026-10-23,Walled Lake Central,Livonia Franklin,,
 2026-10-23,Walled Lake Northern,North Farmington,,
 2026-10-23,Warren De La Salle Collegiate,Toledo Central Catholic (OH),,
@@ -2421,7 +2421,7 @@ date,home,away,home_score,away_score
 2026-10-23,Windsor Sandwich (CN),La Salle St Thomas Of Villanova (CN),,
 2026-10-23,Wyoming,Hart,,
 2026-10-23,Wyoming Kelloggsville,Wyoming Godwin Heights,,
-2026-10-23,Yale,Holly,,
+2026-10-23,Yale,Holly,6,34
 2026-10-23,Zeeland East,Hamilton,,
 2026-10-24,Bloomfield Hills Brother Rice,Detroit Catholic Central,,
 2026-10-24,Dearborn Divine Child,Jackson Lumen Christi,,
