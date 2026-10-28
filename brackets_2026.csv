@@ -1,0 +1,257 @@
+division,region,seed,school,pop
+1,1,1,Howell,87.0
+1,1,2,East Kentwood,83.667
+1,1,3,Grand Ledge,75.111
+1,1,4,Portage Central,72.667
+1,1,5,Hudsonville,66.778
+1,1,6,Rockford,61.444
+1,1,7,Brighton,58.0
+1,1,8,Grandville,54.778
+1,2,1,Clarkston,82.889
+1,2,2,Detroit Catholic Central,79.681
+1,2,3,Oxford,78.778
+1,2,4,Grand Blanc,78.139
+1,2,5,Hartland,71.556
+1,2,6,Davison,63.583
+1,2,7,Lake Orion,53.889
+1,2,8,Bloomfield Hills,52.222
+1,3,1,Detroit Cass Tech,76.861
+1,3,2,Saline,76.778
+1,3,3,Northville,74.0
+1,3,4,Dearborn Fordson,71.333
+1,3,5,Belleville,70.667
+1,3,6,Brownstown Woodhaven,66.0
+1,3,7,Dearborn,55.667
+1,3,8,Plymouth,51.333
+1,4,1,Romeo,83.667
+1,4,2,Rochester Hills Stoney Creek,72.111
+1,4,3,Rochester Adams,70.0
+1,4,4,Rochester,67.444
+1,4,5,Macomb Dakota,64.667
+1,4,6,Utica,56.444
+1,4,7,Macomb L'Anse Creuse North,54.889
+1,4,8,New Baltimore Anchor Bay,54.778
+2,1,1,Byron Center,71.667
+2,1,2,Caledonia,70.903
+2,1,3,Muskegon Mona Shores,69.833
+2,1,4,Traverse City West,63.889
+2,1,5,Portage Northern,59.0
+2,1,6,Traverse City Central,49.667
+2,1,7,East Lansing,48.667
+2,1,8,Muskegon,47.444
+2,2,1,Milford,73.333
+2,2,2,South Lyon,72.0
+2,2,3,South Lyon East,68.333
+2,2,4,Midland Dow,66.222
+2,2,5,Walled Lake Western,65.333
+2,2,6,Saginaw Heritage,60.917
+2,2,7,Flushing,49.778
+2,2,8,Midland,47.222
+2,3,1,Bloomfield Hills Brother Rice,66.889
+2,3,2,Orchard Lake St Mary's,65.667
+2,3,3,St Clair Shores Lakeview,62.111
+2,3,4,Ferndale,61.0
+2,3,5,North Farmington,59.111
+2,3,6,Birmingham Seaholm,56.444
+2,3,7,Birmingham Groves,54.556
+2,3,8,Roseville,53.778
+2,4,1,Gibraltar Carlson,77.444
+2,4,2,Grosse Pointe South,71.889
+2,4,3,Temperance Bedford,64.889
+2,4,4,Allen Park,64.111
+2,4,5,Livonia Franklin,63.111
+2,4,6,Livonia Churchill,54.889
+2,4,7,Dearborn Heights Crestwood,53.556
+2,4,8,Detroit Mumford,47.333
+3,1,1,Mount Pleasant,69.556
+3,1,2,DeWitt,67.111
+3,1,3,Coopersville,65.556
+3,1,4,Cadillac,58.222
+3,1,5,Marquette,54.0
+3,1,6,East Grand Rapids,53.556
+3,1,7,Lowell,53.556
+3,1,8,Petoskey,49.556
+3,2,1,St Joseph,65.889
+3,2,2,Zeeland West,61.972
+3,2,3,Battle Creek Harper Creek,52.889
+3,2,4,Middleville Thornapple Kellogg,52.556
+3,2,5,Coldwater,48.333
+3,2,6,Battle Creek Central,47.556
+3,2,7,Niles,46.111
+3,2,8,Zeeland East,45.889
+3,3,1,Chelsea,70.556
+3,3,2,Mason,67.0
+3,3,3,Fenton,64.333
+3,3,4,Redford Thurston,57.111
+3,3,5,Linden,56.889
+3,3,6,Holly,55.444
+3,3,7,Dexter,52.444
+3,3,8,Waterford Mott,47.111
+3,4,1,Port Huron,75.222
+3,4,2,Harper Woods,72.333
+3,4,3,Detroit Martin Luther King,66.556
+3,4,4,Trenton,57.0
+3,4,5,Warren De La Salle Collegiate,55.524
+3,4,6,Grosse Pointe North,52.333
+3,4,7,Warren Fitzgerald,48.556
+3,4,8,New Boston Huron,48.0
+4,1,1,Grand Rapids Kenowa Hills,66.333
+4,1,2,Ada Forest Hills Eastern,60.556
+4,1,3,Hudsonville Unity Christian,52.778
+4,1,4,Ludington,48.111
+4,1,5,Fruitport,47.778
+4,1,6,Spring Lake,46.333
+4,1,7,Big Rapids,44.111
+4,1,8,Grand Rapids Christian,43.667
+4,2,1,Edwardsburg,66.111
+4,2,2,Stevensville Lakeshore,66.0
+4,2,3,Grand Rapids South Christian,65.222
+4,2,4,Portland,63.778
+4,2,5,Paw Paw,62.778
+4,2,6,Marshall,60.889
+4,2,7,Hastings,60.556
+4,2,8,Vicksburg,58.889
+4,3,1,Goodrich,66.667
+4,3,2,Dearborn Divine Child,63.556
+4,3,3,Adrian,59.778
+4,3,4,St Johns,51.222
+4,3,5,Ortonville Brandon,49.556
+4,3,6,Tecumseh,49.0
+4,3,7,Lansing Sexton,46.333
+4,3,8,Williamston,45.444
+4,4,1,Marysville,52.556
+4,4,2,Detroit Cody,52.556
+4,4,3,Madison Heights Lamphere,51.667
+4,4,4,Detroit East English,51.333
+4,4,5,Macomb Lutheran North,50.556
+4,4,6,Detroit Country Day,48.0
+4,4,7,St Clair,47.444
+4,4,8,Detroit Southeastern,45.667
+5,1,1,Kingsford,56.889
+5,1,2,Muskegon Orchard View,49.222
+5,1,3,Ogemaw Heights,46.778
+5,1,4,Shepherd,46.222
+5,1,5,Negaunee,40.556
+5,1,6,Reed City,40.111
+5,1,7,Remus Chippewa Hills,39.778
+5,1,8,Howard City Tri County,38.222
+5,2,1,Grand Rapids Catholic Central,65.194
+5,2,2,Grand Rapids West Catholic,59.556
+5,2,3,Hopkins,56.0
+5,2,4,Lake Odessa Lakewood,54.0
+5,2,5,Berrien Springs,51.333
+5,2,6,Kalamazoo Hackett Catholic Prep,48.613
+5,2,7,Wyoming Godwin Heights,47.667
+5,2,8,Comstock Park,38.111
+5,3,1,Frankenmuth,56.222
+5,3,2,Saginaw Swan Valley,52.889
+5,3,3,Imlay City,49.222
+5,3,4,Flint Powers Catholic,48.667
+5,3,5,Armada,45.889
+5,3,6,Corunna,41.222
+5,3,7,Pontiac Notre Dame Prep,40.333
+5,3,8,Whitmore Lake,39.0
+5,4,1,Monroe Jefferson,55.556
+5,4,2,Romulus Summit Academy North,49.778
+5,4,3,Redford Union,46.0
+5,4,4,Detroit Voyageur College Prep,43.819
+5,4,5,Ida,43.444
+5,4,6,Detroit Denby,40.444
+5,4,7,Ann Arbor Father Gabriel Richard,40.222
+5,4,8,Flat Rock,33.444
+6,1,1,Kingsley,49.806
+6,1,2,Sanford Meridian,49.278
+6,1,3,Gladwin,43.444
+6,1,4,Traverse City St Francis,41.0
+6,1,5,Calumet,39.0
+6,1,6,Harbor Springs,36.778
+6,1,7,Elk Rapids,33.986
+6,1,8,Mason County Central,31.222
+6,2,1,Almont,61.111
+6,2,2,Marine City,56.667
+6,2,3,Montrose,44.0
+6,2,4,Algonac,41.667
+6,2,5,Midland Bullock Creek,37.278
+6,2,6,Durand,35.667
+6,2,7,New Haven,34.111
+6,2,8,Flint New Standard Academy,32.444
+6,3,1,Jackson Lumen Christi,58.222
+6,3,2,Belding,49.889
+6,3,3,Olivet,45.778
+6,3,4,Buchanan,41.556
+6,3,5,Napoleon,41.444
+6,3,6,Kent City,37.778
+6,3,7,Adrian Madison,37.444
+6,3,8,Brooklyn Columbia Central,36.0
+6,4,1,Detroit Edison,52.778
+6,4,2,Ecorse,52.333
+6,4,3,Detroit Central,49.778
+6,4,4,Clinton,49.667
+6,4,5,Clawson,43.444
+6,4,6,Warren Michigan Collegiate,39.222
+6,4,7,Detroit Communication Media Arts,36.333
+6,4,8,Dearborn Heights Robichaud,34.333
+7,1,1,Menominee,52.778
+7,1,2,Charlevoix,41.361
+7,1,3,McBain,39.472
+7,1,4,Manistee,36.889
+7,1,5,Manton,32.889
+7,1,6,Harrison,32.708
+7,1,7,Oscoda,31.222
+7,1,8,Lakeview,28.222
+7,2,1,Pewamo-Westphalia,43.264
+7,2,2,Millington,42.889
+7,2,3,Ithaca,40.778
+7,2,4,Burton Bendle,40.111
+7,2,5,Elkton-Pigeon-Bay Port Laker,39.556
+7,2,6,Saginaw Valley Lutheran,33.444
+7,2,7,Clinton Township Clintondale,32.444
+7,2,8,Cass City,31.778
+7,3,1,Constantine,46.169
+7,3,2,Schoolcraft,44.905
+7,3,3,North Muskegon,43.625
+7,3,4,Ravenna,42.222
+7,3,5,Cassopolis,37.0
+7,3,6,Lawton,33.058
+7,3,7,Galesburg-Augusta,33.0
+7,3,8,Saranac,31.083
+7,4,1,Monroe St Mary Catholic Central,54.778
+7,4,2,Hanover-Horton,41.222
+7,4,3,Detroit Community,37.444
+7,4,4,Ottawa Lake Whiteford,35.292
+7,4,5,Bronson,34.778
+7,4,6,Union City,32.333
+7,4,7,Jonesville,31.444
+7,4,8,Leslie,30.778
+8,1,1,Beal City,44.778
+8,1,2,Bark River-Harris,37.958
+8,1,3,Maple City Glen Lake,36.333
+8,1,4,Iron Mountain,35.778
+8,1,5,East Jordan,34.764
+8,1,6,Frankfort,28.889
+8,1,7,L'Anse,25.222
+8,1,8,Beaverton,24.458
+8,2,1,New Lothrop,46.0
+8,2,2,Ubly,33.444
+8,2,3,Unionville-Sebewaing,32.889
+8,2,4,Mount Pleasant Sacred Heart,32.319
+8,2,5,Saginaw Michigan Lutheran Seminary,31.736
+8,2,6,Saginaw Nouvel Catholic Central,29.889
+8,2,7,Vassar,27.222
+8,2,8,Vestaburg,26.778
+8,3,1,Hudson,49.556
+8,3,2,Decatur,47.0
+8,3,3,Springport,37.444
+8,3,4,Manchester,34.333
+8,3,5,Fowler,33.75
+8,3,6,Saugatuck,32.222
+8,3,7,Vermontville Maple Valley,27.333
+8,3,8,Sand Creek,26.444
+8,4,1,Madison Heights Madison,45.111
+8,4,2,Royal Oak Shrine Catholic,39.778
+8,4,3,Clarkston Everest Collegiate,39.111
+8,4,4,Southfield Bradford Academy,33.444
+8,4,5,Burton Atherton,30.111
+8,4,6,Allen Park Cabrini,26.889
+8,4,7,Marine City Cardinal Mooney,25.889
+8,4,8,Sterling Heights Parkway Christian,24.333

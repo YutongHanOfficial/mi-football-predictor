@@ -34,12 +34,18 @@ jobs:
       - name: Refresh official playoff points
         run: python refresh_mhsaa.py
 
+      # Official brackets appear on Selection Sunday. A bracket problem shouldn't
+      # block the score update, so this step can't fail the run.
+      - name: Refresh official brackets
+        continue-on-error: true
+        run: python refresh_brackets.py
+
       - name: Commit changes
         run: |
-          if git status --porcelain -- 'games_*.csv' 'mhsaa_*.csv' | grep -q .; then
+          if git status --porcelain -- 'games_*.csv' 'mhsaa_*.csv' 'brackets_*.csv' | grep -q .; then
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add games_*.csv mhsaa_*.csv
+            git add games_*.csv mhsaa_*.csv brackets_*.csv
             git commit -m "Update game data from MHSAA ($(date -u +%Y-%m-%d))"
             git push
           else
