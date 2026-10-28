@@ -15,8 +15,9 @@ for _module in ("engine", "playoffs", "bracket_view"):
     if _module in sys.modules:
         importlib.reload(sys.modules[_module])
 
-from engine import Engine, EngineConfig, discover_seasons, is_oos
-from playoffs import PlayoffSimulator, load_brackets, load_divisions, load_locations, FIELD_PER_DIVISION
+from engine import Engine, EngineConfig, discover_seasons, is_oos, week_index
+from playoffs import (PlayoffSimulator, load_brackets, load_divisions, load_locations, FIELD_PER_DIVISION,
+                      playoff_results, result_short, result_text)
 from bracket_view import finals_svg, page as bracket_page, region_svg
 
 # ==========================================
@@ -295,7 +296,7 @@ class SeasonPredictor:
         if df.empty:
             return None
         # Shift date back 2 days so Wednesday acts as the start of the week
-        df["week_num"] = (df["date_obj"] - pd.Timedelta(days=2)).dt.isocalendar().week.astype(int)
+        df["week_num"] = week_index(df["date_obj"])
         # Week 1 = first week of Michigan games (out-of-state teams often start a week earlier)
         mi_start = df[df["matchup_scope"] == "In-State Only"].groupby("season")["week_num"].min()
         df["rel_week"] = df["week_num"] - df["season"].map(mi_start).fillna(df["week_num"].min()).astype(int) + 1
@@ -423,6 +424,32 @@ def season_rankings(_predictor, season, version=None):
     df["Div Teams"] = df.groupby("Division")["Team"].transform("size").where(df["Division"].notna()).astype("Int64")
     return df
 
+@st.cache_data(max_entries=20)
+def season_playoff_results(_predictor, season, version=None):
+    """{school: playoff result} for a season (empty until its playoffs start)."""
+    divs = load_season_divisions(season, version=version)
+    return playoff_results(pd.DataFrame(_predictor.games_as_dicts(season)), season,
+                           division_of=lambda t: divs.get(school_key(t), (None, None))[0],
+                           enrollment_of=lambda t: divs.get(school_key(t), (None, None))[1])
+
+def playoff_banner(predictor, season, team):
+    """Banner at the top of a team page with the school's playoff finish that season."""
+    results = season_playoff_results(predictor, season, version=VERSION)
+    if not results or is_oos(team):
+        return
+    res = results.get(team)
+    current = season == predictor.current_season
+    if res is None:
+        st.info(f"Missed the {season} playoffs", icon="🏈")
+        return
+    text = result_text(res, season, current)
+    if res["won"] and res["round"] == res["rounds"]:
+        st.success(f"**{text}**", icon="🏆")
+    elif res["won"] is False and res["round"] == res["rounds"]:
+        st.info(f"**{text}**", icon="🥈")
+    else:
+        st.info(f"**{text}**", icon="🏈")
+
 @st.cache_data(max_entries=200)
 def team_ranking_history(_predictor, team, version=None):
     """One row per season the team played: record, final overall rank and division rank."""
@@ -433,9 +460,12 @@ def team_ranking_history(_predictor, team, version=None):
         if hit.empty:
             continue
         r = hit.iloc[0]
-        label = f"{season} (so far)" if season == _predictor.current_season else season
+        current = season == _predictor.current_season
+        label = f"{season} (so far)" if current else season
+        results = season_playoff_results(_predictor, season, version=version)
         rows.append({
             "Season": label, "Record": r["Record"], "Division": r["Division"] or "—",
+            "Playoffs": result_short(results.get(team), season, current) if results else "—",
             "State Rank": f"#{r['Rank']} of {len(df)}",
             "Division Rank": f"#{r['Div Rank']} of {r['Div Teams']}" if pd.notna(r["Div Rank"]) else "—",
             "Power Rating": r["Power Rating"],
@@ -777,6 +807,7 @@ else:
                 gp, gp_stats = max(1, t_basic["GP"]), max(1, t_basic.get("GP_stats", 0))
                 pf, pa = t_basic["PF"], t_basic["PA"]
             
+                playoff_banner(predictor, season, selected_team)
                 st.markdown("### 📊 Team Dashboard")
                 div_text = division_caption(season, selected_team)
                 if div_text:
@@ -879,7 +910,7 @@ else:
                         history = team_ranking_history(predictor, selected_team, version=VERSION)
                     if not history.empty:
                         st.markdown("### 🏅 Year-by-Year Rankings")
-                        st.caption("Final power ranking each season, statewide and within the school's division that year (Class A–D before 2020).")
+                        st.caption("Final power ranking each season, statewide and within the school's division that year (Class A–D before 2020), and how far the school went in the playoffs.")
                         st.dataframe(history, width="stretch", hide_index=True)
                         st.markdown("---")
             

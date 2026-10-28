@@ -10,7 +10,7 @@ import sys
 
 import pandas as pd
 
-from engine import Engine, EngineConfig, discover_seasons
+from engine import Engine, EngineConfig, discover_seasons, week_index
 
 SEASON_FILES = discover_seasons()
 SCOPES = ["In-State Only", "Michigan vs. Out-of-State", "All Games"]
@@ -19,7 +19,7 @@ SCOPES = ["In-State Only", "Michigan vs. Out-of-State", "All Games"]
 def add_weeks(bt):
     """Week 1 = first week of Michigan games each season (weeks start Wednesday)."""
     bt = bt.copy()
-    bt["week_num"] = (bt["date_obj"] - pd.Timedelta(days=2)).dt.isocalendar().week.astype(int)
+    bt["week_num"] = week_index(bt["date_obj"])
     mi_start = bt[bt["matchup_scope"] == "In-State Only"].groupby("season")["week_num"].min()
     bt["rel_week"] = bt["week_num"] - bt["season"].map(mi_start).fillna(bt["week_num"].min()).astype(int) + 1
     return bt

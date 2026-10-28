@@ -114,6 +114,12 @@ def load_games(path, season):
     return df.reset_index(drop=True)
 
 
+def week_index(dates):
+    """Football weeks (Wednesday-Tuesday) counted continuously, so a season that runs
+    into January (2020) keeps counting up instead of restarting at week 1."""
+    return ((pd.to_datetime(dates) - pd.Timestamp("1970-01-07")).dt.days // 7).astype(int)
+
+
 def discover_seasons(folder=".", max_seasons=None):
     """[(season, path)] for the most recent games_<season>.csv files, oldest first."""
     import glob
