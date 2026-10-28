@@ -11,12 +11,13 @@ import streamlit as st
 # Streamlit Cloud re-runs this script after a deploy without restarting Python, so
 # a stale copy of our own modules can linger in memory. Reload them on every run
 # (they only define functions and classes, so this is cheap).
-for _module in ("engine", "playoffs"):
+for _module in ("engine", "playoffs", "bracket_view"):
     if _module in sys.modules:
         importlib.reload(sys.modules[_module])
 
 from engine import Engine, EngineConfig, discover_seasons, is_oos
 from playoffs import PlayoffSimulator, load_brackets, load_divisions, load_locations, FIELD_PER_DIVISION
+from bracket_view import finals_svg, page as bracket_page, region_svg
 
 # ==========================================
 # ⚙️ ENGINE CONFIGURATION
@@ -322,7 +323,7 @@ class SeasonPredictor:
 def code_version():
     """Changes whenever the model code or data changes, so cached results are rebuilt."""
     parts = []
-    for f in ["engine.py", "predictor.py", "playoffs.py", DIVISIONS_FILE, LOCATIONS_FILE, BRACKETS_FILE] + [f for _, f in SEASON_FILES]:
+    for f in ["engine.py", "predictor.py", "playoffs.py", "bracket_view.py", DIVISIONS_FILE, LOCATIONS_FILE, BRACKETS_FILE] + [f for _, f in SEASON_FILES]:
         parts.append(f"{f}:{os.path.getmtime(f) if os.path.exists(f) else 0}:{os.path.getsize(f) if os.path.exists(f) else 0}")
     return "|".join(parts)
 
@@ -1075,16 +1076,6 @@ else:
                 pass
             elif sim is None:
                 st.warning(f"Playoff data for {CURRENT_SEASON} isn't set up yet: run `python refresh_mhsaa.py` and add the season's last regular-season day to `LAST_REGULAR_DAY` in predictor.py.")
-            official_bracket = sim is not None and sim.official_bracket
-            if official_bracket:
-                st.caption(f"Uses the official MHSAA bracket: plays out the rest of the tournament {PLAYOFF_SIMS:,} times with the rating engine. Completed playoff games are locked in.")
-            else:
-                st.caption(f"Simulates the rest of the regular season {PLAYOFF_SIMS:,} times, computes official MHSAA playoff-point averages (POP), selects the top {FIELD_PER_DIVISION} in each division, then plays out the bracket with the rating engine.")
-            if bracket_problem:
-                st.error(f"Couldn't use `{BRACKETS_FILE}`, so the bracket is projected instead. {bracket_problem}")
-
-            if sim is None:
-                st.warning(f"Playoff data not found. Add `{DIVISIONS_FILE}` to the repository.")
             else:
                 summary = sim.summary()
                 if official_bracket:
@@ -1140,40 +1131,24 @@ else:
                         st.dataframe(b, column_config={"Make Playoffs": st.column_config.ProgressColumn("Make Playoffs", format="%.1f%%", min_value=0, max_value=100)}, hide_index=True, width="stretch")
                 else:
                     regions, semis = sim.projected_bracket(division)
-                    if official_bracket and regions:
-                        st.caption("Official MHSAA bracket. Seeds 1-8 by POP within each Region; District 1 = 1v8 & 4v5, District 2 = 2v7 & 3v6. The higher POP hosts through the Regional Final; Semifinals and the Final are neutral. Results fill in as games are played.")
-                        region_games, final_games = sim.bracket_games(division)
-                        bracket_cols = {"Team A Win %": st.column_config.ProgressColumn("Team A Win %", format="%.0f%%", min_value=0, max_value=100)}
-                        for r_i, games in enumerate(region_games):
-                            st.markdown(f"##### Region {r_i + 1}")
-                            st.dataframe(pd.DataFrame(games).drop(columns=["Round"]), column_config=bracket_cols, hide_index=True, width="stretch")
-                        st.markdown(f"##### Semifinals & Final (Region {semis[0][0] + 1} vs {semis[0][1] + 1}, Region {semis[1][0] + 1} vs {semis[1][1] + 1})")
-                        st.dataframe(pd.DataFrame(final_games).drop(columns=["Round"]), column_config=bracket_cols, hide_index=True, width="stretch")
-                    elif not regions:
+                    if not regions:
                         st.info("Not enough eligible teams to build a bracket for this division.")
                     else:
                         if official_bracket:
-                            st.caption("Official MHSAA field and Regions. Seeds 1-8 by POP within each Region; District 1 = 1v8 & 4v5, District 2 = 2v7 & 3v6. The higher seed hosts.")
+                            st.caption("Official MHSAA bracket. Seeds 1-8 by POP within each Region; the higher POP hosts through the Regional Final, Semifinals and the Final are neutral. Finished games show the score; upcoming games show each team's win chance; empty slots show the most likely team and its chance to get there. Hover a team for details.")
                         else:
-                            st.caption("Most likely field (top 32 by projected POP). Seeds 1-8 by POP within each Region; District 1 = 1v8 & 4v5, District 2 = 2v7 & 3v6. The higher seed has the higher POP and hosts.")
+                            st.caption("Projected bracket: the most likely field (top 32 by projected POP), split into Regions and seeded by POP. Upcoming games show each team's win chance; empty slots show the most likely team and its chance to get there.")
+                        odds = div_df.set_index("Team")
+                        champions = []
                         for r_i, region in enumerate(regions):
-                            seeds = {seed: (team, pop) for seed, team, pop in region}
                             st.markdown(f"##### Region {r_i + 1}")
-                            rows = []
-                            for district, pairs in (("District 1", ((1, 8), (4, 5))), ("District 2", ((2, 7), (3, 6)))):
-                                for a, b in pairs:
-                                    ta, pa = seeds[a]
-                                    tb, pb = seeds[b]
-                                    winner = sim.result(ta, tb)
-                                    rows.append({
-                                        "District": district,
-                                        "Higher Seed": f"#{a} {ta}",
-                                        "Lower Seed": f"#{b} {tb}",
-                                        "Higher Seed Win %": sim.matchup_prob(ta, tb, pa, pb) * 100,
-                                        "Result": f"{winner} won" if winner else "",
-                                    })
-                            st.dataframe(pd.DataFrame(rows), column_config={"Higher Seed Win %": st.column_config.ProgressColumn("Higher Seed Win %", format="%.0f%%", min_value=0, max_value=100)}, hide_index=True, width="stretch")
-                        st.caption(f"Semifinals pair Region {semis[0][0] + 1} with Region {semis[0][1] + 1}, and Region {semis[1][0] + 1} with Region {semis[1][1] + 1}.")
+                            (svg, height), champ = region_svg(sim, odds, region)
+                            st.iframe(bracket_page(svg), height=int(height) + 30)
+                            champions.append(champ)
+                        st.markdown(f"##### State Semifinals & Final")
+                        st.caption(f"Region {semis[0][0] + 1} plays Region {semis[0][1] + 1}, and Region {semis[1][0] + 1} plays Region {semis[1][1] + 1}.")
+                        svg, height = finals_svg(sim, odds, champions, semis)
+                        st.iframe(bracket_page(svg), height=int(height) + 30)
                 with st.expander("ℹ️ How the playoff predictor works"):
                     st.markdown(f"""
 **Playoff-point average (2026 MHSAA rules)**

@@ -201,11 +201,14 @@ class PlayoffSimulator:
 
         # Completed playoff games (after the regular season) fix their winners
         self.results = {}
+        self.scores = {}  # same keys: (winner's points, loser's points)
         played = season_games[(season_games["date_obj"] > self.last_date) & season_games["completed"]]
         for _, g in played.iterrows():
             if g["home"] in self.pp.index and g["away"] in self.pp.index and g["home_score"] != g["away_score"]:
                 h, a = self.pp.index[g["home"]], self.pp.index[g["away"]]
-                self.results[frozenset((h, a))] = h if g["home_score"] > g["away_score"] else a
+                key = frozenset((h, a))
+                self.results[key] = h if g["home_score"] > g["away_score"] else a
+                self.scores[key] = (int(max(g["home_score"], g["away_score"])), int(min(g["home_score"], g["away_score"])))
 
         self.official_bracket = brackets is not None
         if self.official_bracket:
@@ -416,51 +419,6 @@ class PlayoffSimulator:
             regions.append([(k + 1, self.teams[t], proj[t]) for k, t in enumerate(seeds)])
         return regions, semis
 
-    def bracket_games(self, division):
-        """Every game of a division's bracket, round by round, filled in as results come in.
-
-        Returns (region_games, final_games): region_games[r] lists Region r+1's District
-        Semifinals, District Finals and Regional Final; final_games lists the Semifinals
-        and Final. Each game: round, game, team_a, team_b, host, prob_a (None until both
-        teams are known), winner."""
-        regions, semis = self.projected_bracket(division)
-        if not regions:
-            return [], []
-
-        def play(out, round_name, label, a, b, neutral=False):
-            """a/b: (display name, team or None, pop). Returns the side that advances."""
-            known = a[1] is not None and b[1] is not None
-            winner = self.result(a[1], b[1]) if known else None
-            out.append({
-                "Round": round_name, "Game": label, "Team A": a[0], "Team B": b[0],
-                "Host": ("Neutral site" if neutral else (a[1] if a[2] >= b[2] else b[1])) if known else "",
-                "Team A Win %": self.matchup_prob(a[1], b[1], a[2], b[2], neutral) * 100 if known else None,
-                "Result": f"{winner} won" if winner else "",
-            })
-            if winner:
-                w = a if winner == a[1] else b
-                return (w[0], w[1], w[2])
-            return (f"Winner of {label}", None, 0.0)
-
-        region_games, champs = [], []
-        for r, region in enumerate(regions):
-            out = []
-            seed = {s: (f"#{s} {t}", t, p) for s, t, p in region}
-            d_semis = [play(out, "District Semifinal", f"District {2 * r + 1}: #{a} v #{b}", seed[a], seed[b])
-                       for a, b in ((1, 8), (4, 5))]
-            d_semis += [play(out, "District Semifinal", f"District {2 * r + 2}: #{a} v #{b}", seed[a], seed[b])
-                        for a, b in ((2, 7), (3, 6))]
-            d1 = play(out, "District Final", f"District {2 * r + 1} Final", d_semis[0], d_semis[1])
-            d2 = play(out, "District Final", f"District {2 * r + 2} Final", d_semis[2], d_semis[3])
-            champs.append(play(out, "Regional Final", f"Regional {r + 1} Final", d1, d2))
-            region_games.append(out)
-
-        final_games = []
-        finalists = [play(final_games, "Semifinal", f"Semifinal {i + 1}", champs[a], champs[b], neutral=True)
-                     for i, (a, b) in enumerate(semis)]
-        play(final_games, "Final", "Final (Ford Field)", finalists[0], finalists[1], neutral=True)
-        return region_games, final_games
-
     def eliminated(self):
         """Teams that have lost a completed playoff game."""
         return {self.teams[t] for pair, w in self.results.items() for t in pair if t != w}
@@ -469,6 +427,10 @@ class PlayoffSimulator:
         """Winner of a completed playoff game between the two teams, else None."""
         w = self.results.get(frozenset((self.pp.index[team_a], self.pp.index[team_b])))
         return None if w is None else self.teams[w]
+
+    def score(self, team_a, team_b):
+        """(winner's points, loser's points) of a completed playoff game, else None."""
+        return self.scores.get(frozenset((self.pp.index[team_a], self.pp.index[team_b])))
 
     def matchup_prob(self, team_a, team_b, pop_a, pop_b, neutral=False):
         """Win probability for team_a, with the higher POP hosting unless neutral."""
