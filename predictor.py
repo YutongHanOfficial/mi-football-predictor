@@ -141,7 +141,8 @@ class SeasonView:
                 self.teams[t] = {"OSRS": float(o[i]), "DSRS": float(d[i]), "games": int(self.ratings.games_played[i])}
         self.team_list = sorted(self.teams)
 
-        order = sorted(self.teams, key=lambda t: self.power(t), reverse=True)
+        # Only teams that have played are ranked (a schedule alone doesn't earn a rank)
+        order = sorted((t for t in self.teams if self.teams[t]["games"] > 0), key=lambda t: self.power(t), reverse=True)
         self._in_state = [t for t in order if not is_oos(t)]
         self._oos = [t for t in order if is_oos(t)]
 
@@ -384,13 +385,62 @@ def load_season_divisions(season, version=None):
     d = pd.read_csv(path, dtype={"division": str})
     return {school_key(r.school): (r.division, r.enrollment) for r in d.itertuples() if isinstance(r.division, str)}
 
-def division_caption(season, team):
-    """e.g. "Division 2 · 1,850 students"; pre-2020 seasons used Class A-D."""
-    div, enrollment = load_season_divisions(season, version=VERSION).get(school_key(team), (None, None))
+def division_name(season, team):
+    """"Division 2", or "Class B" before 2020; None if MHSAA doesn't list the school."""
+    div = load_season_divisions(season, version=VERSION).get(school_key(team), (None, None))[0]
     if div is None:
         return None
-    name = f"Division {div}" if div.isdigit() else f"Class {div}"
+    return f"Division {div}" if div.isdigit() else f"Class {div}"
+
+def division_sort_key(name):
+    return (name is None, name or "")
+
+def division_caption(season, team):
+    """e.g. "Division 2 · 1,850 students"."""
+    name = division_name(season, team)
+    if name is None:
+        return None
+    enrollment = load_season_divisions(season, version=VERSION)[school_key(team)][1]
     return f"**{name}**" + (f" · {int(enrollment):,} students" if pd.notna(enrollment) else "")
+
+@st.cache_data(max_entries=20)
+def season_rankings(_predictor, season, version=None):
+    """End-of-season (or current) power rankings of Michigan teams, overall and within
+    each division. Columns: Team, Division, Rank, Div Rank, Record, Power Rating, Offense, Defense."""
+    view = _predictor.view(season)
+    rows = []
+    for t, d in view.teams.items():
+        if is_oos(t) or d["games"] == 0:
+            continue
+        rec = view.stats(t)
+        rows.append({"Team": t, "Division": division_name(season, t), "Record": f"{rec['W']}-{rec['L']}",
+                     "Power Rating": round(d["OSRS"] - d["DSRS"], 2),
+                     "Offense": round(d["OSRS"], 2), "Defense": round(-d["DSRS"], 2)})
+    df = pd.DataFrame(rows, columns=["Team", "Division", "Record", "Power Rating", "Offense", "Defense"])
+    df = df.sort_values("Power Rating", ascending=False).reset_index(drop=True)
+    df["Rank"] = range(1, len(df) + 1)
+    df["Div Rank"] = df.groupby("Division")["Power Rating"].rank(ascending=False, method="first").astype("Int64")
+    df["Div Teams"] = df.groupby("Division")["Team"].transform("size").where(df["Division"].notna()).astype("Int64")
+    return df
+
+@st.cache_data(max_entries=200)
+def team_ranking_history(_predictor, team, version=None):
+    """One row per season the team played: record, final overall rank and division rank."""
+    rows = []
+    for season in reversed(_predictor.seasons):
+        df = season_rankings(_predictor, season, version=version)
+        hit = df[df["Team"] == team]
+        if hit.empty:
+            continue
+        r = hit.iloc[0]
+        label = f"{season} (so far)" if season == _predictor.current_season else season
+        rows.append({
+            "Season": label, "Record": r["Record"], "Division": r["Division"] or "—",
+            "State Rank": f"#{r['Rank']} of {len(df)}",
+            "Division Rank": f"#{r['Div Rank']} of {r['Div Teams']}" if pd.notna(r["Div Rank"]) else "—",
+            "Power Rating": r["Power Rating"],
+        })
+    return pd.DataFrame(rows)
 
 @st.cache_resource(max_entries=1)
 def load_playoff_sim(_predictor, version):
@@ -671,9 +721,25 @@ else:
             
             show_oos = (view_filter == "Out of State (OOS)")
 
+            if not show_oos:
+                ranked = season_rankings(predictor, season, version=VERSION)
+                divisions = sorted(ranked["Division"].dropna().unique(), key=division_sort_key)
+                div_pick = st.selectbox("Division", ["All divisions"] + divisions, key=f"rank_div_{season}")
+                if div_pick == "All divisions":
+                    table = ranked.assign(**{"Div Rank": [f"{r}/{n}" if pd.notna(r) else "—" for r, n in zip(ranked["Div Rank"], ranked["Div Teams"])],
+                                             "Division": ranked["Division"].fillna("—")})
+                    table["Rank"] = [f"{r}/{len(ranked)}" for r in ranked["Rank"]]
+                    cols = ["Rank", "Team", "Division", "Div Rank", "Record", "Power Rating", "Offense", "Defense"]
+                else:
+                    table = ranked[ranked["Division"] == div_pick].copy()
+                    table["State Rank"] = [f"{r}/{len(ranked)}" for r in table["Rank"]]
+                    table["Rank"] = [f"{r}/{len(table)}" for r in table["Div Rank"]]
+                    cols = ["Rank", "Team", "State Rank", "Record", "Power Rating", "Offense", "Defense"]
+                st.dataframe(table, column_order=cols, width="stretch", hide_index=True)
+
             rankings = []
             for t_name, t_data in view.teams.items():
-                if show_oos != is_oos(t_name): continue
+                if not show_oos or not is_oos(t_name): continue
 
                 o_rating, d_rating = t_data["OSRS"], t_data["DSRS"]
                 s_rec = view.stats(t_name)
@@ -689,7 +755,8 @@ else:
             for idx, r in enumerate(rankings):
                 r["Rank"] = f"{idx + 1}/{len(rankings)}{' (OOS)' if show_oos else ''}"
             
-            st.dataframe(rankings, column_order=["Rank", "Team", "Record", "Power Rating", "Offense", "Defense"], width="stretch", hide_index=True)
+            if show_oos:
+                st.dataframe(rankings, column_order=["Rank", "Team", "Record", "Power Rating", "Offense", "Defense"], width="stretch", hide_index=True)
 
     # ----------------------------------------------------
     # TAB 3: TEAM SCHEDULES & HUB
@@ -806,6 +873,15 @@ else:
                 else: st.info(f"No completed games recorded yet for the {display_year} season.")
                 
                 st.markdown("---")
+
+                if not is_oos(selected_team):
+                    with st.spinner("Ranking every season..."):
+                        history = team_ranking_history(predictor, selected_team, version=VERSION)
+                    if not history.empty:
+                        st.markdown("### 🏅 Year-by-Year Rankings")
+                        st.caption("Final power ranking each season, statewide and within the school's division that year (Class A–D before 2020).")
+                        st.dataframe(history, width="stretch", hide_index=True)
+                        st.markdown("---")
             
                 if upcoming_schedule:
                     st.markdown("### 🔮 Upcoming Game Projections")
