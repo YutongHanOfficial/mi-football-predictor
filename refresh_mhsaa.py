@@ -1,7 +1,8 @@
 """
 Refresh mhsaa_<season>.csv from MHSAA's Playoff Point Summary feed.
 
-    python refresh_mhsaa.py
+    python refresh_mhsaa.py              # current season
+    python refresh_mhsaa.py 2019 2020    # past seasons (division shown on team pages)
 
 MHSAA updates its official playoff-point averages less often than scores come in,
 so `pop_through` records which games the snapshot covers: the cutoff date at which
@@ -9,6 +10,7 @@ the records in games_<season>.csv best match MHSAA's official win-loss records.
 The playoff predictor compares only games played before that date.
 """
 import json
+import sys
 import urllib.request
 from datetime import date, timedelta
 
@@ -35,8 +37,14 @@ def snapshot_cutoff(official, games_path):
     return best or date.today().isoformat()
 
 
-def main():
-    req = urllib.request.Request(URL, headers={"User-Agent": "Mozilla/5.0 (mi-football-predictor)"})
+def division_label(raw):
+    """Divisions 1-8 since 2020 (kept as numbers); Class A-D before that."""
+    raw = raw.strip().rstrip("$")
+    return int(raw) if raw.isdigit() else (raw or None)
+
+
+def main(season=None):
+    req = urllib.request.Request(URL + (str(season) if season else ""), headers={"User-Agent": "Mozilla/5.0 (mi-football-predictor)"})
     with urllib.request.urlopen(req, timeout=60) as resp:
         rows = json.load(resp)
     d = pd.DataFrame(rows)
@@ -47,7 +55,7 @@ def main():
     d = d[(d["IsEightPlayer"].astype(str) == "0") & (d["YearTypeCode"] == season)]
     out = pd.DataFrame({
         "school": d["School"].str.strip(),
-        "division": d["Class"].str.strip().str.rstrip("$").astype(int),
+        "division": d["Class"].map(division_label),
         "opted_up": d["Class"].str.contains(r"\$").astype(int),
         "enrollment": d["Enrollment"],
         "games_scheduled": d["GamesInSchedule"],
@@ -63,4 +71,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    for arg in sys.argv[1:] or [None]:
+        main(arg)
