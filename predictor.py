@@ -345,6 +345,53 @@ def get_cached_history(_predictor, season, team_name, version=None):
 def get_cached_backtest(_predictor, season, version=None):
     return _predictor.backtest(season)
 
+# Older score files use school names MHSAA has since changed
+SCHOOL_RENAMES = {
+    "Birmingham Brother Rice": "Bloomfield Hills Brother Rice",
+    "Detroit Edison Public School Academy": "Detroit Edison",
+    "Detroit U-D Jesuit": "Detroit U of D Jesuit",
+    "Detroit Voyageur": "Detroit Voyageur College Prep",
+    "Detroit Western International": "Detroit Western",
+    "East Detroit": "Eastpointe",
+    "Grand Rapids Forest Hills Eastern": "Ada Forest Hills Eastern",
+    "Harper Woods Chandler Park Academy": "Harper Woods Chandler Park",
+    "Iron River West Iron County": "West Iron County",
+    "Kalamazoo Hackett": "Kalamazoo Hackett Catholic Prep",
+    "Lincoln Alcona": "Alcona",
+    "Saginaw Nouvel": "Saginaw Nouvel Catholic Central",
+    "Sanford Meridian Early College": "Sanford Meridian",
+    "St Joseph Lake Michigan Catholic": "St Joseph Our Lady of the Lake Catholic",
+    "Standish-Sterling Central": "Standish-Sterling",
+    "Stanton Central Montcalm": "Central Montcalm",
+    "Warren DeLaSalle": "Warren De La Salle Collegiate",
+    "Waterford Our Lady": "Waterford Our Lady of the Lakes",
+    "Wayland Union": "Wayland",
+}
+
+def school_key(name):
+    """Spelling-insensitive key: "Mt Pleasant" == "Mount Pleasant", "Erie-Mason" == "Erie Mason"."""
+    n = SCHOOL_RENAMES.get(name, name).lower()
+    n = re.sub(r"\bmt\b", "mount", n)
+    n = re.sub(r"\bhts\b", "heights", n)
+    return re.sub(r"[^a-z]", "", n)
+
+@st.cache_data(max_entries=20)
+def load_season_divisions(season, version=None):
+    """{school key: (division, enrollment)} from mhsaa_<season>.csv, or {} if the file is missing."""
+    path = f"mhsaa_{season}.csv"
+    if not os.path.exists(path):
+        return {}
+    d = pd.read_csv(path, dtype={"division": str})
+    return {school_key(r.school): (r.division, r.enrollment) for r in d.itertuples() if isinstance(r.division, str)}
+
+def division_caption(season, team):
+    """e.g. "Division 2 · 1,850 students"; pre-2020 seasons used Class A-D."""
+    div, enrollment = load_season_divisions(season, version=VERSION).get(school_key(team), (None, None))
+    if div is None:
+        return None
+    name = f"Division {div}" if div.isdigit() else f"Class {div}"
+    return f"**{name}**" + (f" · {int(enrollment):,} students" if pd.notna(enrollment) else "")
+
 @st.cache_resource(max_entries=1)
 def load_playoff_sim(_predictor, version):
     """Returns (simulator, problem with the brackets file or None)."""
@@ -544,16 +591,21 @@ else:
     get_rank_display = view.rank_display
     all_teams = view.team_list
 
-    def remembered_index(state_key, default):
-        """Keep a team picked on one season selected when switching to another season."""
-        team = st.session_state.get(state_key, default)
-        if team in all_teams:
-            return all_teams.index(team)
-        return all_teams.index(default) if default in all_teams else 0
+    def team_picker(label, state_key, default, **kwargs):
+        """Team selectbox that keeps its pick across seasons and tab switches.
 
-    def remember(state_key, team):
-        if team:
-            st.session_state[state_key] = team
+        The pick lives in st.session_state[state_key]; the widget gets its own key so
+        Streamlit doesn't forget it while its tab is closed, and a change takes effect
+        on the first click."""
+        widget_key = f"{state_key}_widget"
+        team = st.session_state.get(state_key, default)
+        if team not in all_teams:
+            team = default if default in all_teams else all_teams[0]
+        st.session_state[widget_key] = team
+
+        def keep():
+            st.session_state[state_key] = st.session_state[widget_key]
+        return st.selectbox(label, all_teams, key=widget_key, on_change=keep, **kwargs)
 
     # ----------------------------------------------------
     # TAB 1: MATCHUP SIMULATOR
@@ -563,8 +615,7 @@ else:
             col_a, col_b = st.columns(2)
             with col_a:
                 st.markdown("### ✈️ Away Team")
-                away = st.selectbox("Away Team Select", all_teams, index=remembered_index("pick_away", "Grand Blanc"), label_visibility="collapsed")
-                remember("pick_away", away)
+                away = team_picker("Away Team Select", "pick_away", "Grand Blanc", label_visibility="collapsed")
                 if away:
                     a_stats = view.stats(away)
                     a_pwr = round(view.power(away), 2)
@@ -574,8 +625,7 @@ else:
 
             with col_b:
                 st.markdown("### 🏠 Home Team")
-                home = st.selectbox("Home Team Select", all_teams, index=remembered_index("pick_home", "Davison"), label_visibility="collapsed")
-                remember("pick_home", home)
+                home = team_picker("Home Team Select", "pick_home", "Davison", label_visibility="collapsed")
                 if home:
                     h_stats = view.stats(home)
                     h_pwr = round(view.power(home), 2)
@@ -648,8 +698,7 @@ else:
         if tab3.open:
             st.subheader("Team Schedule", anchor=False)
         
-            selected_team = st.selectbox("Select Team Hub:", all_teams, index=remembered_index("pick_hub", "Grand Blanc"))
-            remember("pick_hub", selected_team)
+            selected_team = team_picker("Select Team Hub:", "pick_hub", "Grand Blanc")
 
             if selected_team:
                 team_rank = get_rank_display(selected_team)
@@ -662,6 +711,9 @@ else:
                 pf, pa = t_basic["PF"], t_basic["PA"]
             
                 st.markdown("### 📊 Team Dashboard")
+                div_text = division_caption(season, selected_team)
+                if div_text:
+                    st.markdown(f"{div_text} ({display_year})")
                 m1, m2, m3, m4 = st.columns(4)
                 m1.metric("Overall Rank", f"#{team_rank}")
                 m2.metric("Power Rating", f"{p_rating}")
