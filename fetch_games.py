@@ -19,6 +19,8 @@ from datetime import date
 URL = ("https://my.mhsaa.com//DesktopModules/MHSAA-Endpoint/handlers/ContestWithParticipantDepotSearch.ashx"
        "?Method=ScoreCenterSearch&StartDate={start}&EndDate={end}&Sport=BFB&Level=V")
 FIELDS = ["date", "home", "away", "home_score", "away_score"]
+# Seasons that didn't finish by mid-December (COVID pushed the 2020 playoffs into January)
+SEASON_END = {"2020": "2021-01-31"}
 
 # Level tags MHSAA sometimes appends to a team name, e.g. "Coldwater (V)"
 LEVEL_TAG = re.compile(r"\s*\((V|BV|JV|FR)\)\s*$")
@@ -48,8 +50,8 @@ def score(value):
 
 
 def fetch_season(season):
-    """All varsity games from August through mid-December of `season`."""
-    url = URL.format(start=f"{season}-08-01", end=f"{season}-12-15")
+    """All varsity games from August through mid-December of `season` (or SEASON_END)."""
+    url = URL.format(start=f"{season}-08-01", end=SEASON_END.get(str(season), f"{season}-12-15"))
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (mi-football-predictor)"})
     with urllib.request.urlopen(req, timeout=120) as resp:
         rows = json.load(resp)

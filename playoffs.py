@@ -33,8 +33,10 @@ from collections import defaultdict
 import numpy as np
 import pandas as pd
 from scipy.optimize import linear_sum_assignment
+from scipy.sparse import coo_matrix
+from scipy.sparse.csgraph import connected_components
 
-from engine import is_oos
+from engine import is_oos, week_index
 
 WIN_POINTS = {1: 60, 2: 55, 3: 50, 4: 45, 5: 40, 6: 35, 7: 30, 8: 25}
 BONUS_MULT = {1: 6, 2: 6, 3: 5, 4: 5, 5: 4, 6: 4, 7: 3, 8: 3}
@@ -462,3 +464,94 @@ class PlayoffSimulator:
                 "Win Title": reach[i, 5] / n,
             })
         return pd.DataFrame(rows)
+
+
+# ------------------------------------------------------------------
+# Past playoff results
+# ------------------------------------------------------------------
+# 2020 (COVID) opened with an extra Pre-District round for every team
+EXTRA_ROUNDS = {"2020": ["Pre-District"]}
+
+
+def playoff_results(games, season, division_of=None, enrollment_of=None):
+    """How far each Michigan school went in `season`'s playoffs, from its games.
+
+    The playoffs start the first week (week 8 or later) with 128 in-state games, one
+    round per week after that (weeks without games, like 2020's pause, are skipped).
+    Each Division's bracket is a connected group of playoff games; it is numbered by
+    the schools' official divisions, or before 2020 (Class A-D) by enrollment, largest
+    first. Returns {school: {"division", "round", "round_name", "won", "rounds"}};
+    "won" is None for a game not played yet."""
+    g = games[~games["home"].map(is_oos) & ~games["away"].map(is_oos)].copy()
+    if g.empty:
+        return {}
+    g["week"] = week_index(g["date"])
+    counts = g.groupby("week").size()
+    first = counts.index.min()
+    start = next((w for w, n in counts.items() if w - first >= 7 and 100 <= n <= 136), None)
+    if start is None:
+        return {}
+    names = EXTRA_ROUNDS.get(str(season), []) + ROUNDS
+    weeks = [w for w in counts.index if w < start][-(len(names) - len(ROUNDS)):] if len(names) > len(ROUNDS) else []
+    weeks = (weeks + [w for w in counts.index if w >= start])[:len(names)]
+    p = g[g["week"].isin(weeks)].copy()
+    p["round"] = p["week"].map({w: i + 1 for i, w in enumerate(weeks)})
+    played = p["home_score"].notna() & p["away_score"].notna()
+
+    # Brackets: connected groups of schools that met in the playoffs
+    teams = sorted(set(p["home"]) | set(p["away"]))
+    ix = {t: i for i, t in enumerate(teams)}
+    graph = coo_matrix((np.ones(len(p)), (p["home"].map(ix), p["away"].map(ix))), shape=(len(teams), len(teams)))
+    _, label = connected_components(graph, directed=False)
+    groups = defaultdict(list)
+    for t in teams:
+        groups[label[ix[t]]].append(t)
+    division = {}
+    official = [pd.Series([division_of(t) for t in m]).dropna() for m in groups.values()] if division_of else []
+    if official and all(len(o) and str(o.mode()[0]).isdigit() for o in official):
+        for (k, members), o in zip(groups.items(), official):
+            division[k] = int(o.mode()[0])
+    elif enrollment_of and len(groups) == 8:
+        size = {k: np.nanmedian([enrollment_of(t) or np.nan for t in m]) for k, m in groups.items()}
+        for d, k in enumerate(sorted(size, key=lambda k: -size[k]), start=1):
+            division[k] = d
+
+    # Each school's last playoff game decides its result (a game with no score is
+    # upcoming this season, or was canceled in a past one)
+    out = {}
+    for r in p.assign(played=played).sort_values("round").itertuples():
+        for team, mine, theirs in ((r.home, r.home_score, r.away_score), (r.away, r.away_score, r.home_score)):
+            out[team] = {"division": division.get(label[ix[team]]), "round": r.round, "round_name": names[r.round - 1],
+                         "won": (mine > theirs) if r.played else None, "rounds": len(names)}
+    return out
+
+
+def result_text(res, season, is_current):
+    """Banner text for one school's playoff result, e.g. "2025 Division 1 State Champions"."""
+    div = f"Division {res['division']} " if res.get("division") else ""
+    names = EXTRA_ROUNDS.get(str(season), []) + ROUNDS
+    if res["won"] is None:
+        if is_current:
+            return f"In the {season} {div}playoffs: next up, the {res['round_name']}"
+        return f"Reached the {season} {div}{res['round_name']}"
+    if res["won"] and res["round"] < res["rounds"] and is_current:
+        return f"In the {season} {div}playoffs: next up, the {names[res['round']]}"
+    if res["won"] and res["round"] == res["rounds"]:
+        return f"{season} {div}State Champions"
+    if not res["won"] and res["round"] == res["rounds"]:
+        return f"{season} {div}State Runner-Up"
+    if res["won"]:
+        return f"Reached the {season} {div}{names[res['round']]}"
+    return f"Lost in the {season} {div}{res['round_name']}"
+
+
+def result_short(res, season, is_current):
+    """Compact version for tables, e.g. "🏆 State Champions", "Lost Regional Final"."""
+    if res is None:
+        return "Missed playoffs"
+    names = EXTRA_ROUNDS.get(str(season), []) + ROUNDS
+    if res["won"] is None or (res["won"] and res["round"] < res["rounds"] and is_current):
+        return "Still alive" if is_current else f"Reached {res['round_name']}"
+    if res["round"] == res["rounds"]:
+        return "🏆 State Champions" if res["won"] else "🥈 State Runner-Up"
+    return f"Reached {names[res['round']]}" if res["won"] else f"Lost {res['round_name']}"
