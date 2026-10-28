@@ -395,6 +395,10 @@ class PlayoffSimulator:
         self._results = (qualify, pop_sum, top_seed, reach, n_sims)
         return self.summary()
 
+    def seeds(self, division):
+        """{team: (region index, seed index)} for the official bracket's field."""
+        return {self.teams[t]: (r, k) for r, seeds in enumerate(self.field.get(division, [])) for k, t in enumerate(seeds)}
+
     def projected_bracket(self, division):
         """The official bracket once published; before that the most likely field (top 32
         by projected POP), split into Regions and seeded.
@@ -473,30 +477,29 @@ class PlayoffSimulator:
 EXTRA_ROUNDS = {"2020": ["Pre-District"]}
 
 
-def playoff_results(games, season, division_of=None, enrollment_of=None):
-    """How far each Michigan school went in `season`'s playoffs, from its games.
+def playoff_games(games, season, division_of=None, enrollment_of=None):
+    """`season`'s playoff games, with columns round (1 = first round) and division.
 
     The playoffs start the first week (week 8 or later) with 128 in-state games, one
     round per week after that (weeks without games, like 2020's pause, are skipped).
     Each Division's bracket is a connected group of playoff games; it is numbered by
     the schools' official divisions, or before 2020 (Class A-D) by enrollment, largest
-    first. Returns {school: {"division", "round", "round_name", "won", "rounds"}};
-    "won" is None for a game not played yet."""
+    first. Empty if the playoffs haven't started."""
     g = games[~games["home"].map(is_oos) & ~games["away"].map(is_oos)].copy()
     if g.empty:
-        return {}
+        return g
     g["week"] = week_index(g["date"])
     counts = g.groupby("week").size()
     first = counts.index.min()
     start = next((w for w, n in counts.items() if w - first >= 7 and 100 <= n <= 136), None)
     if start is None:
-        return {}
+        return g.iloc[0:0]
     names = EXTRA_ROUNDS.get(str(season), []) + ROUNDS
     weeks = [w for w in counts.index if w < start][-(len(names) - len(ROUNDS)):] if len(names) > len(ROUNDS) else []
     weeks = (weeks + [w for w in counts.index if w >= start])[:len(names)]
     p = g[g["week"].isin(weeks)].copy()
     p["round"] = p["week"].map({w: i + 1 for i, w in enumerate(weeks)})
-    played = p["home_score"].notna() & p["away_score"].notna()
+    p["played"] = p["home_score"].notna() & p["away_score"].notna()
 
     # Brackets: connected groups of schools that met in the playoffs
     teams = sorted(set(p["home"]) | set(p["away"]))
@@ -515,13 +518,23 @@ def playoff_results(games, season, division_of=None, enrollment_of=None):
         size = {k: np.nanmedian([enrollment_of(t) or np.nan for t in m]) for k, m in groups.items()}
         for d, k in enumerate(sorted(size, key=lambda k: -size[k]), start=1):
             division[k] = d
+    p["division"] = p["home"].map(lambda t: division.get(label[ix[t]]))
+    return p
 
+
+def playoff_results(games, season, division_of=None, enrollment_of=None):
+    """How far each Michigan school went in `season`'s playoffs (see playoff_games).
+
+    Returns {school: {"division", "round", "round_name", "won", "rounds"}}; "won" is
+    None for a game not played yet."""
+    p = playoff_games(games, season, division_of, enrollment_of)
+    names = EXTRA_ROUNDS.get(str(season), []) + ROUNDS
     # Each school's last playoff game decides its result (a game with no score is
     # upcoming this season, or was canceled in a past one)
     out = {}
-    for r in p.assign(played=played).sort_values("round").itertuples():
+    for r in p.sort_values("round").itertuples():
         for team, mine, theirs in ((r.home, r.home_score, r.away_score), (r.away, r.away_score, r.home_score)):
-            out[team] = {"division": division.get(label[ix[team]]), "round": r.round, "round_name": names[r.round - 1],
+            out[team] = {"division": None if pd.isna(r.division) else int(r.division), "round": r.round, "round_name": names[r.round - 1],
                          "won": (mine > theirs) if r.played else None, "rounds": len(names)}
     return out
 

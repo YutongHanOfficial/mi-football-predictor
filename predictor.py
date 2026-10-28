@@ -17,8 +17,8 @@ for _module in ("engine", "playoffs", "bracket_view"):
 
 from engine import Engine, EngineConfig, discover_seasons, is_oos, week_index
 from playoffs import (PlayoffSimulator, load_brackets, load_divisions, load_locations, FIELD_PER_DIVISION,
-                      playoff_results, result_short, result_text)
-from bracket_view import finals_svg, page as bracket_page, region_svg
+                      playoff_games, playoff_results, result_short, result_text)
+from bracket_view import finals_svg, page as bracket_page, past_finals_svg, past_region_svg, past_rounds, region_svg
 
 # ==========================================
 # ⚙️ ENGINE CONFIGURATION
@@ -424,13 +424,20 @@ def season_rankings(_predictor, season, version=None):
     df["Div Teams"] = df.groupby("Division")["Team"].transform("size").where(df["Division"].notna()).astype("Int64")
     return df
 
+def _division_lookups(season, version):
+    divs = load_season_divisions(season, version=version)
+    return {"division_of": lambda t: divs.get(school_key(t), (None, None))[0],
+            "enrollment_of": lambda t: divs.get(school_key(t), (None, None))[1]}
+
 @st.cache_data(max_entries=20)
 def season_playoff_results(_predictor, season, version=None):
     """{school: playoff result} for a season (empty until its playoffs start)."""
-    divs = load_season_divisions(season, version=version)
-    return playoff_results(pd.DataFrame(_predictor.games_as_dicts(season)), season,
-                           division_of=lambda t: divs.get(school_key(t), (None, None))[0],
-                           enrollment_of=lambda t: divs.get(school_key(t), (None, None))[1])
+    return playoff_results(pd.DataFrame(_predictor.games_as_dicts(season)), season, **_division_lookups(season, version))
+
+@st.cache_data(max_entries=20)
+def season_playoff_games(_predictor, season, version=None):
+    """A season's playoff games with their round and division."""
+    return playoff_games(pd.DataFrame(_predictor.games_as_dicts(season)), season, **_division_lookups(season, version))
 
 def playoff_banner(predictor, season, team):
     """Banner at the top of a team page with the school's playoff finish that season."""
@@ -663,7 +670,7 @@ else:
         "🏆 Power Rankings", 
         "📅 Team Schedules", 
         "📆 Upcoming Matchups", 
-        "🏟️ Playoff Predictor",
+        "🏟️ Playoffs",
         "📈 Season Leaderboards",
         "🎯 Model Accuracy"
     ], key="main_tab", on_change="rerun")  # lazy: only the open tab's code runs
@@ -1210,14 +1217,43 @@ else:
                         st.dataframe(bd["df"])
 
     # ----------------------------------------------------
-    # TAB: PLAYOFF PREDICTOR
+    # TAB: PLAYOFFS
     # ----------------------------------------------------
     with tab_playoffs:
         if tab_playoffs.open:
-            st.subheader("Playoff Predictor", anchor=False)
+            st.subheader(f"{season} Playoffs", anchor=False)
             if not view.is_current:
                 sim, bracket_problem = None, None
-                st.info(f"The playoff predictor covers the current season. Switch to {predictor.current_season} to see playoff odds.")
+                past = season_playoff_games(predictor, season, version=VERSION)
+                if past.empty:
+                    st.info(f"No playoff games found for {season}.")
+                else:
+                    results = season_playoff_results(predictor, season, version=VERSION)
+                    col_team, col_div = st.columns([2, 1])
+                    with col_team:
+                        follow = team_picker("Follow a team", "pick_hub", "Grand Blanc")
+                    divisions = sorted(int(d) for d in past["division"].dropna().unique())
+                    team_div = (results.get(follow) or {}).get("division")
+                    with col_div:
+                        # Keyed by team so picking a new team jumps to its division
+                        division = st.selectbox("Division", divisions, format_func=lambda d: f"Division {d}",
+                                                index=divisions.index(team_div) if team_div in divisions else 0,
+                                                key=f"past_div_{season}_{follow}")
+                    playoff_banner(predictor, season, follow)
+                    built = past_rounds(past[past["division"] == division])
+                    if built is None:
+                        st.info(f"The Division {division} bracket for {season} is incomplete in the game data.")
+                    else:
+                        rounds, champ = built
+                        st.caption(f"Final scores from every Division {division} playoff game. "
+                                   + (f"{follow}'s games are highlighted." if team_div == division else ""))
+                        for r_i in range(4):
+                            st.markdown(f"##### Region {r_i + 1}")
+                            svg, height = past_region_svg(rounds, r_i, highlight=follow)
+                            st.iframe(bracket_page(svg), height=int(height) + 30)
+                        st.markdown("##### State Semifinals & Final")
+                        svg, height = past_finals_svg(rounds, highlight=follow)
+                        st.iframe(bracket_page(svg), height=int(height) + 30)
             else:
                 with st.spinner(f"Simulating the playoffs {PLAYOFF_SIMS:,} times..."):
                     sim, bracket_problem = load_playoff_sim(predictor, VERSION)
@@ -1237,8 +1273,6 @@ else:
                 st.warning(f"Playoff data for {CURRENT_SEASON} isn't set up yet: run `python refresh_mhsaa.py` and add the season's last regular-season day to `LAST_REGULAR_DAY` in predictor.py.")
             else:
                 summary = sim.summary()
-                if official_bracket:
-                    summary = summary[summary["Make Playoffs"] > 0]
                 official = sim.official
                 summary["Record"] = summary["Team"].map(lambda t: f"{official.loc[t, 'official_wins']}-{official.loc[t, 'official_losses']}" if t in official.index else "")
 
@@ -1251,16 +1285,23 @@ else:
                     view = st.radio("View", ["Playoff Odds", bracket_label], horizontal=True, label_visibility="collapsed", key="playoff_view")
 
                 div_df = summary[summary["Div"] == division].sort_values(["Make Playoffs", "Proj POP"], ascending=False).reset_index(drop=True)
+                if official_bracket:
+                    seed_of = {t: f"Region {r + 1} · #{k + 1}" for t, (r, k) in sim.seeds(division).items()}
+                    div_df["Seed"] = div_df["Team"].map(seed_of).fillna("Missed")
+                    div_df = div_df.sort_values(["Current POP"], ascending=False).reset_index(drop=True)
+                    field_df = div_df[div_df["Seed"] != "Missed"]
+                else:
+                    field_df = div_df
                 locks = int((div_df["Make Playoffs"] >= 0.995).sum())
                 bubble = div_df[(div_df["Make Playoffs"] > 0.02) & (div_df["Make Playoffs"] < 0.98)]
                 fav = div_df.sort_values("Win Title", ascending=False).iloc[0]
 
                 m1, m2, m3, m4 = st.columns(4)
                 if official_bracket:
-                    m1.metric("Teams in Field", len(div_df))
+                    m1.metric("Teams in Field", f"{len(field_df)} of {len(div_df)}")
                     out = sim.eliminated()
-                    m2.metric("Still Alive", int((~div_df["Team"].isin(out)).sum()))
-                    m3.metric("Eliminated", int(div_df["Team"].isin(out).sum()))
+                    m2.metric("Still Alive", int((~field_df["Team"].isin(out)).sum()))
+                    m3.metric("Eliminated", int(field_df["Team"].isin(out).sum()))
                 else:
                     m1.metric("Teams in Division", len(div_df))
                     m2.metric("Locked In (>99%)", locks)
@@ -1269,14 +1310,20 @@ else:
 
                 if view == "Playoff Odds":
                     pct_cols = ["Make Playoffs", "Region #1 Seed", "Win 1st Round", "Win District", "Win Regional", "Reach Final", "Win Title"]
-                    show = div_df[["Team", "Record", "Current POP", "Proj POP"] + pct_cols].copy()
+                    if official_bracket:
+                        # Every school in the division, by its final POP, with where it landed
+                        st.caption(f"All {len(div_df)} Division {division} schools by playoff-point average. The top {FIELD_PER_DIVISION} eligible made the field.")
+                        pct_cols = pct_cols[2:]
+                        show = div_df[["Team", "Record", "Current POP", "Seed"] + pct_cols].copy()
+                    else:
+                        show = div_df[["Team", "Record", "Current POP", "Proj POP"] + pct_cols].copy()
                     show.insert(0, "Rank", range(1, len(show) + 1))
                     for c in pct_cols:
                         show[c] = show[c] * 100
                     st.dataframe(
                         show,
                         column_config={
-                            "Current POP": st.column_config.NumberColumn(format="%.3f", help="Official MHSAA playoff-point average right now"),
+                            "Current POP": st.column_config.NumberColumn("POP" if official_bracket else "Current POP", format="%.3f", help="Official MHSAA playoff-point average"),
                             "Proj POP": st.column_config.NumberColumn(format="%.2f", help="Final regular-season POP (decides seeds and hosts)" if official_bracket else "Average POP after the remaining regular-season games"),
                             **{c: st.column_config.ProgressColumn(c, format="%.1f%%", min_value=0, max_value=100) for c in pct_cols},
                         },
@@ -1308,7 +1355,7 @@ else:
                         st.caption(f"Region {semis[0][0] + 1} plays Region {semis[0][1] + 1}, and Region {semis[1][0] + 1} plays Region {semis[1][1] + 1}.")
                         svg, height = finals_svg(sim, odds, champions, semis)
                         st.iframe(bracket_page(svg), height=int(height) + 30)
-                with st.expander("ℹ️ How the playoff predictor works"):
+                with st.expander("ℹ️ How the playoff projections work"):
                     st.markdown(f"""
 **Playoff-point average (2026 MHSAA rules)**
 - *Base:* win points by opponent division (D1 60, D2 55, D3 50, D4 45, D5 40, D6 35, D7 30, D8 25) divided by games played.

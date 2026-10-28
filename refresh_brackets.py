@@ -10,7 +10,7 @@ This is the feed behind mhsaa.com/sports/football → Brackets:
 Until MHSAA publishes the brackets, TournamentData comes back empty and nothing is written.
 The update-data GitHub Action runs this after fetching games.
 
-Once brackets_<season>.csv exists, the Playoff Predictor uses the official field and Regions
+Once brackets_<season>.csv exists, the Playoffs tab uses the official field and Regions
 instead of projecting them. Delete the file to go back to projections.
 
 CSV format (one row per qualifier; also fine to type in by hand if the feed changes):
