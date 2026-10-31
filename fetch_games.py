@@ -8,6 +8,9 @@ Each file holds every game of the season: finished games with scores and upcomin
 games with blank scores (so the schedule fills in automatically), plus playoff
 games once they are scheduled. Out-of-state teams keep MHSAA's state tag, e.g.
 "Toledo Central Catholic (OH)". Forfeits are recorded 1-0, as MHSAA does.
+
+Scores MHSAA has wrong go in score_corrections.csv (date, home, away, home_score,
+away_score, note); they're applied after every download so the fix survives updates.
 """
 import csv
 import json
@@ -19,6 +22,7 @@ from datetime import date
 URL = ("https://my.mhsaa.com//DesktopModules/MHSAA-Endpoint/handlers/ContestWithParticipantDepotSearch.ashx"
        "?Method=ScoreCenterSearch&StartDate={start}&EndDate={end}&Sport=BFB&Level=V")
 FIELDS = ["date", "home", "away", "home_score", "away_score"]
+CORRECTIONS_FILE = "score_corrections.csv"
 # Seasons that didn't finish by mid-December (COVID pushed the 2020 playoffs into January)
 SEASON_END = {"2020": "2021-01-31"}
 
@@ -98,6 +102,22 @@ def describe_changes(old, new):
     return f"{added} new, {scored} newly scored, {changed} corrected, {removed} removed"
 
 
+def apply_corrections(games, path=CORRECTIONS_FILE):
+    """Override MHSAA's score for each game listed in score_corrections.csv."""
+    fixes = {}
+    for c in read_existing(path):
+        fixes[(c["date"],) + tuple(sorted([c["home"], c["away"]]))] = c
+    applied = 0
+    for g in games:
+        c = fixes.get((g["date"],) + tuple(sorted([g["home"], g["away"]])))
+        if c is None:
+            continue
+        g["home"], g["away"] = c["home"], c["away"]
+        g["home_score"], g["away_score"] = score(c["home_score"]), score(c["away_score"])
+        applied += 1
+    return applied
+
+
 def main(seasons):
     for season in seasons:
         path = f"games_{season}.csv"
@@ -113,12 +133,14 @@ def main(seasons):
                 if is_oos(g["home"]) and is_oos(g["away"])
                 and (g["date"],) + tuple(sorted([g["home"], g["away"]])) not in have]
         games = sorted(games + kept, key=lambda g: (g["date"], g["home"], g["away"]))
+        fixed = apply_corrections(games)
         with open(path, "w", newline="", encoding="utf-8") as f:
             w = csv.DictWriter(f, fieldnames=FIELDS)
             w.writeheader()
             w.writerows(games)
         played = sum(1 for g in games if g["home_score"] != "")
-        print(f"{season}: {len(games)} games ({played} played) -> {path}  [{describe_changes(old, games)}]")
+        note = f", {fixed} corrected from {CORRECTIONS_FILE}" if fixed else ""
+        print(f"{season}: {len(games)} games ({played} played) -> {path}  [{describe_changes(old, games)}{note}]")
 
 
 if __name__ == "__main__":
