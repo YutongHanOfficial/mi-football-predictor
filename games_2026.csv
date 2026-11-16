@@ -2560,67 +2560,114 @@ date,home,away,home_score,away_score
 2026-10-31,Southfield Bradford Academy,Burton Atherton,34,14
 2026-10-31,Traverse City St Francis,Calumet,35,14
 2026-11-03,Grand Rapids Catholic Central,Comstock Park,56,13
-2026-11-06,Ada Forest Hills Eastern,Hudsonville Unity Christian,,
-2026-11-06,Almont,Midland Bullock Creek,,
-2026-11-06,Beal City,East Jordan,,
-2026-11-06,Belding,Olivet,,
-2026-11-06,Bloomfield Hills Brother Rice,North Farmington,,
-2026-11-06,Byron Center,Portage Northern,,
-2026-11-06,Caledonia,Muskegon Mona Shores,,
-2026-11-06,Charlevoix,Harrison,,
-2026-11-06,Chelsea,Redford Thurston,,
-2026-11-06,Clarkston,Grand Blanc,,
-2026-11-06,DeWitt,Coopersville,,
-2026-11-06,Dearborn Divine Child,Adrian,,
-2026-11-06,Decatur,Springport,,
-2026-11-06,Detroit Cass Tech,Dearborn Fordson,,
-2026-11-06,Detroit Catholic Central,Oxford,,
-2026-11-06,Detroit Country Day,St Clair,,
-2026-11-06,Ecorse,Warren Michigan Collegiate,,
-2026-11-06,Edwardsburg,Portland,,
-2026-11-06,Frankenmuth,Armada,,
-2026-11-06,Gibraltar Carlson,Livonia Franklin,,
-2026-11-06,Goodrich,St Johns,,
-2026-11-06,Grand Rapids Kenowa Hills,Ludington,,
-2026-11-06,Grand Rapids West Catholic,Hopkins,,
-2026-11-06,Grosse Pointe South,Temperance Bedford,,
-2026-11-06,Harper Woods,Detroit Martin Luther King,,
-2026-11-06,Hudson,Fowler,,
-2026-11-06,Jackson Lumen Christi,Napoleon,,
-2026-11-06,Kingsley,Traverse City St Francis,,
-2026-11-06,Marine City,Montrose,,
-2026-11-06,Marysville,Macomb Lutheran North,,
-2026-11-06,Mason,Fenton,,
-2026-11-06,Milford,Midland Dow,,
-2026-11-06,Millington,Ithaca,,
-2026-11-06,Monroe Jefferson,Ida,,
-2026-11-06,Monroe St Mary Catholic Central,Ottawa Lake Whiteford,,
-2026-11-06,Mount Pleasant,Cadillac,,
-2026-11-06,New Lothrop,Saginaw Michigan Lutheran Seminary,,
-2026-11-06,Ogemaw Heights,Remus Chippewa Hills,,
-2026-11-06,Orchard Lake St Mary's,St Clair Shores Lakeview,,
-2026-11-06,Pewamo-Westphalia,Elkton-Pigeon-Bay Port Laker,,
-2026-11-06,Port Huron,Warren De La Salle Collegiate,,
-2026-11-06,Portage Central,Grandville,,
-2026-11-06,Rochester Hills Stoney Creek,Rochester Adams,,
-2026-11-06,Romeo,Rochester,,
-2026-11-06,Romulus Summit Academy North,Detroit Denby,,
-2026-11-06,Saginaw Swan Valley,Imlay City,,
-2026-11-06,Saline,Northville,,
-2026-11-06,Sanford Meridian,Gladwin,,
-2026-11-06,South Lyon,South Lyon East,,
-2026-11-06,St Joseph,Middleville Thornapple Kellogg,,
-2026-11-06,Stevensville Lakeshore,Grand Rapids South Christian,,
-2026-11-06,Ubly,Unionville-Sebewaing,,
-2026-11-06,Union City,Jonesville,,
-2026-11-06,Zeeland West,Battle Creek Central,,
-2026-11-07,Bark River-Harris,Maple City Glen Lake,,
-2026-11-07,Constantine,Ravenna,,
-2026-11-07,Detroit Edison,Clinton,,
-2026-11-07,East Kentwood,Grand Ledge,,
-2026-11-07,Kingsford,Negaunee,,
-2026-11-07,Madison Heights Madison,Southfield Bradford Academy,,
-2026-11-07,Menominee,Manistee,,
-2026-11-07,Royal Oak Shrine Catholic,Clarkston Everest Collegiate,,
-2026-11-07,Schoolcraft,North Muskegon,,
-2026-11-10,Grand Rapids Catholic Central,Berrien Springs,,
+2026-11-06,Ada Forest Hills Eastern,Hudsonville Unity Christian,23,49
+2026-11-06,Almont,Midland Bullock Creek,43,28
+2026-11-06,Beal City,East Jordan,41,6
+2026-11-06,Belding,Olivet,28,20
+2026-11-06,Bloomfield Hills Brother Rice,North Farmington,35,14
+2026-11-06,Byron Center,Portage Northern,59,37
+2026-11-06,Caledonia,Muskegon Mona Shores,35,49
+2026-11-06,Charlevoix,Harrison,41,8
+2026-11-06,Chelsea,Redford Thurston,51,14
+2026-11-06,Clarkston,Grand Blanc,27,26
+2026-11-06,DeWitt,Coopersville,54,21
+2026-11-06,Dearborn Divine Child,Adrian,49,14
+2026-11-06,Decatur,Springport,22,34
+2026-11-06,Detroit Cass Tech,Dearborn Fordson,28,14
+2026-11-06,Detroit Catholic Central,Oxford,40,27
+2026-11-06,Detroit Country Day,St Clair,35,13
+2026-11-06,Ecorse,Warren Michigan Collegiate,26,6
+2026-11-06,Edwardsburg,Portland,17,35
+2026-11-06,Frankenmuth,Armada,48,14
+2026-11-06,Gibraltar Carlson,Livonia Franklin,6,17
+2026-11-06,Goodrich,St Johns,42,7
+2026-11-06,Grand Rapids Kenowa Hills,Ludington,63,0
+2026-11-06,Grand Rapids West Catholic,Hopkins,45,14
+2026-11-06,Grosse Pointe South,Temperance Bedford,42,0
+2026-11-06,Harper Woods,Detroit Martin Luther King,20,6
+2026-11-06,Hudson,Fowler,35,0
+2026-11-06,Jackson Lumen Christi,Napoleon,37,0
+2026-11-06,Kingsley,Traverse City St Francis,38,7
+2026-11-06,Marine City,Montrose,37,29
+2026-11-06,Marysville,Macomb Lutheran North,20,48
+2026-11-06,Mason,Fenton,49,0
+2026-11-06,Milford,Midland Dow,31,19
+2026-11-06,Millington,Ithaca,16,39
+2026-11-06,Monroe Jefferson,Ida,43,23
+2026-11-06,Monroe St Mary Catholic Central,Ottawa Lake Whiteford,34,38
+2026-11-06,Mount Pleasant,Cadillac,56,41
+2026-11-06,New Lothrop,Saginaw Michigan Lutheran Seminary,49,21
+2026-11-06,Ogemaw Heights,Remus Chippewa Hills,34,14
+2026-11-06,Orchard Lake St Mary's,St Clair Shores Lakeview,42,7
+2026-11-06,Pewamo-Westphalia,Elkton-Pigeon-Bay Port Laker,41,7
+2026-11-06,Port Huron,Warren De La Salle Collegiate,10,27
+2026-11-06,Portage Central,Grandville,33,18
+2026-11-06,Rochester Hills Stoney Creek,Rochester Adams,21,7
+2026-11-06,Romeo,Rochester,42,2
+2026-11-06,Romulus Summit Academy North,Detroit Denby,30,28
+2026-11-06,Saginaw Swan Valley,Imlay City,29,12
+2026-11-06,Saline,Northville,14,17
+2026-11-06,Sanford Meridian,Gladwin,56,21
+2026-11-06,South Lyon,South Lyon East,55,32
+2026-11-06,St Joseph,Middleville Thornapple Kellogg,13,41
+2026-11-06,Stevensville Lakeshore,Grand Rapids South Christian,0,51
+2026-11-06,Ubly,Unionville-Sebewaing,32,8
+2026-11-06,Union City,Jonesville,30,52
+2026-11-06,Zeeland West,Battle Creek Central,48,12
+2026-11-07,Bark River-Harris,Maple City Glen Lake,38,13
+2026-11-07,Constantine,Ravenna,12,42
+2026-11-07,Detroit Edison,Clinton,26,24
+2026-11-07,East Kentwood,Grand Ledge,42,21
+2026-11-07,Kingsford,Negaunee,14,20
+2026-11-07,Madison Heights Madison,Southfield Bradford Academy,32,0
+2026-11-07,Menominee,Manistee,42,8
+2026-11-07,Royal Oak Shrine Catholic,Clarkston Everest Collegiate,14,24
+2026-11-07,Schoolcraft,North Muskegon,0,10
+2026-11-13,Almont,Marine City,41,14
+2026-11-13,Bloomfield Hills Brother Rice,Orchard Lake St Mary's,14,48
+2026-11-13,Byron Center,Muskegon Mona Shores,28,45
+2026-11-13,Chelsea,Mason,42,24
+2026-11-13,Clarkston,Detroit Catholic Central,7,21
+2026-11-13,Detroit Cass Tech,Northville,40,30
+2026-11-13,Frankenmuth,Saginaw Swan Valley,27,21
+2026-11-13,Goodrich,Dearborn Divine Child,14,21
+2026-11-13,Grand Rapids Kenowa Hills,Hudsonville Unity Christian,42,21
+2026-11-13,Grand Rapids South Christian,Portland,35,20
+2026-11-13,Grosse Pointe South,Livonia Franklin,50,13
+2026-11-13,Harper Woods,Warren De La Salle Collegiate,38,13
+2026-11-13,Hudson,Springport,61,20
+2026-11-13,Jackson Lumen Christi,Belding,56,20
+2026-11-13,Kingsley,Sanford Meridian,34,28
+2026-11-13,Macomb Lutheran North,Detroit Country Day,13,21
+2026-11-13,Milford,South Lyon,26,20
+2026-11-13,Monroe Jefferson,Romulus Summit Academy North,15,12
+2026-11-13,Mount Pleasant,DeWitt,24,41
+2026-11-13,New Lothrop,Ubly,39,34
+2026-11-13,Ogemaw Heights,Negaunee,15,12
+2026-11-13,Ottawa Lake Whiteford,Jonesville,32,20
+2026-11-13,Pewamo-Westphalia,Ithaca,10,29
+2026-11-13,Romeo,Rochester Hills Stoney Creek,16,9
+2026-11-13,Zeeland West,Middleville Thornapple Kellogg,30,24
+2026-11-14,Beal City,Bark River-Harris,45,16
+2026-11-14,Detroit Edison,Ecorse,39,8
+2026-11-14,East Kentwood,Portage Central,23,20
+2026-11-14,Grand Rapids West Catholic,Berrien Springs,45,15
+2026-11-14,Madison Heights Madison,Clarkston Everest Collegiate,34,22
+2026-11-14,Menominee,Charlevoix,21,14
+2026-11-14,North Muskegon,Ravenna,14,21
+2026-11-21,Beal City,New Lothrop,,
+2026-11-21,Chelsea,Harper Woods,,
+2026-11-21,DeWitt,Zeeland West,,
+2026-11-21,Dearborn Divine Child,Detroit Country Day,,
+2026-11-21,Detroit Cass Tech,Romeo,,
+2026-11-21,East Kentwood,Detroit Catholic Central,,
+2026-11-21,Frankenmuth,Monroe Jefferson,,
+2026-11-21,Grand Rapids Kenowa Hills,Grand Rapids South Christian,,
+2026-11-21,Grand Rapids West Catholic,Ogemaw Heights,,
+2026-11-21,Hudson,Madison Heights Madison,,
+2026-11-21,Jackson Lumen Christi,Detroit Edison,,
+2026-11-21,Kingsley,Almont,,
+2026-11-21,Menominee,Ithaca,,
+2026-11-21,Milford,Muskegon Mona Shores,,
+2026-11-21,Orchard Lake St Mary's,Grosse Pointe South,,
+2026-11-21,Ravenna,Ottawa Lake Whiteford,,
