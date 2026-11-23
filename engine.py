@@ -95,11 +95,25 @@ def is_oos(team_name):
     return bool(m) and m.group(1).upper() != "MI"
 
 
+def load_aliases(folder="."):
+    """{old name: current name} from team_aliases.csv, for schools MHSAA renamed."""
+    import os
+    path = os.path.join(folder, "team_aliases.csv")
+    if not os.path.exists(path):
+        return {}
+    a = pd.read_csv(path, dtype=str)
+    return dict(zip(a["old_name"].str.strip(), a["current_name"].str.strip()))
+
+
 def load_games(path, season):
-    """Load a season CSV into a DataFrame, deduplicating repeated rows."""
+    """Load a season CSV into a DataFrame, deduplicating repeated rows. Renamed
+    schools get their current name, so their history carries across seasons."""
+    import os
     df = pd.read_csv(path, encoding="utf-8-sig", dtype=str).fillna("")
     for c in ("date", "home", "away", "home_score", "away_score"):
         df[c] = df[c].str.strip()
+    aliases = load_aliases(os.path.dirname(path) or ".")
+    df["home"], df["away"] = df["home"].replace(aliases), df["away"].replace(aliases)
     first = np.where(df["home"] < df["away"], df["home"], df["away"])
     second = np.where(df["home"] < df["away"], df["away"], df["home"])
     key = df["date"] + "|" + pd.Series(first, index=df.index) + "|" + pd.Series(second, index=df.index)

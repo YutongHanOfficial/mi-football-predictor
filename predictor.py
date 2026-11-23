@@ -325,7 +325,7 @@ class SeasonPredictor:
 def code_version():
     """Changes whenever the model code or data changes, so cached results are rebuilt."""
     parts = []
-    for f in ["engine.py", "predictor.py", "playoffs.py", "bracket_view.py", DIVISIONS_FILE, LOCATIONS_FILE, BRACKETS_FILE] + [f for _, f in SEASON_FILES]:
+    for f in ["engine.py", "predictor.py", "playoffs.py", "bracket_view.py", DIVISIONS_FILE, LOCATIONS_FILE, BRACKETS_FILE, "team_aliases.csv"] + [f for _, f in SEASON_FILES]:
         parts.append(f"{f}:{os.path.getmtime(f) if os.path.exists(f) else 0}:{os.path.getsize(f) if os.path.exists(f) else 0}")
     return "|".join(parts)
 
